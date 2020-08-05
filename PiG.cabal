@@ -1,0 +1,86 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 2cc9df8aab9ecc0b79ed71bed9656188eb5e37fa9a200e7aa0089eb00774d79e
+
+name:           PiG
+version:        0.0.1
+description:    Please see the README on Github at <https://github.com/PKopel/PiG#readme>
+homepage:       https://github.com/PKopel/PiG#readme
+bug-reports:    https://github.com/PKopel/PiG/issues
+author:         Paweł Kopel
+maintainer:     pawel.kopel2@gmail.com
+copyright:      2020 Paweł Kopel
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/PKopel/PiG
+
+library
+  exposed-modules:
+      Import
+      Interp
+      Parser
+      Run
+      Types
+      Util
+  other-modules:
+      Paths_PiG
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      attoparsec
+    , base >=4.11 && <10
+    , containers
+    , mtl
+    , rio >=0.1.12.0
+    , text
+  default-language: Haskell2010
+
+executable PiG-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_PiG
+  hs-source-dirs:
+      app
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      PiG
+    , attoparsec
+    , base >=4.11 && <10
+    , containers
+    , mtl
+    , optparse-simple
+    , rio >=0.1.12.0
+    , text
+  default-language: Haskell2010
+
+test-suite PiG-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      UtilSpec
+      Paths_PiG
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      PiG
+    , attoparsec
+    , base >=4.11 && <10
+    , containers
+    , hspec
+    , mtl
+    , rio >=0.1.12.0
+    , text
+  default-language: Haskell2010
