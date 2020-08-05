@@ -1,4 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Types where
 
@@ -8,7 +9,6 @@ import Data.Map
 import Control.Monad.Writer
 import RIO
 import RIO.Process
-import RIO.Text
 
 -- | Command line arguments
 data Options = Options
@@ -62,22 +62,15 @@ type Val = Double
 
 type Store = Map Var Val
 
-newtype Interp a = Interp {runInterp :: Store -> Either Text (a, Store)}
+newtype Interp a = Interp {runInterp :: WriterT [Text] (StateT Store (RIO App)) a}
+  deriving
+    ( Functor,
+      Applicative,
+      Monad,
+      MonadIO,
+      MonadWriter [Text],
+      MonadState Store
+    )
 
-newtype Interp' a = Interp' {runInterp' :: WriterT [Text] StateT}
-
-instance Functor Interp where
-  fmap = liftM
-
-instance Applicative Interp where
-  pure = return
-  (<*>) = ap
-
-instance Monad Interp where
-  return x = Interp $ \r -> Right (x, r)
-  i >>= k = Interp $ \r -> case runInterp i r of
-    Left msg -> Left msg
-    Right (x, r') -> runInterp (k x) r'
-
-instance MonadFail Interp where
-  fail msg = Interp $ \_ -> Left $ pack msg
+getStore :: Interp Store
+getStore = get

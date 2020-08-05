@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Interp
@@ -36,9 +37,14 @@ eval (e1 :/: e2) = do
   if v2 == 0 then fail "division by zero" else return (v1 / v2)
 
 rd :: Var -> Interp Val
-rd x = Interp $ \r -> case Map.lookup x r of
-  Nothing -> Left ("unbound variable " <> x)
-  Just v -> Right (v, r)
+rd x =
+  Interp $ do
+    store <- getStore
+
+    Map.lookup x $
+      getStore >>= \case
+        Nothing -> lift . logInfo ("unbound variable " <> x)
+        Just v -> lift . put (v, r)
 
 wr :: Var -> Val -> Interp ()
 wr x v = Interp $ \r -> Right ((), Map.insert x v r)
