@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7471dc373766a3c523b561669db353d50fc3a81cf018265cd447d9fc4f64ff56
+-- hash: 7950e4561032d1edfa1c10396e243dcf72acfef05d9ddce99afc47566ac37e16
 
 name:           PiG
-version:        0.0.2
+version:        0.1
 description:    Please see the README on Github at <https://github.com/PKopel/PiG#readme>
 homepage:       https://github.com/PKopel/PiG#readme
 bug-reports:    https://github.com/PKopel/PiG/issues
