@@ -40,7 +40,7 @@ library:
   source-dirs: src
 
 executables:
-  PiG-exe:
+  PiG:
     main:                Main.hs
     source-dirs:         app
     dependencies:
