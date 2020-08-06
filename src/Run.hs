@@ -3,15 +3,15 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Run
-  ( run,
+  ( run
   )
 where
 
-import Data.Map as Map
-import Data.Text.IO as TIO
-import Import
-import Interp
-import Parser
+import           Data.Map                      as Map
+import           Data.Text.IO                  as TIO
+import           Import
+import           Interp
+import           Parser
 
 run :: RIO App ()
 run = do
@@ -23,10 +23,10 @@ runLine store = do
   logSticky "PiG> "
   line <- liftIO TIO.getLine
   case runParser line of
-    Left msg -> proceed msg
+    Left  msg  -> proceed msg
     Right prog -> do
       ((), store') <- runProg store prog
       runLine store'
-  where
-    proceed "exit" = return ()
-    proceed msg = (logInfo . displayShow) (msg <> "\n") >> runLine store
+ where
+  proceed "exit" = return ()
+  proceed msg    = (logInfo . displayShow) (msg <> "\n") >> runLine store

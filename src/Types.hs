@@ -46,6 +46,7 @@ data Exp
 data Stmt
   = Var := Exp
   | While Exp Stmt
+  | If Exp Stmt
   | Seq [Stmt]
   | Print Exp
   deriving (Show)

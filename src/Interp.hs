@@ -57,7 +57,10 @@ exec (x := e        ) = eval e >>= wr x
 exec (Seq   []      ) = return ()
 exec (Seq   (s : ss)) = exec s >> exec (Seq ss)
 exec (Print e       ) = eval e >>= pt
-exec (While e s     ) = eval e >>= \case
+exec (If e s        ) = eval e >>= \case
+  Just v  -> when (v /= 0) (exec s)
+  Nothing -> return ()
+exec (While e s) = eval e >>= \case
   Just v  -> when (v /= 0) (exec (Seq [s, While e s]))
   Nothing -> return ()
 
