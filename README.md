@@ -6,12 +6,12 @@ a  ::= x | n | a opa a | ( a )
 
 opa ::= + | - | * | / | ^
 
-S  ::= x = a | S1; S2 | while b do S done
+S  ::= x = a | S1; S2 | while b do S done | print a | exit
 ```
-## Execute  
+## Usage  
 
 * Run `stack exec -- PiG-exe` to start interpreter
-* With `stack exec -- PiG-exe --verbose` you will see the same message, with more logging.
+* With `stack exec -- PiG-exe --verbose` to start interpreter with more logging.
 
 ### Dependencies
 * **[Attoparsec](https://hackage.haskell.org/package/attoparsec)**
