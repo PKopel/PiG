@@ -1,14 +1,12 @@
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Types where
 
-import Control.Monad
-import Control.Monad.State
-import Data.Map
-import Control.Monad.Writer
-import RIO
-import RIO.Process
-import RIO.Text
+import           Control.Monad.State
+import           Data.Map
+import           RIO
+import           RIO.Process
 
 -- | Command line arguments
 data Options = Options
@@ -23,11 +21,11 @@ data App = App
   }
 
 instance HasLogFunc App where
-  logFuncL = lens appLogFunc (\x y -> x {appLogFunc = y})
+  logFuncL = lens appLogFunc (\x y -> x { appLogFunc = y })
 
 instance HasProcessContext App where
   processContextL =
-    lens appProcessContext (\x y -> x {appProcessContext = y})
+    lens appProcessContext (\x y -> x { appProcessContext = y })
 
 infixl 6 :+:, :-:
 
@@ -49,7 +47,7 @@ data Stmt
   = Var := Exp
   | While Exp Stmt
   | Seq [Stmt]
-  | Print Var
+  | Print Exp
   deriving (Show)
 
 type Var = Text
@@ -58,26 +56,17 @@ type Operator = Text
 
 type Prog = Stmt
 
-type Val = Double
+type Val = Maybe Double
 
 type Store = Map Var Val
 
-newtype Interp a = Interp {runInterp :: Store -> Either Text (a, Store)}
+type Interp = StateT Store (RIO App)
 
-newtype Interp' a = Interp' {runInterp' :: WriterT [Text] StateT}
+getStore :: Interp Store
+getStore = get
 
-instance Functor Interp where
-  fmap = liftM
+putStore :: Store -> Interp ()
+putStore = put
 
-instance Applicative Interp where
-  pure = return
-  (<*>) = ap
-
-instance Monad Interp where
-  return x = Interp $ \r -> Right (x, r)
-  i >>= k = Interp $ \r -> case runInterp i r of
-    Left msg -> Left msg
-    Right (x, r') -> runInterp (k x) r'
-
-instance MonadFail Interp where
-  fail msg = Interp $ \_ -> Left $ pack msg
+runInterp :: Interp a -> Store -> RIO App (a, Store)
+runInterp = runStateT

@@ -3,29 +3,30 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Run
-  ( run
+  ( run,
   )
 where
 
-import           Data.Map                      as Map
-import           Data.Text.IO                  as TIO
-import           Import
-import           Interp
-import           Parser
+import Data.Map as Map
+import Data.Text.IO as TIO
+import Import
+import Interp
+import Parser
 
 run :: RIO App ()
 run = do
-  logInfo "We're inside the experimental PiG interpretter!\n"
+  logInfo "We're inside the experimental PiG interpretter!"
   runLine Map.empty
-  logInfo "exit\n"
 
 runLine :: Store -> RIO App ()
 runLine store = do
-  logInfo "PiG> "
+  logSticky "PiG> "
   line <- liftIO TIO.getLine
-  case runParser line >>= runProg store of
-    Left  msg    -> proceed msg
-    Right store' -> runLine store'
- where
-  proceed ":exit" = return ()
-  proceed msg     = (logInfo . fromString) (msg ++ "\n") >> runLine store
+  case runParser line of
+    Left msg -> proceed msg
+    Right prog -> do
+      ((), store') <- runProg store prog
+      runLine store'
+  where
+    proceed "exit" = return ()
+    proceed msg = (logInfo . displayShow) (msg <> "\n") >> runLine store
