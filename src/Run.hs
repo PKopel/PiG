@@ -15,7 +15,7 @@ import Parser
 
 run :: RIO App ()
 run = do
-  logInfo "We're inside the experimental PiG interpretter!"
+  logInfo "We're inside the experimental PiG interpreter!"
   runLine Map.empty
 
 runLine :: Store -> RIO App ()
