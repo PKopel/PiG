@@ -10,8 +10,8 @@ S  ::= x = a | do S1; S2 done | while a; S | if a; S | print a | exit
 ```
 ## Usage  
 
-* Run `stack exec -- PiG-exe` to start interpreter
-* With `stack exec -- PiG-exe --verbose` to start interpreter with more logging.
+* Run `stack exec -- PiG` to start interpreter
+* With `stack exec -- PiG --verbose` to start interpreter with more logging.
 
 ### Dependencies
 * **[Attoparsec](https://hackage.haskell.org/package/attoparsec)**
