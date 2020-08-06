@@ -3,67 +3,63 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Interp
-  ( runProg,
+  ( runProg
   )
 where
 
-import Control.Monad
-import Data.Map as Map
-import Import
-import RIO.Text
+import           Control.Monad
+import           Data.Map                      as Map
+import           Import
 
 eval :: Exp -> Interp Val
-eval (C n) = return n
-eval (V x) = rd x
+eval (C n      ) = return n
+eval (V x      ) = rd x
 eval (e1 :+: e2) = do
   v1 <- eval e1
   v2 <- eval e2
-  return (v1 + v2)
+  return ((+) <$> v1 <*> v2)
 eval (e1 :-: e2) = do
   v1 <- eval e1
   v2 <- eval e2
-  return (v1 - v2)
+  return ((-) <$> v1 <*> v2)
 eval (e1 :*: e2) = do
   v1 <- eval e1
   v2 <- eval e2
-  return (v1 * v2)
+  return ((*) <$> v1 <*> v2)
 eval (e1 :^: e2) = do
   v1 <- eval e1
   v2 <- eval e2
-  return (v1 ** v2)
+  return ((**) <$> v1 <*> v2)
 eval (e1 :/: e2) = do
   v1 <- eval e1
   v2 <- eval e2
-  if v2 == 0 then fail "division by zero" else return (v1 / v2)
+  return $ if v2 == Just 0 then Nothing else ((/) <$> v1 <*> v2)
 
 rd :: Var -> Interp Val
-rd x =
-  Interp $ do
-    store <- getStore
-
-    Map.lookup x $
-      getStore >>= \case
-        Nothing -> lift . logInfo ("unbound variable " <> x)
-        Just v -> lift . put (v, r)
+rd x = do
+  store <- getStore
+  case Map.lookup x store of
+    Nothing -> print ("unbound variable " <> x) >> return Nothing
+    Just v  -> return v
 
 wr :: Var -> Val -> Interp ()
-wr x v = Interp $ \r -> Right ((), Map.insert x v r)
+wr x v = do
+  store <- getStore
+  putStore $ Map.insert x v store
 
-pt :: Var -> Interp ()
-pt x = Interp $ \r -> case Map.lookup x r of
-  Nothing -> Left ("unbound variable " <> x)
-  Just v -> Left $ x <> ":=" <> (pack . show) v
+pt :: Val -> Interp ()
+pt x = case x of
+  Nothing -> print ("can't print that" :: Text)
+  Just v  -> print v
 
 exec :: Stmt -> Interp ()
-exec (x := e) = eval e >>= wr x
-exec (Seq []) = return ()
-exec (Seq (s : ss)) = exec s >> exec (Seq ss)
-exec (Print e) = pt e
-exec (While e s) = do
-  v <- eval e
-  when (v /= 0) (exec (Seq [s, While e s]))
+exec (x := e        ) = eval e >>= wr x
+exec (Seq   []      ) = return ()
+exec (Seq   (s : ss)) = exec s >> exec (Seq ss)
+exec (Print e       ) = eval e >>= pt
+exec (While e s     ) = eval e >>= \case
+  Just v  -> when (v /= 0) (exec (Seq [s, While e s]))
+  Nothing -> return ()
 
-runProg :: Store -> Prog -> Either String Store
-runProg r p = case runInterp (exec p) r of
-  Left msg -> Left $ unpack msg
-  Right (_, r') -> Right r'
+runProg :: Store -> Prog -> RIO App ((), Store)
+runProg r p = runInterp (exec p) r
