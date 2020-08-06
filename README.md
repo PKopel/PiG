@@ -6,7 +6,7 @@ a  ::= x | n | a opa a | ( a )
 
 opa ::= + | - | * | / | ^
 
-S  ::= x = a | S1; S2 | while b do S done | print a | exit
+S  ::= x = a | S1; S2 | while a; do S done | print a | exit
 ```
 ## Usage  
 
