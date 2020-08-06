@@ -1,6 +1,6 @@
 # PiG
 
-Interpreter for very simple language. The grammar is defined as follows:
+Interpreter for a very simple language. The grammar is defined as follows:
 ```
 a  ::= x | n | a opa a | ( a )
 
