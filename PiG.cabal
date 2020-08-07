@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f2cc74be239cf890492d0342342d4c44fbb66cdfbd69346b0bf589d872b6b9d8
+-- hash: 97a9f5d611189d58f617d67312fe63a8b399bb0c82c79813031cb28117cef2b1
 
 name:           PiG
-version:        0.1.1
+version:        0.2.0
 description:    Please see the README on Github at <https://github.com/PKopel/PiG#readme>
 homepage:       https://github.com/PKopel/PiG#readme
 bug-reports:    https://github.com/PKopel/PiG/issues
@@ -28,11 +28,13 @@ source-repository head
 library
   exposed-modules:
       Import
-      Interp
-      Parser
+      Interp.Eval
+      Interp.Exec
+      Lang.Lexer
+      Lang.Parser
       Run
-      Types
-      Util
+      Utils.Types
+      Utils.Util
   other-modules:
       Paths_PiG
   hs-source-dirs:
@@ -43,6 +45,7 @@ library
     , base >=4.11 && <10
     , containers
     , mtl
+    , parsec
     , rio >=0.1.12.0
     , text
   default-language: Haskell2010
@@ -61,6 +64,7 @@ executable PiG
     , containers
     , mtl
     , optparse-simple
+    , parsec
     , rio >=0.1.12.0
     , text
   default-language: Haskell2010
@@ -81,6 +85,7 @@ test-suite PiG-test
     , containers
     , hspec
     , mtl
+    , parsec
     , rio >=0.1.12.0
     , text
   default-language: Haskell2010

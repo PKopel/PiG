@@ -2,11 +2,9 @@
 
 module Import
   ( module RIO
-  , module Types
-  , module Util
+  , module Utils.Util
   )
 where
 
 import           RIO
-import           Types
-import           Util
+import           Utils.Util

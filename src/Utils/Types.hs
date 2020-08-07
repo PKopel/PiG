@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module Types where
+module Utils.Types where
 
 import           Control.Monad.State
 import           Data.Map
@@ -27,37 +27,54 @@ instance HasProcessContext App where
   processContextL =
     lens appProcessContext (\x y -> x { appProcessContext = y })
 
-infixl 6 :+:, :-:
-
-infixl 7 :*:, :/:
-
 infix 1 :=
 
-data Exp
-  = C Val
-  | V Var
-  | Exp :+: Exp
-  | Exp :-: Exp
-  | Exp :*: Exp
-  | Exp :/: Exp
-  | Exp :^: Exp
+data Expr
+  = A AlgExpr
+  | B BoolExpr
+  deriving (Show)
+
+data BoolExpr
+  = BoolVar Var
+  | BoolConst (Maybe Bool)
+  | Not BoolExpr
+  | BoolBinary BoolBinOp BoolExpr BoolExpr
+  | RelBinary RelBinOp AlgExpr AlgExpr
+  deriving (Show)
+
+data BoolBinOp = And | Or deriving (Show)
+
+data RelBinOp = Greater | Less deriving (Show)
+
+data AlgExpr
+  = AlgVar Var
+  | AlgConst (Maybe Double)
+  | Neg AlgExpr
+  | AlgBinary AlgBinOp AlgExpr AlgExpr
+  deriving (Show)
+
+data AlgBinOp
+  = Add
+  | Subtract
+  | Multiply
+  | Divide
+  | Power
   deriving (Show)
 
 data Stmt
-  = Var := Exp
-  | While Exp Stmt
-  | If Exp Stmt
+  = Var := Expr
+  | While Expr Stmt
+  | If Expr Stmt Stmt
   | Seq [Stmt]
-  | Print Exp
+  | Print Expr
+  | Skip
   deriving (Show)
 
-type Var = Text
+data Val = AlgVal Double | BoolVal Bool | Empty deriving (Show)
 
-type Operator = Text
+type Var = String
 
 type Prog = Stmt
-
-type Val = Maybe Double
 
 type Store = Map Var Val
 
@@ -71,3 +88,11 @@ putStore = put
 
 runInterp :: Interp a -> Store -> RIO App (a, Store)
 runInterp = runStateT
+
+algVal :: Maybe Double -> Val
+algVal Nothing  = Empty
+algVal (Just v) = AlgVal v
+
+boolVal :: Maybe Bool -> Val
+boolVal Nothing  = Empty
+boolVal (Just v) = BoolVal v

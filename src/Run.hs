@@ -8,10 +8,10 @@ module Run
 where
 
 import           Data.Map                      as Map
-import           Data.Text.IO                  as TIO
 import           Import
-import           Interp
-import           Parser
+import           Interp.Exec
+import           Lang.Parser
+import           System.IO
 
 run :: RIO App ()
 run = do
@@ -21,9 +21,9 @@ run = do
 runLine :: Store -> RIO App ()
 runLine store = do
   logSticky "PiG> "
-  line <- liftIO TIO.getLine
-  case runParser line of
-    Left  msg  -> proceed msg
+  line <- liftIO getLine
+  case parseProg line of
+    Left  err  -> proceed err
     Right prog -> do
       ((), store') <- runProg store prog
       runLine store'

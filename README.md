@@ -2,11 +2,17 @@
 
 Interpreter for a very simple language. The grammar is defined as follows:
 ```
-a  ::= x | n | a opa a | ( a )
+A ::= x | n | -A | A opa A | ( A )
+
+B ::= true | false | not B | B opb B | A opr A
 
 opa ::= + | - | * | / | ^
 
-S  ::= x = a | do S1; S2 done | while a; S | if a; S | print a | exit
+opb ::= and | or
+
+opr ::= > | <
+
+S ::= x = A | { S; } S | ( S ) | while A do S | while B do S | if A then S [else S] | if B then S [else S] | print A | print B | exit
 ```
 ## Usage  
 
