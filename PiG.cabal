@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 97a9f5d611189d58f617d67312fe63a8b399bb0c82c79813031cb28117cef2b1
+-- hash: ec3401c7f3489ec9be736af5a4220483441d60d6eb7b22b1242a111249dd5c77
 
 name:           PiG
 version:        0.2.0
@@ -41,8 +41,7 @@ library
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints
   build-depends:
-      attoparsec
-    , base >=4.11 && <10
+      base >=4.11 && <10
     , containers
     , mtl
     , parsec
@@ -59,7 +58,6 @@ executable PiG
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       PiG
-    , attoparsec
     , base >=4.11 && <10
     , containers
     , mtl
@@ -80,7 +78,6 @@ test-suite PiG-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       PiG
-    , attoparsec
     , base >=4.11 && <10
     , containers
     , hspec
