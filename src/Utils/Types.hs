@@ -3,10 +3,10 @@
 
 module Utils.Types where
 
-import           Control.Monad.State
-import           Data.Map
-import           RIO
-import           RIO.Process
+import Control.Monad.State
+import Data.Map
+import RIO
+import RIO.Process
 
 -- | Command line arguments
 data Options = Options
@@ -21,37 +21,29 @@ data App = App
   }
 
 instance HasLogFunc App where
-  logFuncL = lens appLogFunc (\x y -> x { appLogFunc = y })
+  logFuncL = lens appLogFunc (\x y -> x {appLogFunc = y})
 
 instance HasProcessContext App where
   processContextL =
-    lens appProcessContext (\x y -> x { appProcessContext = y })
+    lens appProcessContext (\x y -> x {appProcessContext = y})
 
 infix 1 :=
 
 data Expr
-  = A AlgExpr
-  | B BoolExpr
-  deriving (Show)
-
-data BoolExpr
-  = BoolVar Var
-  | BoolConst (Maybe Bool)
-  | Not BoolExpr
-  | BoolBinary BoolBinOp BoolExpr BoolExpr
-  | RelBinary RelBinOp AlgExpr AlgExpr
+  = Var Var
+  | Val Val
+  | Neg Expr
+  | BoolBinary BoolBinOp Expr Expr
+  | RelBinary RelBinOp Expr Expr
+  | AlgBinary AlgBinOp Expr Expr
+  | ListBinary ListBinOp Expr Expr
   deriving (Show)
 
 data BoolBinOp = And | Or deriving (Show)
 
 data RelBinOp = Greater | Less deriving (Show)
 
-data AlgExpr
-  = AlgVar Var
-  | AlgConst (Maybe Double)
-  | Neg AlgExpr
-  | AlgBinary AlgBinOp AlgExpr AlgExpr
-  deriving (Show)
+data ListBinOp = Cons | Cat deriving (Show)
 
 data AlgBinOp
   = Add
@@ -70,7 +62,7 @@ data Stmt
   | Skip
   deriving (Show)
 
-data Val = AlgVal Double | BoolVal Bool | Empty deriving (Show)
+data Val = AlgVal Double | BoolVal Bool | ListVal [Val] | Empty deriving (Show)
 
 type Var = String
 
@@ -90,9 +82,9 @@ runInterp :: Interp a -> Store -> RIO App (a, Store)
 runInterp = runStateT
 
 algVal :: Maybe Double -> Val
-algVal Nothing  = Empty
+algVal Nothing = Empty
 algVal (Just v) = AlgVal v
 
 boolVal :: Maybe Bool -> Val
-boolVal Nothing  = Empty
+boolVal Nothing = Empty
 boolVal (Just v) = BoolVal v

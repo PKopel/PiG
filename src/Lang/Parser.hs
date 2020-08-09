@@ -3,21 +3,23 @@
 
 module Lang.Parser where
 
-import           Control.Monad
-import           Import                  hiding ( optional
-                                                , try
-                                                , (<|>)
-                                                )
-import           Lang.Lexer
-import           Text.Parsec
-import           Text.ParserCombinators.Parsec
-                                         hiding ( try )
-import           Text.ParserCombinators.Parsec.Expr
+import Control.Monad
+import Import hiding
+  ( optional,
+    try,
+    (<|>),
+  )
+import Lang.Lexer
+import Text.Parsec
+import Text.ParserCombinators.Parsec hiding
+  ( try,
+  )
+import Text.ParserCombinators.Parsec.Expr
 
 parseProg :: String -> Either String Prog
 parseProg "exit" = Left "exit"
-parseProg p      = case parse progParser "PiG" p of
-  Left  err  -> Left $ show err
+parseProg p = case parse progParser "PiG" p of
+  Left err -> Left $ show err
   Right prog -> Right prog
 
 progParser :: Parser Prog
@@ -25,13 +27,13 @@ progParser = whiteSpace >> stmtParser
 
 stmtParser :: Parser Stmt
 stmtParser = parens stmtParser <|> sequenceOfStmt
- where
-  sequenceOfStmt = do
-    list <- (sepEndBy1 singleStmtParser semi)
-    -- If there's only one statement return it without using Seq.
-    return $ case list of
-      [stmt] -> stmt
-      _      -> Seq list
+  where
+    sequenceOfStmt = do
+      list <- (sepEndBy1 singleStmtParser semi)
+      -- If there's only one statement return it without using Seq.
+      return $ case list of
+        [stmt] -> stmt
+        _ -> Seq list
 
 singleStmtParser :: Parser Stmt
 singleStmtParser =
@@ -44,7 +46,7 @@ singleStmtParser =
 
 ifStmtParser :: Parser Stmt
 ifStmtParser = do
-  cond  <- reserved "if" >> exprParser
+  cond <- reserved "if" >> exprParser
   stmt1 <- reserved "then" >> singleStmtParser
   stmt2 <- option Skip (reserved "else" >> singleStmtParser)
   return $ If cond stmt1 stmt2
@@ -57,7 +59,7 @@ whileStmtParser = do
 
 assignStmtParser :: Parser Stmt
 assignStmtParser = do
-  var  <- identifier
+  var <- identifier
   expr <- reservedOp "=" >> exprParser
   return $ var := expr
 
@@ -69,6 +71,7 @@ printStmtParser = do
 skipStmtParser :: Parser Stmt
 skipStmtParser = reserved "skip" >> return Skip
 
+listParser :: Parser
 exprParser :: Parser Expr
 exprParser = B <$> try boolExprParser <|> A <$> algExprParser
 
