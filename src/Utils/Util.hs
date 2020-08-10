@@ -53,7 +53,8 @@ printExpr :: Val -> Interp ()
 printExpr = \case
   AlgVal v -> print v
   BoolVal v -> print v
-  Empty -> print ("can't print that" :: Text)
+  ListVal v -> print v
+  Empty -> print ("can't print that")
 
 print :: Show a => a -> Interp ()
-print = lift . logInfo . displayShow
+print = lift . logInfo . fromString . show
