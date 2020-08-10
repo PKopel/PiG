@@ -1,72 +1,69 @@
-
 {-# LANGUAGE LambdaCase #-}
+
 module Interp.Eval where
 
-import           Import
+import Import
 
 eval :: Expr -> Interp Val
-eval (A expr) = algVal <$> evalAlg expr
-eval (B expr) = boolVal <$> evalBool expr
+eval (Val n) = return n
+eval (Var x) = readVar x
+eval (Neg e) =
+  eval e >>= \case
+    AlgVal v -> return . AlgVal . negate $ v
+    BoolVal v -> return . BoolVal . not $ v
+    _ -> return Empty
+eval (AlgBinary op e1 e2) = evalAlgBin op e1 e2
+eval (BoolBinary op e1 e2) = evalBoolBin op e1 e2
+eval (RelBinary op e1 e2) = evalRelBin op e1 e2
 
-evalAlg :: AlgExpr -> Interp (Maybe Double)
-evalAlg (AlgConst n) = return n
-evalAlg (AlgVar   x) = readVar x >>= \case
-  AlgVal v -> return $ Just v
-  _        -> return Nothing
-evalAlg (Neg e) = do
-  v <- evalAlg e
-  return (negate <$> v)
-evalAlg (AlgBinary op e1 e2) = evalAlgBin op e1 e2
+evalAlg :: Expr -> Interp (Maybe Double)
+evalAlg e = eval e >>= return . algValToMaybe
 
-evalAlgBin :: AlgBinOp -> AlgExpr -> AlgExpr -> Interp (Maybe Double)
+evalBool :: Expr -> Interp (Maybe Bool)
+evalBool e = eval e >>= return . boolValToMaybe
+
+evalAlgBin :: AlgBinOp -> Expr -> Expr -> Interp Val
 evalAlgBin Add e1 e2 = do
   v1 <- evalAlg e1
   v2 <- evalAlg e2
-  return ((+) <$> v1 <*> v2)
+  return . maybeToAlgVal $ ((+) <$> v1 <*> v2)
 evalAlgBin Subtract e1 e2 = do
   v1 <- evalAlg e1
   v2 <- evalAlg e2
-  return ((-) <$> v1 <*> v2)
+  return . maybeToAlgVal $ ((-) <$> v1 <*> v2)
 evalAlgBin Multiply e1 e2 = do
   v1 <- evalAlg e1
   v2 <- evalAlg e2
-  return ((*) <$> v1 <*> v2)
+  return . maybeToAlgVal $ ((*) <$> v1 <*> v2)
 evalAlgBin Power e1 e2 = do
   v1 <- evalAlg e1
   v2 <- evalAlg e2
-  return ((**) <$> v1 <*> v2)
+  return . maybeToAlgVal $ ((**) <$> v1 <*> v2)
 evalAlgBin Divide e1 e2 = do
   v1 <- evalAlg e1
   v2 <- evalAlg e2
-  return $ if v2 == Just 0 then Nothing else ((/) <$> v1 <*> v2)
+  return . maybeToAlgVal $ if v2 == Just 0 then Nothing else ((/) <$> v1 <*> v2)
 
-evalBool :: BoolExpr -> Interp (Maybe Bool)
-evalBool (BoolConst n) = return n
-evalBool (BoolVar   x) = readVar x >>= \case
-  BoolVal v -> return $ Just v
-  _         -> return Nothing
-evalBool (Not e) = do
-  v <- evalBool e
-  return (not <$> v)
-evalBool (BoolBinary op e1 e2) = evalBoolBin op e1 e2
-evalBool (RelBinary  op e1 e2) = evalRelBin op e1 e2
-
-evalBoolBin :: BoolBinOp -> BoolExpr -> BoolExpr -> Interp (Maybe Bool)
+evalBoolBin :: BoolBinOp -> Expr -> Expr -> Interp Val
 evalBoolBin And e1 e2 = do
   v1 <- evalBool e1
   v2 <- evalBool e2
-  return ((&&) <$> v1 <*> v2)
+  return . maybeToBoolVal $ ((&&) <$> v1 <*> v2)
 evalBoolBin Or e1 e2 = do
   v1 <- evalBool e1
   v2 <- evalBool e2
-  return ((||) <$> v1 <*> v2)
+  return . maybeToBoolVal $ ((||) <$> v1 <*> v2)
 
-evalRelBin :: RelBinOp -> AlgExpr -> AlgExpr -> Interp (Maybe Bool)
+evalRelBin :: RelBinOp -> Expr -> Expr -> Interp Val
 evalRelBin Greater e1 e2 = do
   v1 <- evalAlg e1
   v2 <- evalAlg e2
-  return ((>) <$> v1 <*> v2)
+  return . maybeToBoolVal $ ((>) <$> v1 <*> v2)
 evalRelBin Less e1 e2 = do
   v1 <- evalAlg e1
   v2 <- evalAlg e2
-  return ((<) <$> v1 <*> v2)
+  return . maybeToBoolVal $ ((<) <$> v1 <*> v2)
+evalRelBin Equal e1 e2 = do
+  v1 <- evalAlg e1
+  v2 <- evalAlg e2
+  return . maybeToBoolVal $ ((==) <$> v1 <*> v2)

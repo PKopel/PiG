@@ -1,5 +1,5 @@
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
 module Utils.Types where
 
@@ -36,14 +36,17 @@ data Expr
   | BoolBinary BoolBinOp Expr Expr
   | RelBinary RelBinOp Expr Expr
   | AlgBinary AlgBinOp Expr Expr
+  | ListUnary ListUnOp Expr
   | ListBinary ListBinOp Expr Expr
   deriving (Show)
 
 data BoolBinOp = And | Or deriving (Show)
 
-data RelBinOp = Greater | Less deriving (Show)
+data RelBinOp = Greater | Less | Equal deriving (Show)
 
-data ListBinOp = Cons | Cat deriving (Show)
+data ListBinOp = AddFirst | AddLast deriving (Show)
+
+data ListUnOp = RmFirst | RmLast deriving (Show)
 
 data AlgBinOp
   = Add
@@ -80,11 +83,3 @@ putStore = put
 
 runInterp :: Interp a -> Store -> RIO App (a, Store)
 runInterp = runStateT
-
-algVal :: Maybe Double -> Val
-algVal Nothing = Empty
-algVal (Just v) = AlgVal v
-
-boolVal :: Maybe Bool -> Val
-boolVal Nothing = Empty
-boolVal (Just v) = BoolVal v
