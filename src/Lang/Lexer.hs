@@ -34,10 +34,15 @@ languageDef = emptyDef
                             , "-"
                             , "*"
                             , "/"
-                            , "="
+                            , ":="
                             , "^"
                             , "<"
                             , ">"
+                            , "="
+                            , "+<"
+                            , "+>"
+                            , "-<"
+                            , "->"
                             , "and"
                             , "or"
                             , "not"
@@ -49,18 +54,18 @@ lexer = Token.makeTokenParser languageDef
 
 identifier :: ParsecT String u Identity String
 identifier = Token.identifier lexer -- parses an identifier
+
 reserved :: String -> ParsecT String u Identity ()
 reserved = Token.reserved lexer -- parses a reserved name
-
 
 reservedOp :: String -> ParsecT String u Identity ()
 reservedOp = Token.reservedOp lexer -- parses an operator
 
+brackets :: ParsecT String u Identity a -> ParsecT String u Identity a
+brackets = Token.brackets lexer -- parses sequence in brackets
+
 parens :: ParsecT String u Identity a -> ParsecT String u Identity a
-parens = Token.parens lexer -- parses surrounding parenthesis:
---   parens p
--- takes care of the parenthesis and
--- uses p to parse what's inside them
+parens = Token.parens lexer -- parses sequence in parenthesis
 
 double :: ParsecT String u Identity Double
 double = Token.float lexer -- parses a double
@@ -71,10 +76,13 @@ integer = Token.integer lexer -- parses an integer
 semi :: ParsecT String u Identity String
 semi = Token.semi lexer -- parses a semicolon
 
+commaSep :: ParsecT String u Identity a -> ParsecT String u Identity [a]
+commaSep = Token.commaSep lexer -- parses a list separated by comma
+
 whiteSpace :: ParsecT String u Identity ()
 whiteSpace = Token.whiteSpace lexer -- parses whitespace
 
-algOperators :: [[Operator Char st AlgExpr]]
+algOperators :: [[Operator Char st Expr]]
 algOperators =
   [ [Prefix (reservedOp "-" >> return (Neg))]
   , [Infix (reservedOp "^" >> return (AlgBinary Power)) AssocLeft]
@@ -86,9 +94,9 @@ algOperators =
     ]
   ]
 
-boolOperators :: [[Operator Char st BoolExpr]]
+boolOperators :: [[Operator Char st Expr]]
 boolOperators =
-  [ [Prefix (reservedOp "not" >> return (Not))]
+  [ [Prefix (reservedOp "not" >> return (Neg))]
   , [ Infix (reservedOp "and" >> return (BoolBinary And)) AssocLeft
     , Infix (reservedOp "or" >> return (BoolBinary Or))   AssocLeft
     ]

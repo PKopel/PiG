@@ -1,9 +1,10 @@
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
 module Utils.Types where
 
 import           Control.Monad.State
+import           Data.List
 import           Data.Map
 import           RIO
 import           RIO.Process
@@ -30,28 +31,23 @@ instance HasProcessContext App where
 infix 1 :=
 
 data Expr
-  = A AlgExpr
-  | B BoolExpr
-  deriving (Show)
-
-data BoolExpr
-  = BoolVar Var
-  | BoolConst (Maybe Bool)
-  | Not BoolExpr
-  | BoolBinary BoolBinOp BoolExpr BoolExpr
-  | RelBinary RelBinOp AlgExpr AlgExpr
+  = Var Var
+  | Val Val
+  | Neg Expr
+  | BoolBinary BoolBinOp Expr Expr
+  | RelBinary RelBinOp Expr Expr
+  | AlgBinary AlgBinOp Expr Expr
+  | ListUnary ListUnOp Expr
+  | ListBinary ListBinOp Expr Expr
   deriving (Show)
 
 data BoolBinOp = And | Or deriving (Show)
 
-data RelBinOp = Greater | Less deriving (Show)
+data RelBinOp = Greater | Less | Equal deriving (Show)
 
-data AlgExpr
-  = AlgVar Var
-  | AlgConst (Maybe Double)
-  | Neg AlgExpr
-  | AlgBinary AlgBinOp AlgExpr AlgExpr
-  deriving (Show)
+data ListBinOp = AddFirst | AddLast deriving (Show)
+
+data ListUnOp = RmFirst | RmLast deriving (Show)
 
 data AlgBinOp
   = Add
@@ -70,7 +66,13 @@ data Stmt
   | Skip
   deriving (Show)
 
-data Val = AlgVal Double | BoolVal Bool | Empty deriving (Show)
+data Val = AlgVal Double | BoolVal Bool | ListVal [Val] | Empty
+
+instance Show Val where
+  show (AlgVal  v) = show v
+  show (BoolVal v) = show v
+  show (ListVal v) = '[' : intercalate ", " (show <$> v) ++ "]"
+  show Empty       = "null"
 
 type Var = String
 
@@ -88,11 +90,3 @@ putStore = put
 
 runInterp :: Interp a -> Store -> RIO App (a, Store)
 runInterp = runStateT
-
-algVal :: Maybe Double -> Val
-algVal Nothing  = Empty
-algVal (Just v) = AlgVal v
-
-boolVal :: Maybe Bool -> Val
-boolVal Nothing  = Empty
-boolVal (Just v) = BoolVal v

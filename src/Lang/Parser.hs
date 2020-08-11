@@ -58,7 +58,7 @@ whileStmtParser = do
 assignStmtParser :: Parser Stmt
 assignStmtParser = do
   var  <- identifier
-  expr <- reservedOp "=" >> exprParser
+  expr <- reservedOp ":=" >> exprParser
   return $ var := expr
 
 printStmtParser :: Parser Stmt
@@ -69,36 +69,42 @@ printStmtParser = do
 skipStmtParser :: Parser Stmt
 skipStmtParser = reserved "skip" >> return Skip
 
-exprParser :: Parser Expr
-exprParser = B <$> try boolExprParser <|> A <$> algExprParser
+algValParser :: Parser Val
+algValParser = AlgVal <$> (try double <|> fromInteger <$> integer)
 
-algExprParser :: Parser AlgExpr
+boolValParser :: Parser Val
+boolValParser =
+  BoolVal
+    <$> (   try (reserved "true" >> return True)
+        <|> try (reserved "false" >> return False)
+        )
+
+listValParser :: Parser Val
+listValParser = ListVal
+  <$> (brackets . commaSep) (listValParser <|> boolValParser <|> algValParser)
+
+exprParser :: Parser Expr
+exprParser = try boolExprParser <|> try listExprParser <|> algExprParser
+
+algExprParser :: Parser Expr
 algExprParser = buildExpressionParser algOperators algTerm
 
-boolExprParser :: Parser BoolExpr
+boolExprParser :: Parser Expr
 boolExprParser = buildExpressionParser boolOperators boolTerm
 
-algTerm :: ParsecT String () Identity AlgExpr
-algTerm =
-  parens algExprParser
-    <|> AlgVar
-    <$> identifier
-    <|> AlgConst
-    <$> Just
-    <$> try double
-    <|> AlgConst
-    <$> Just
-    <$> fromInteger
-    <$> integer
+algTerm :: ParsecT String () Identity Expr
+algTerm = parens algExprParser <|> Var <$> identifier <|> Val <$> algValParser
 
-boolTerm :: ParsecT String () Identity BoolExpr
+boolTerm :: ParsecT String () Identity Expr
 boolTerm =
   parens boolExprParser
-    <|> try (reserved "true" >> return (BoolConst (Just True)))
-    <|> try (reserved "false" >> return (BoolConst (Just False)))
+    <|> Var
+    <$> identifier
+    <|> Val
+    <$> boolValParser
     <|> relExprParser
 
-relExprParser :: ParsecT String () Identity BoolExpr
+relExprParser :: ParsecT String () Identity Expr
 relExprParser = do
   a1 <- algExprParser
   op <- relation
@@ -107,4 +113,33 @@ relExprParser = do
 
 relation :: ParsecT String u Identity RelBinOp
 relation =
-  (reservedOp ">" >> return Greater) <|> (reservedOp "<" >> return Less)
+  (reservedOp ">" >> return Greater)
+    <|> (reservedOp "<" >> return Less)
+    <|> (reservedOp "=" >> return Equal)
+
+listExprParser :: Parser Expr
+listExprParser =
+  parens listExprParser
+    <|> try
+          (do
+            a1 <- Val <$> listValParser <|> Var <$> identifier
+            op <- listBinAction
+            a2 <- exprParser
+            return $ ListBinary op a1 a2
+          )
+    <|> try
+          (do
+            op <- listUnAction
+            a  <- exprParser
+            return $ ListUnary op a
+          )
+    <|> Val
+    <$> listValParser
+
+listBinAction :: ParsecT String u Identity ListBinOp
+listBinAction =
+  (reservedOp "+>" >> return AddFirst) <|> (reservedOp "+<" >> return AddLast)
+
+listUnAction :: ParsecT String u Identity ListUnOp
+listUnAction =
+  (reservedOp "->" >> return RmFirst) <|> (reservedOp "-<" >> return RmLast)

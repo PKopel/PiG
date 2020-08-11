@@ -29,4 +29,4 @@ runLine store = do
       runLine store'
  where
   proceed "exit" = return ()
-  proceed msg    = (logInfo . displayShow) (msg <> "\n") >> runLine store
+  proceed msg    = (logInfo . fromString) (msg <> "\n") >> runLine store
