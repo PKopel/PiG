@@ -3,10 +3,11 @@
 
 module Utils.Types where
 
-import Control.Monad.State
-import Data.Map
-import RIO
-import RIO.Process
+import           Control.Monad.State
+import           Data.List
+import           Data.Map
+import           RIO
+import           RIO.Process
 
 -- | Command line arguments
 data Options = Options
@@ -21,11 +22,11 @@ data App = App
   }
 
 instance HasLogFunc App where
-  logFuncL = lens appLogFunc (\x y -> x {appLogFunc = y})
+  logFuncL = lens appLogFunc (\x y -> x { appLogFunc = y })
 
 instance HasProcessContext App where
   processContextL =
-    lens appProcessContext (\x y -> x {appProcessContext = y})
+    lens appProcessContext (\x y -> x { appProcessContext = y })
 
 infix 1 :=
 
@@ -65,7 +66,13 @@ data Stmt
   | Skip
   deriving (Show)
 
-data Val = AlgVal Double | BoolVal Bool | ListVal [Val] | Empty deriving (Show)
+data Val = AlgVal Double | BoolVal Bool | ListVal [Val] | Empty
+
+instance Show Val where
+  show (AlgVal  v) = show v
+  show (BoolVal v) = show v
+  show (ListVal v) = '[' : intercalate ", " (show <$> v) ++ "]"
+  show Empty       = "null"
 
 type Var = String
 

@@ -1,56 +1,53 @@
 module Lang.Lexer where
 
-import Control.Monad.Identity
-import Import
-import Text.Parsec
-import Text.ParserCombinators.Parsec.Expr
-import Text.ParserCombinators.Parsec.Language
-import Text.ParserCombinators.Parsec.Token
-  ( GenTokenParser,
-  )
-import qualified Text.ParserCombinators.Parsec.Token as Token
+import           Control.Monad.Identity
+import           Import
+import           Text.Parsec
+import           Text.ParserCombinators.Parsec.Expr
+import           Text.ParserCombinators.Parsec.Language
+import           Text.ParserCombinators.Parsec.Token
+                                                ( GenTokenParser )
+import qualified Text.ParserCombinators.Parsec.Token
+                                               as Token
 
 languageDef :: GenLanguageDef String u Identity
-languageDef =
-  emptyDef
-    { Token.commentStart = "/*",
-      Token.commentEnd = "*/",
-      Token.commentLine = "//",
-      Token.identStart = letter,
-      Token.identLetter = alphaNum,
-      Token.reservedNames =
-        [ "if",
-          "then",
-          "else",
-          "while",
-          "do",
-          "skip",
-          "true",
-          "false",
-          "not",
-          "and",
-          "or",
-          "print"
-        ],
-      Token.reservedOpNames =
-        [ "+",
-          "-",
-          "*",
-          "/",
-          ":=",
-          "^",
-          "<",
-          ">",
-          "=",
-          "+<",
-          "+>",
-          "-<",
-          "->",
-          "and",
-          "or",
-          "not"
-        ]
-    }
+languageDef = emptyDef
+  { Token.commentStart    = "/*"
+  , Token.commentEnd      = "*/"
+  , Token.commentLine     = "//"
+  , Token.identStart      = letter
+  , Token.identLetter     = alphaNum
+  , Token.reservedNames   = [ "if"
+                            , "then"
+                            , "else"
+                            , "while"
+                            , "do"
+                            , "skip"
+                            , "true"
+                            , "false"
+                            , "not"
+                            , "and"
+                            , "or"
+                            , "print"
+                            ]
+  , Token.reservedOpNames = [ "+"
+                            , "-"
+                            , "*"
+                            , "/"
+                            , ":="
+                            , "^"
+                            , "<"
+                            , ">"
+                            , "="
+                            , "+<"
+                            , "+>"
+                            , "-<"
+                            , "->"
+                            , "and"
+                            , "or"
+                            , "not"
+                            ]
+  }
 
 lexer :: GenTokenParser String u Identity
 lexer = Token.makeTokenParser languageDef
@@ -87,20 +84,20 @@ whiteSpace = Token.whiteSpace lexer -- parses whitespace
 
 algOperators :: [[Operator Char st Expr]]
 algOperators =
-  [ [Prefix (reservedOp "-" >> return (Neg))],
-    [Infix (reservedOp "^" >> return (AlgBinary Power)) AssocLeft],
-    [ Infix (reservedOp "*" >> return (AlgBinary Multiply)) AssocLeft,
-      Infix (reservedOp "/" >> return (AlgBinary Divide)) AssocLeft
-    ],
-    [ Infix (reservedOp "+" >> return (AlgBinary Add)) AssocLeft,
-      Infix (reservedOp "-" >> return (AlgBinary Subtract)) AssocLeft
+  [ [Prefix (reservedOp "-" >> return (Neg))]
+  , [Infix (reservedOp "^" >> return (AlgBinary Power)) AssocLeft]
+  , [ Infix (reservedOp "*" >> return (AlgBinary Multiply)) AssocLeft
+    , Infix (reservedOp "/" >> return (AlgBinary Divide))   AssocLeft
+    ]
+  , [ Infix (reservedOp "+" >> return (AlgBinary Add))      AssocLeft
+    , Infix (reservedOp "-" >> return (AlgBinary Subtract)) AssocLeft
     ]
   ]
 
 boolOperators :: [[Operator Char st Expr]]
 boolOperators =
-  [ [Prefix (reservedOp "not" >> return (Neg))],
-    [ Infix (reservedOp "and" >> return (BoolBinary And)) AssocLeft,
-      Infix (reservedOp "or" >> return (BoolBinary Or)) AssocLeft
+  [ [Prefix (reservedOp "not" >> return (Neg))]
+  , [ Infix (reservedOp "and" >> return (BoolBinary And)) AssocLeft
+    , Infix (reservedOp "or" >> return (BoolBinary Or))   AssocLeft
     ]
   ]
