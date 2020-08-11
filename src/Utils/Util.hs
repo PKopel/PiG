@@ -2,8 +2,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
--- | Silly utility module, used to demonstrate how to write a test
--- case.
 module Utils.Util
   ( print
   , isVar
@@ -60,7 +58,7 @@ readVar :: Var -> Interp Val
 readVar x = do
   store <- getStore
   case Map.lookup x store of
-    Nothing -> print ("unbound variable " <> x) >> return Empty
+    Nothing -> return Empty
     Just v  -> return v
 
 writeVar :: Var -> Val -> Interp ()
