@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6361d0dfc6527f403915215ae79afee2b67990920f4f994dd7266a6b214afa15
+-- hash: 499588fd2a86e8335a799c98b74e6a6aba4cf334e8e362e9fb7ab17197f44e63
 
 name:           PiG
-version:        0.3.3
+version:        0.3.4
 description:    Please see the README on Github at <https://github.com/PKopel/PiG#readme>
 homepage:       https://github.com/PKopel/PiG#readme
 bug-reports:    https://github.com/PKopel/PiG/issues
@@ -43,6 +43,7 @@ library
   build-depends:
       base >=4.11 && <10
     , containers
+    , haskeline
     , mtl
     , parsec
     , rio >=0.1.12.0
@@ -60,6 +61,7 @@ executable PiG
       PiG
     , base >=4.11 && <10
     , containers
+    , haskeline
     , mtl
     , optparse-simple
     , parsec
@@ -80,6 +82,7 @@ test-suite PiG-test
       PiG
     , base >=4.11 && <10
     , containers
+    , haskeline
     , hspec
     , mtl
     , parsec
