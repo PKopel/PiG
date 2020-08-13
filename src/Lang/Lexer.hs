@@ -11,43 +11,38 @@ import qualified Text.ParserCombinators.Parsec.Token
                                                as Token
 
 languageDef :: GenLanguageDef String u Identity
-languageDef = emptyDef
-  { Token.commentStart    = "/*"
-  , Token.commentEnd      = "*/"
-  , Token.commentLine     = "//"
-  , Token.identStart      = letter
-  , Token.identLetter     = alphaNum
-  , Token.reservedNames   = [ "if"
-                            , "then"
-                            , "else"
-                            , "while"
-                            , "do"
-                            , "skip"
-                            , "true"
-                            , "false"
-                            , "not"
-                            , "and"
-                            , "or"
-                            , "print"
-                            ]
-  , Token.reservedOpNames = [ "+"
-                            , "-"
-                            , "*"
-                            , "/"
-                            , ":="
-                            , "^"
-                            , "<"
-                            , ">"
-                            , "="
-                            , "+<"
-                            , "+>"
-                            , "-<"
-                            , "->"
-                            , "and"
-                            , "or"
-                            , "not"
-                            ]
-  }
+languageDef = emptyDef { Token.commentStart    = "/*"
+                       , Token.commentEnd      = "*/"
+                       , Token.commentLine     = "//"
+                       , Token.identStart      = letter
+                       , Token.identLetter     = alphaNum
+                       , Token.reservedNames   = reservedNms
+                       , Token.reservedOpNames = reservedOps
+                       }
+
+reservedNms :: [String]
+reservedNms =
+  ["if", "then", "else", "while", "do", "skip", "true", "false", "print"]
+
+reservedOps :: [String]
+reservedOps =
+  [ "+"
+  , "-"
+  , "*"
+  , "/"
+  , "="
+  , "^"
+  , "<"
+  , ">"
+  , "=="
+  , "+<"
+  , "+>"
+  , "-<"
+  , "->"
+  , "&&"
+  , "||"
+  , "~"
+  ]
 
 lexer :: GenTokenParser String u Identity
 lexer = Token.makeTokenParser languageDef
@@ -62,10 +57,13 @@ reservedOp :: String -> ParsecT String u Identity ()
 reservedOp = Token.reservedOp lexer -- parses an operator
 
 brackets :: ParsecT String u Identity a -> ParsecT String u Identity a
-brackets = Token.brackets lexer -- parses sequence in brackets
+brackets = Token.brackets lexer -- parses a sequence in brackets
 
 parens :: ParsecT String u Identity a -> ParsecT String u Identity a
-parens = Token.parens lexer -- parses sequence in parenthesis
+parens = Token.parens lexer -- parses a sequence in parenthesis
+
+braces :: ParsecT String u Identity a -> ParsecT String u Identity a
+braces = Token.braces lexer -- parses a sequence in braces
 
 double :: ParsecT String u Identity Double
 double = Token.float lexer -- parses a double
@@ -96,8 +94,8 @@ algOperators =
 
 boolOperators :: [[Operator Char st Expr]]
 boolOperators =
-  [ [Prefix (reservedOp "not" >> return (Neg))]
-  , [ Infix (reservedOp "and" >> return (BoolBinary And)) AssocLeft
-    , Infix (reservedOp "or" >> return (BoolBinary Or))   AssocLeft
+  [ [Prefix (reservedOp "~" >> return (Neg))]
+  , [ Infix (reservedOp "&&" >> return (BoolBinary And)) AssocLeft
+    , Infix (reservedOp "||" >> return (BoolBinary Or))  AssocLeft
     ]
   ]

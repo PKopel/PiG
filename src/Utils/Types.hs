@@ -3,11 +3,11 @@
 
 module Utils.Types where
 
-import           Control.Monad.State
-import           Data.List
-import           Data.Map
-import           RIO
-import           RIO.Process
+import Control.Monad.State
+import Data.List
+import Data.Map
+import RIO
+import RIO.Process
 
 -- | Command line arguments
 data Options = Options
@@ -22,11 +22,11 @@ data App = App
   }
 
 instance HasLogFunc App where
-  logFuncL = lens appLogFunc (\x y -> x { appLogFunc = y })
+  logFuncL = lens appLogFunc (\x y -> x {appLogFunc = y})
 
 instance HasProcessContext App where
   processContextL =
-    lens appProcessContext (\x y -> x { appProcessContext = y })
+    lens appProcessContext (\x y -> x {appProcessContext = y})
 
 infix 1 :=
 
@@ -69,10 +69,11 @@ data Stmt
 data Val = AlgVal Double | BoolVal Bool | ListVal [Val] | Empty
 
 instance Show Val where
-  show (AlgVal  v) = show v
-  show (BoolVal v) = show v
+  show (AlgVal v) = show v
+  show (BoolVal True) = "true"
+  show (BoolVal False) = "false"
   show (ListVal v) = '[' : intercalate ", " (show <$> v) ++ "]"
-  show Empty       = "null"
+  show Empty = "null"
 
 type Var = String
 
@@ -80,7 +81,14 @@ type Prog = Stmt
 
 type Store = Map Var Val
 
-type Interp = StateT Store (RIO App)
+newtype Interp a = Interp {runInterp :: StateT Store (RIO App) a}
+  deriving
+    ( Functor,
+      Applicative,
+      Monad,
+      MonadIO,
+      MonadState Store
+    )
 
 getStore :: Interp Store
 getStore = get
@@ -88,5 +96,5 @@ getStore = get
 putStore :: Store -> Interp ()
 putStore = put
 
-runInterp :: Interp a -> Store -> RIO App (a, Store)
-runInterp = runStateT
+runWithStore :: Interp a -> Store -> RIO App (a, Store)
+runWithStore = runStateT . runInterp

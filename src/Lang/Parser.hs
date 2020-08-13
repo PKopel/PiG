@@ -24,7 +24,7 @@ progParser :: Parser Prog
 progParser = whiteSpace >> stmtParser
 
 stmtParser :: Parser Stmt
-stmtParser = parens stmtParser <|> sequenceOfStmt
+stmtParser = braces stmtParser <|> sequenceOfStmt
  where
   sequenceOfStmt = do
     list <- (sepEndBy1 singleStmtParser semi)
@@ -35,7 +35,7 @@ stmtParser = parens stmtParser <|> sequenceOfStmt
 
 singleStmtParser :: Parser Stmt
 singleStmtParser =
-  try (parens stmtParser)
+  try (braces stmtParser)
     <|> try printStmtParser
     <|> try ifStmtParser
     <|> try whileStmtParser
@@ -58,7 +58,7 @@ whileStmtParser = do
 assignStmtParser :: Parser Stmt
 assignStmtParser = do
   var  <- identifier
-  expr <- reservedOp ":=" >> exprParser
+  expr <- reservedOp "=" >> exprParser
   return $ var := expr
 
 printStmtParser :: Parser Stmt
@@ -115,7 +115,7 @@ relation :: ParsecT String u Identity RelBinOp
 relation =
   (reservedOp ">" >> return Greater)
     <|> (reservedOp "<" >> return Less)
-    <|> (reservedOp "=" >> return Equal)
+    <|> (reservedOp "==" >> return Equal)
 
 listExprParser :: Parser Expr
 listExprParser =
