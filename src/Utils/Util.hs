@@ -20,6 +20,7 @@ where
 
 import           Data.Map                      as Map
 import           RIO
+import           System.Console.Haskeline
 import           Utils.Types
 
 valToList :: Val -> [Val]
@@ -67,4 +68,4 @@ writeVar x v = do
   putStore $ Map.insert x v store
 
 print :: Show a => a -> Interp ()
-print = lift . logInfo . fromString . show
+print = Interp . lift . outputStrLn . fromString . show

@@ -15,8 +15,7 @@ import           Text.ParserCombinators.Parsec
 import           Text.ParserCombinators.Parsec.Expr
 
 parseProg :: String -> Either String Prog
-parseProg "exit" = Left "exit"
-parseProg p      = case parse progParser "PiG" p of
+parseProg p = case parse progParser "PiG" p of
   Left  err  -> Left $ show err
   Right prog -> Right prog
 
