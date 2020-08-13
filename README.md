@@ -26,7 +26,9 @@ S = x "=" A | S ";" S | "{" S "}" | "while" E "do" S | "if" E "then" S ["else" S
 * With `stack exec -- PiG --verbose` to start interpreter with more logging.
 
 ### Dependencies
-* **[Attoparsec](https://hackage.haskell.org/package/attoparsec)**
+* **[RIO](https://hackage.haskell.org/package/rio)**
+* **[Parsec](https://hackage.haskell.org/package/parsec)**
+* **[Haskeline](https://hackage.haskell.org/package/haskeline)**
 
 ### Author
 
