@@ -47,7 +47,7 @@ data BoolBinOp = And | Or deriving (Show)
 
 data RelBinOp = Greater | Less | Equal deriving (Show)
 
-data ListBinOp = AddFirst | AddLast deriving (Show)
+data ListBinOp = Concat deriving (Show)
 
 data ListUnOp = RmFirst | RmLast deriving (Show)
 

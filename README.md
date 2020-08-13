@@ -4,9 +4,9 @@ Interpreter for a very simple language. The grammar is defined as follows:
 ```
 A = x | n | "-" A | A opa A | "(" A ")"
 
-B = "true" | "false" | "~" B | B opb B | A opr A
+B = "true" | "false" | "-" B | B opb B | A opr A
 
-L = "[" [ {E ","} E] "]" | L opl E | "-<" L | "->" L
+L = "[" [ {E ","} E] "]" | E "#" E | "-<" L | "->" L
 
 E = A | B | L
 
@@ -15,8 +15,6 @@ opa = "+" | "-" | "*" | "/" | "^"
 opb = "&&" | "||"
 
 opr = ">" | "<" | "=="
-
-opl = "+>" | "+<"
 
 S = x "=" A | S ";" S | "{" S "}" | "while" E "do" S | "if" E "then" S ["else" S] | "print" E 
 ```
