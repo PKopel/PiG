@@ -73,14 +73,11 @@ evalRelBin Equal e1 e2 = do
   return . maybeToBoolVal $ (==) <$> v1 <*> v2
 
 evalListBin :: ListBinOp -> Expr -> Expr -> Interp Val
-evalListBin AddFirst e1 e2 = do
-  l <- evalList e1
+evalListBin Concat e1 e2 = do
+  l <- eval e1
   v <- eval e2
-  return . maybeToListVal $ (++) <$> Just (valToList v) <*> l
-evalListBin AddLast e1 e2 = do
-  l <- evalList e1
-  v <- eval e2
-  return . maybeToListVal $ (++) <$> l <*> Just (valToList v)
+  return . maybeToListVal $ (++) <$> toMaybeList l <*> toMaybeList v
+  where toMaybeList = Just . valToList
 
 evalListUn :: ListUnOp -> Expr -> Interp Val
 evalListUn RmFirst e = do

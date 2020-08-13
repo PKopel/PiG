@@ -22,12 +22,15 @@ parseProg p = case parse progParser "PiG" p of
 progParser :: Parser Prog
 progParser = whiteSpace >> stmtParser
 
+endParser :: ParsecT String u Identity ()
+endParser =
+  lookAhead $ whiteSpace <* (skipMany1 semi <|> skipMany1 endOfLine <|> eof)
+
 stmtParser :: Parser Stmt
 stmtParser = braces stmtParser <|> sequenceOfStmt
  where
   sequenceOfStmt = do
     list <- (sepEndBy1 singleStmtParser semi)
-    -- If there's only one statement return it without using Seq.
     return $ case list of
       [stmt] -> stmt
       _      -> Seq list
@@ -83,13 +86,18 @@ listValParser = ListVal
   <$> (brackets . commaSep) (listValParser <|> boolValParser <|> algValParser)
 
 exprParser :: Parser Expr
-exprParser = try boolExprParser <|> try listExprParser <|> algExprParser
+exprParser =
+  try (last boolExprParser) <|> try (last algExprParser) <|> last listExprParser
+  where last b = b <* endParser
 
 algExprParser :: Parser Expr
 algExprParser = buildExpressionParser algOperators algTerm
 
 boolExprParser :: Parser Expr
 boolExprParser = buildExpressionParser boolOperators boolTerm
+
+listExprParser :: Parser Expr
+listExprParser = buildExpressionParser listOperators listTerm
 
 algTerm :: ParsecT String () Identity Expr
 algTerm = parens algExprParser <|> Var <$> identifier <|> Val <$> algValParser
@@ -116,29 +124,11 @@ relation =
     <|> (reservedOp "<" >> return Less)
     <|> (reservedOp "==" >> return Equal)
 
-listExprParser :: Parser Expr
-listExprParser =
+listTerm :: ParsecT String () Identity Expr
+listTerm =
   parens listExprParser
-    <|> try
-          (do
-            a1 <- Val <$> listValParser <|> Var <$> identifier
-            op <- listBinAction
-            a2 <- exprParser
-            return $ ListBinary op a1 a2
-          )
-    <|> try
-          (do
-            op <- listUnAction
-            a  <- exprParser
-            return $ ListUnary op a
-          )
+    <|> Var
+    <$> identifier
     <|> Val
     <$> listValParser
-
-listBinAction :: ParsecT String u Identity ListBinOp
-listBinAction =
-  (reservedOp "+>" >> return AddFirst) <|> (reservedOp "+<" >> return AddLast)
-
-listUnAction :: ParsecT String u Identity ListUnOp
-listUnAction =
-  (reservedOp "->" >> return RmFirst) <|> (reservedOp "-<" >> return RmLast)
+    <|> (try algExprParser <|> boolExprParser)

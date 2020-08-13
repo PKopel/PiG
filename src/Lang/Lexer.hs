@@ -26,23 +26,7 @@ reservedNms =
 
 reservedOps :: [String]
 reservedOps =
-  [ "+"
-  , "-"
-  , "*"
-  , "/"
-  , "="
-  , "^"
-  , "<"
-  , ">"
-  , "=="
-  , "+<"
-  , "+>"
-  , "-<"
-  , "->"
-  , "&&"
-  , "||"
-  , "~"
-  ]
+  ["+", "-", "*", "/", "=", "^", "<", ">", "==", "#", "-<", ">-", "&&", "||"]
 
 lexer :: GenTokenParser String u Identity
 lexer = Token.makeTokenParser languageDef
@@ -94,8 +78,16 @@ algOperators =
 
 boolOperators :: [[Operator Char st Expr]]
 boolOperators =
-  [ [Prefix (reservedOp "~" >> return (Neg))]
+  [ [Prefix (reservedOp "-" >> return (Neg))]
   , [ Infix (reservedOp "&&" >> return (BoolBinary And)) AssocLeft
     , Infix (reservedOp "||" >> return (BoolBinary Or))  AssocLeft
     ]
+  ]
+
+listOperators :: [[Operator Char st Expr]]
+listOperators =
+  [ [ Prefix (reservedOp ">-" >> return (ListUnary RmFirst))
+    , Prefix (reservedOp "-<" >> return (ListUnary RmLast))
+    ]
+  , [Infix (reservedOp "#" >> return (ListBinary Concat)) AssocLeft]
   ]
