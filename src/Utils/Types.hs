@@ -67,7 +67,7 @@ data Stmt
   | Skip
   deriving (Show)
 
-data Val = AlgVal Double | BoolVal Bool | ListVal [Val] | FunVal [Var] Stmt Expr | Empty
+data Val = AlgVal Double | BoolVal Bool | ListVal [Val] | FunVal [Var] Stmt Expr | Null
 
 instance Show Val where
   show (AlgVal  v    ) = show v
@@ -75,7 +75,7 @@ instance Show Val where
   show (BoolVal False) = "false"
   show (ListVal v    ) = '[' : intercalate ", " (show <$> v) ++ "]"
   show (FunVal _ _ _ ) = "function"
-  show Empty           = "null"
+  show Null            = "null"
 
 type Var = String
 

@@ -28,15 +28,15 @@ valToList (ListVal vs) = vs
 valToList v            = [v]
 
 maybeToAlgVal :: Maybe Double -> Val
-maybeToAlgVal Nothing  = Empty
+maybeToAlgVal Nothing  = Null
 maybeToAlgVal (Just v) = AlgVal v
 
 maybeToBoolVal :: Maybe Bool -> Val
-maybeToBoolVal Nothing  = Empty
+maybeToBoolVal Nothing  = Null
 maybeToBoolVal (Just v) = BoolVal v
 
 maybeToListVal :: Maybe [Val] -> Val
-maybeToListVal Nothing  = Empty
+maybeToListVal Nothing  = Null
 maybeToListVal (Just v) = ListVal v
 
 algValToMaybe :: Val -> Maybe Double
@@ -62,7 +62,7 @@ readVar x = do
     Just v  -> return v
     Nothing -> case Map.lookup x (getGlobals store) of
       Just v  -> return v
-      Nothing -> return Empty
+      Nothing -> return Null
 
 writeVar :: Var -> Val -> Interp ()
 writeVar x v = do

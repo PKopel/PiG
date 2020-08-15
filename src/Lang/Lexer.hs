@@ -24,7 +24,17 @@ languageDef = emptyDef { Token.commentStart    = "/*"
 
 reservedNms :: [String]
 reservedNms =
-  ["if", "then", "else", "while", "do", "skip", "return", "true", "false"]
+  [ "if"
+  , "then"
+  , "else"
+  , "while"
+  , "do"
+  , "skip"
+  , "return"
+  , "true"
+  , "false"
+  , "null"
+  ]
 
 reservedOps :: [String]
 reservedOps =

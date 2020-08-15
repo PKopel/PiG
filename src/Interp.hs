@@ -13,7 +13,7 @@ eval (Var x) = readVar x
 eval (Neg e) = eval e >>= \case
   AlgVal  v -> return . AlgVal . negate $ v
   BoolVal v -> return . BoolVal . not $ v
-  _         -> return Empty
+  _         -> return Null
 eval (AlgBinary  op e1 e2) = evalAlgBin op e1 e2
 eval (BoolBinary op e1 e2) = evalBoolBin op e1 e2
 eval (RelBinary  op e1 e2) = evalRelBin op e1 e2
@@ -32,7 +32,7 @@ eval (FunApp    n  vs    ) = do
       withStore $ setLocals
         ((flip Map.difference) (Map.difference newLocals oldLocals))
       return retVal
-    _ -> return Empty
+    _ -> return Null
 
 evalAlg :: Expr -> Interp (Maybe Double)
 evalAlg e = eval e >>= return . algValToMaybe
@@ -101,13 +101,13 @@ evalListUn RmFirst e = do
   let (iv, x) = isVar e
   evalList e >>= \case
     Just (h : t) -> when iv (writeVar x (ListVal t)) >> return h
-    _            -> return Empty
+    _            -> return Null
 evalListUn RmLast e = do
   let (iv, x) = isVar e
   evalList e >>= \case
     Just l@(_ : _) ->
       when iv (writeVar x (ListVal $ init l)) >> return (last l)
-    _ -> return Empty
+    _ -> return Null
 
 exec :: Stmt -> Interp ()
 exec Skip             = return ()

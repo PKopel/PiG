@@ -88,7 +88,10 @@ skipStmtParser :: Parser Stmt
 skipStmtParser = (reserved "skip" >> return Skip) <?> "skip"
 
 algValParser :: Parser Val
-algValParser = AlgVal <$> (try double <|> fromInteger <$> integer)
+algValParser =
+  AlgVal
+    <$> (try double <|> fromInteger <$> integer)
+    <|> (reserved "null" >> return Null)
 
 boolValParser :: Parser Val
 boolValParser =
@@ -96,6 +99,7 @@ boolValParser =
     <$> (   try (reserved "true" >> return True)
         <|> try (reserved "false" >> return False)
         )
+    <|> (reserved "null" >> return Null)
 
 funValParser :: Parser Val
 funValParser =
@@ -116,8 +120,10 @@ funValParser =
     <?> "function definition"
 
 listValParser :: Parser Val
-listValParser = ListVal
-  <$> (brackets . commaSep) (listValParser <|> boolValParser <|> algValParser)
+listValParser =
+  ListVal
+    <$> (brackets . commaSep) (listValParser <|> boolValParser <|> algValParser)
+    <|> (reserved "null" >> return Null)
 
 exprParser :: Parser Expr
 exprParser =
