@@ -18,7 +18,7 @@ t = (a) => a
 s = (a,b) => { c = a + b; return c}
 ```
 
-One can also write statements like `when ... do ...`, `if ... then ... [else ...]` and sequences of statements separated by ';', 
+One can also write statements like `when ... do ...`, `if ... then ... [else ...]` and sequences of statements separated by `;`, 
 optionaly enclosed in braces. Writing single expression will effect in writing result of this expression to stdout. 
 
 Supported operators are:
