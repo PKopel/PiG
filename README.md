@@ -22,9 +22,9 @@ One can also write statements like `when ... do ...`, `if ... then ... [else ...
 optionaly enclosed in braces. Writing single expression will effect in writing result of this expression to stdout. 
 
 Supported operators are:
-* '+', '-', '*', '/' and '^' for numbers
-* '-', '||', '&&' for booleans
-* '<>', '-<', '>-' for lists
+* `+`, `-`, `*`, `/` and `^` for numbers
+* `-`, `||`, `&&` for booleans
+* `<>`, `-<`, `>-` for lists
 
 ### Dependencies
 * **[RIO](https://hackage.haskell.org/package/rio)**
