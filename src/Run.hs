@@ -8,7 +8,7 @@ module Run
 where
 
 import           Import
-import           Interp.Exec
+import           Interp
 import           Lang.Parser
 import           System.Console.Haskeline
 

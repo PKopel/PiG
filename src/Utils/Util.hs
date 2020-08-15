@@ -3,12 +3,10 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Utils.Util
-  ( print
+  ( printVal
   , isVar
   , readVar
-  , readFun
   , writeVar
-  , writeFun
   , valToList
   , maybeToAlgVal
   , maybeToBoolVal
@@ -73,17 +71,5 @@ writeVar x v = do
     then setLocals (Map.insert x v) store
     else setGlobals (Map.insert x v) store
 
-readFun :: Var -> Interp Fun
-readFun x = do
-  store <- getStore
-  case Map.lookup x (getFuns store) of
-    Just v  -> return v
-    Nothing -> return None
-
-writeFun :: Var -> Fun -> Interp ()
-writeFun f s = do
-  store <- getStore
-  putStore $ setFuns (Map.insert f s) store
-
-print :: Show a => a -> Interp ()
-print = Interp . lift . outputStrLn . fromString . show
+printVal :: Show a => a -> Interp ()
+printVal = Interp . lift . outputStrLn . fromString . show

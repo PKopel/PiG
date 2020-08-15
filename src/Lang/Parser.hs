@@ -29,6 +29,7 @@ endParser =
     <* (   skipMany1 semi
        <|> skipMany1 endOfLine
        <|> skipMany1 (char ')')
+       <|> skipMany1 (char '}')
        <|> skipMany1 (char ',')
        <|> eof
        )
@@ -47,8 +48,6 @@ singleStmtParser =
     <|> try whileStmtParser
     <|> try skipStmtParser
     <|> try assignStmtParser
-    <|> try funAppStmtParser
-    <|> funDefStmtParser
     <|> printStmtParser
 
 ifStmtParser :: Parser Stmt
@@ -85,25 +84,6 @@ printStmtParser = Print <$> exprParser <?> "print"
 skipStmtParser :: Parser Stmt
 skipStmtParser = (reserved "skip" >> return Skip) <?> "skip"
 
-funDefStmtParser :: Parser Stmt
-funDefStmtParser =
-  (do
-      name <- reservedOp "\\" >> identifier
-      args <- parens (commaSep identifier)
-      body <- singleStmtParser
-      return $ FunDef name $ Fun args body
-    )
-    <?> "function definition"
-
-funAppStmtParser :: Parser Stmt
-funAppStmtParser =
-  (do
-      name <- identifier
-      args <- parens (commaSep exprParser)
-      return $ FunApp name args
-    )
-    <?> "function application"
-
 algValParser :: Parser Val
 algValParser = AlgVal <$> (try double <|> fromInteger <$> integer)
 
@@ -114,13 +94,34 @@ boolValParser =
         <|> try (reserved "false" >> return False)
         )
 
+funValParser :: Parser Val
+funValParser =
+  (do
+      args <- parens (commaSep identifier)
+      reservedOp "=>"
+      try
+          (braces $ do
+            body <- stmtParser
+            ret  <- reserved "return" >> exprParser
+            return $ FunVal args body ret
+          )
+        <|> (do
+              ret <- exprParser
+              return $ FunVal args Skip ret
+            )
+    )
+    <?> "function definition"
+
 listValParser :: Parser Val
 listValParser = ListVal
   <$> (brackets . commaSep) (listValParser <|> boolValParser <|> algValParser)
 
 exprParser :: Parser Expr
 exprParser =
-  try (last boolExprParser) <|> try (last algExprParser) <|> last listExprParser
+  try (last boolExprParser)
+    <|> try (last algExprParser)
+    <|> try (last funExprParser)
+    <|> last listExprParser
   where last b = b <* endParser
 
 algExprParser :: Parser Expr
@@ -131,6 +132,18 @@ boolExprParser = buildExpressionParser boolOperators boolTerm
 
 listExprParser :: Parser Expr
 listExprParser = buildExpressionParser listOperators listTerm
+
+funExprParser :: Parser Expr
+funExprParser = try funAppParser <|> Val <$> funValParser
+
+funAppParser :: Parser Expr
+funAppParser =
+  (do
+      name <- identifier
+      args <- parens (commaSep exprParser)
+      return $ FunApp name args
+    )
+    <?> "function application"
 
 algTerm :: ParsecT String () Identity Expr
 algTerm = parens algExprParser <|> Var <$> identifier <|> Val <$> algValParser
