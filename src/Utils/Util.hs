@@ -3,7 +3,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Utils.Util
-  ( print
+  ( printVal
   , isVar
   , readVar
   , writeVar
@@ -58,14 +58,18 @@ isVar _       = (False, "")
 readVar :: Var -> Interp Val
 readVar x = do
   store <- getStore
-  case Map.lookup x store of
-    Nothing -> return Empty
+  case Map.lookup x (getLocals store) of
     Just v  -> return v
+    Nothing -> case Map.lookup x (getGlobals store) of
+      Just v  -> return v
+      Nothing -> return Empty
 
 writeVar :: Var -> Val -> Interp ()
 writeVar x v = do
   store <- getStore
-  putStore $ Map.insert x v store
+  putStore $ if Map.member x (getLocals store)
+    then setLocals (Map.insert x v) store
+    else setGlobals (Map.insert x v) store
 
-print :: Show a => a -> Interp ()
-print = Interp . lift . outputStrLn . fromString . show
+printVal :: Show a => a -> Interp ()
+printVal = Interp . lift . outputStrLn . fromString . show

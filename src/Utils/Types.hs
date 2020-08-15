@@ -10,7 +10,6 @@ import           RIO
 import           RIO.Process
 import           System.Console.Haskeline
 
--- | Command line arguments
 data Options = Options
   { optionsVerbose :: !Bool
   }
@@ -20,7 +19,6 @@ data App = App
     appProcessContext :: !ProcessContext,
     appOptions :: !Options,
     appSettings :: !(Settings IO)
-    -- Add other app-specific configuration information here
   }
 
 instance HasLogFunc App where
@@ -41,6 +39,7 @@ data Expr
   | AlgBinary AlgBinOp Expr Expr
   | ListUnary ListUnOp Expr
   | ListBinary ListBinOp Expr Expr
+  | FunApp Var [Expr]
   deriving (Show)
 
 data BoolBinOp = And | Or deriving (Show)
@@ -68,20 +67,42 @@ data Stmt
   | Skip
   deriving (Show)
 
-data Val = AlgVal Double | BoolVal Bool | ListVal [Val] | Empty
+data Val = AlgVal Double | BoolVal Bool | ListVal [Val] | FunVal [Var] Stmt Expr | Empty
 
 instance Show Val where
   show (AlgVal  v    ) = show v
   show (BoolVal True ) = "true"
   show (BoolVal False) = "false"
   show (ListVal v    ) = '[' : intercalate ", " (show <$> v) ++ "]"
+  show (FunVal _ _ _ ) = "function"
   show Empty           = "null"
 
 type Var = String
 
 type Prog = Stmt
 
-type Store = Map Var Val
+data Store = Store {gVars :: Map Var Val, lVars :: Map Var Val}
+
+emptyStore :: Store
+emptyStore = Store { gVars = empty, lVars = empty }
+
+globalL :: Lens' Store (Map Var Val)
+globalL = lens gVars (\x y -> x { gVars = y })
+
+localL :: Lens' Store (Map Var Val)
+localL = lens lVars (\x y -> x { lVars = y })
+
+getLocals :: Store -> Map Var Val
+getLocals = view localL
+
+getGlobals :: Store -> Map Var Val
+getGlobals = view globalL
+
+setLocals :: (Map Var Val -> Map Var Val) -> Store -> Store
+setLocals = over localL
+
+setGlobals :: (Map Var Val -> Map Var Val) -> Store -> Store
+setGlobals = over globalL
 
 newtype Interp a = Interp {runInterp :: StateT Store (InputT IO) a}
   deriving
@@ -97,6 +118,9 @@ getStore = get
 
 putStore :: Store -> Interp ()
 putStore = put
+
+withStore :: (Store -> Store) -> Interp ()
+withStore f = getStore >>= putStore . f
 
 runWithStore :: Interp a -> Store -> InputT IO (a, Store)
 runWithStore = runStateT . runInterp

@@ -24,52 +24,65 @@ progParser = whiteSpace >> stmtParser
 
 endParser :: ParsecT String u Identity ()
 endParser =
-  lookAhead $ whiteSpace <* (skipMany1 semi <|> skipMany1 endOfLine <|> eof)
+  lookAhead
+    $  whiteSpace
+    <* (   skipMany1 semi
+       <|> skipMany1 endOfLine
+       <|> skipMany1 (char ')')
+       <|> skipMany1 (char '}')
+       <|> skipMany1 (char ',')
+       <|> eof
+       )
 
 stmtParser :: Parser Stmt
-stmtParser = braces stmtParser <|> sequenceOfStmt
- where
-  sequenceOfStmt = do
-    list <- (sepEndBy1 singleStmtParser semi)
-    return $ case list of
-      [stmt] -> stmt
-      _      -> Seq list
+stmtParser = do
+  list <- (sepEndBy1 singleStmtParser semi)
+  return $ case list of
+    [stmt] -> stmt
+    _      -> Seq list
 
 singleStmtParser :: Parser Stmt
 singleStmtParser =
-  try (braces stmtParser)
-    <|> try printStmtParser
+  braces stmtParser
     <|> try ifStmtParser
     <|> try whileStmtParser
     <|> try skipStmtParser
-    <|> assignStmtParser
+    <|> try assignStmtParser
+    <|> printStmtParser
 
 ifStmtParser :: Parser Stmt
-ifStmtParser = do
-  cond  <- reserved "if" >> exprParser
-  stmt1 <- reserved "then" >> singleStmtParser
-  stmt2 <- option Skip (reserved "else" >> singleStmtParser)
-  return $ If cond stmt1 stmt2
+ifStmtParser =
+  (do
+      cond  <- reserved "if" >> exprParser
+      stmt1 <- reserved "then" >> singleStmtParser
+      stmt2 <- option Skip (reserved "else" >> singleStmtParser)
+      return $ If cond stmt1 stmt2
+    )
+    <?> "if"
 
 whileStmtParser :: Parser Stmt
-whileStmtParser = do
-  cond <- reserved "while" >> exprParser
-  stmt <- reserved "do" >> singleStmtParser
-  return $ While cond stmt
+whileStmtParser =
+  (do
+      cond <- reserved "while" >> exprParser
+      stmt <- reserved "do" >> singleStmtParser
+      return $ While cond stmt
+    )
+    <?> "while"
 
 assignStmtParser :: Parser Stmt
-assignStmtParser = do
-  var  <- identifier
-  expr <- reservedOp "=" >> exprParser
-  return $ var := expr
+assignStmtParser =
+  (do
+      var  <- identifier
+      expr <- reservedOp "=" >> exprParser
+      return $ var := expr
+    )
+    <?> "assignment"
 
 printStmtParser :: Parser Stmt
-printStmtParser = do
-  expr <- reserved "print" >> exprParser
-  return $ Print expr
+printStmtParser = Print <$> exprParser <?> "print"
 
 skipStmtParser :: Parser Stmt
-skipStmtParser = reserved "skip" >> return Skip
+skipStmtParser = (reserved "skip" >> return Skip) <?> "skip"
 
 algValParser :: Parser Val
 algValParser = AlgVal <$> (try double <|> fromInteger <$> integer)
@@ -81,13 +94,34 @@ boolValParser =
         <|> try (reserved "false" >> return False)
         )
 
+funValParser :: Parser Val
+funValParser =
+  (do
+      args <- parens (commaSep identifier)
+      reservedOp "=>"
+      try
+          (braces $ do
+            body <- stmtParser
+            ret  <- reserved "return" >> exprParser
+            return $ FunVal args body ret
+          )
+        <|> (do
+              ret <- exprParser
+              return $ FunVal args Skip ret
+            )
+    )
+    <?> "function definition"
+
 listValParser :: Parser Val
 listValParser = ListVal
   <$> (brackets . commaSep) (listValParser <|> boolValParser <|> algValParser)
 
 exprParser :: Parser Expr
 exprParser =
-  try (last boolExprParser) <|> try (last algExprParser) <|> last listExprParser
+  try (last boolExprParser)
+    <|> try (last algExprParser)
+    <|> try (last funExprParser)
+    <|> last listExprParser
   where last b = b <* endParser
 
 algExprParser :: Parser Expr
@@ -98,6 +132,18 @@ boolExprParser = buildExpressionParser boolOperators boolTerm
 
 listExprParser :: Parser Expr
 listExprParser = buildExpressionParser listOperators listTerm
+
+funExprParser :: Parser Expr
+funExprParser = try funAppParser <|> Val <$> funValParser
+
+funAppParser :: Parser Expr
+funAppParser =
+  (do
+      name <- identifier
+      args <- parens (commaSep exprParser)
+      return $ FunApp name args
+    )
+    <?> "function application"
 
 algTerm :: ParsecT String () Identity Expr
 algTerm = parens algExprParser <|> Var <$> identifier <|> Val <$> algValParser

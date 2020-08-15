@@ -1,8 +1,11 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Interp.Eval where
+module Interp where
 
+import           Control.Monad
+import qualified Data.Map                      as Map
 import           Import
+import           System.Console.Haskeline
 
 eval :: Expr -> Interp Val
 eval (Val n) = return n
@@ -16,6 +19,20 @@ eval (BoolBinary op e1 e2) = evalBoolBin op e1 e2
 eval (RelBinary  op e1 e2) = evalRelBin op e1 e2
 eval (ListBinary op e1 e2) = evalListBin op e1 e2
 eval (ListUnary op e     ) = evalListUn op e
+eval (FunApp    n  vs    ) = do
+  fun <- readVar n
+  case fun of
+    FunVal as stmt ret -> do
+      newLocals <-
+        Map.fromList <$> zipWithM (\a v -> eval v >>= return . (,) a) as vs
+      oldLocals <- getStore >>= return . getLocals
+      withStore $ setLocals (Map.union newLocals)
+      exec stmt
+      retVal <- eval ret
+      withStore $ setLocals
+        ((flip Map.difference) (Map.difference newLocals oldLocals))
+      return retVal
+    _ -> return Empty
 
 evalAlg :: Expr -> Interp (Maybe Double)
 evalAlg e = eval e >>= return . algValToMaybe
@@ -91,3 +108,23 @@ evalListUn RmLast e = do
     Just l@(_ : _) ->
       when iv (writeVar x (ListVal $ init l)) >> return (last l)
     _ -> return Empty
+
+exec :: Stmt -> Interp ()
+exec Skip             = return ()
+exec (x := e        ) = eval e >>= writeVar x
+exec (Seq   []      ) = return ()
+exec (Seq   (s : ss)) = exec s >> exec (Seq ss)
+exec (Print e       ) = eval e >>= printVal
+exec (If e s1 s2    ) = eval e >>= \case
+  AlgVal  v -> if v /= 0 then exec s1 else exec s2
+  BoolVal v -> if v then exec s1 else exec s2
+  ListVal v -> if length v > 0 then exec s1 else exec s2
+  _         -> return ()
+exec (While e s) = eval e >>= \case
+  AlgVal  v -> when (v /= 0) (exec (Seq [s, While e s]))
+  BoolVal v -> when v (exec (Seq [s, While e s]))
+  ListVal v -> when (length v > 0) (exec (Seq [s, While e s]))
+  _         -> return ()
+
+runProg :: Store -> Prog -> InputT IO ((), Store)
+runProg r p = runWithStore (exec p) r
