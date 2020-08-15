@@ -23,11 +23,13 @@ exec (FunApp n vs   ) = do
   case fun of
     None        -> return ()
     Fun as stmt -> do
-      locals <-
+      newLocals <-
         Map.fromList <$> zipWithM (\a v -> eval v >>= return . (,) a) as vs
-      withStore $ setLocals (Map.union locals)
+      oldLocals <- getStore >>= return . getLocals
+      withStore $ setLocals (Map.union newLocals)
       exec stmt
-      withStore $ setLocals (const Map.empty)
+      withStore $ setLocals
+        ((flip Map.difference) (Map.difference newLocals oldLocals))
 exec (If e s1 s2) = eval e >>= \case
   AlgVal  v -> if v /= 0 then exec s1 else exec s2
   BoolVal v -> if v then exec s1 else exec s2
