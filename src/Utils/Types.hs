@@ -39,6 +39,7 @@ data Expr
   | AlgBinary AlgBinOp Expr Expr
   | ListUnary ListUnOp Expr
   | ListBinary ListBinOp Expr Expr
+  | FunApp Var [Expr]
   deriving (Show)
 
 data BoolBinOp = And | Or deriving (Show)
@@ -62,32 +63,28 @@ data Stmt
   | While Expr Stmt
   | If Expr Stmt Stmt
   | Seq [Stmt]
-  | Ign Expr
-  | FunDef Var Fun
-  | FunApp Var [Expr]
   | Print Expr
   | Skip
   deriving (Show)
 
-data Val = AlgVal Double | BoolVal Bool | ListVal [Val] | Empty
-
-data Fun = Fun [Var] Stmt | None deriving (Show)
+data Val = AlgVal Double | BoolVal Bool | ListVal [Val] | FunVal [Var] Stmt Expr | Empty
 
 instance Show Val where
   show (AlgVal  v    ) = show v
   show (BoolVal True ) = "true"
   show (BoolVal False) = "false"
   show (ListVal v    ) = '[' : intercalate ", " (show <$> v) ++ "]"
+  show (FunVal _ _ _ ) = "function"
   show Empty           = "null"
 
 type Var = String
 
 type Prog = Stmt
 
-data Store = Store {gVars :: Map Var Val, lVars :: Map Var Val, functions :: Map Var Fun}
+data Store = Store {gVars :: Map Var Val, lVars :: Map Var Val}
 
 emptyStore :: Store
-emptyStore = Store { gVars = empty, lVars = empty, functions = empty }
+emptyStore = Store { gVars = empty, lVars = empty }
 
 globalL :: Lens' Store (Map Var Val)
 globalL = lens gVars (\x y -> x { gVars = y })
@@ -95,26 +92,17 @@ globalL = lens gVars (\x y -> x { gVars = y })
 localL :: Lens' Store (Map Var Val)
 localL = lens lVars (\x y -> x { lVars = y })
 
-funsL :: Lens' Store (Map Var Fun)
-funsL = lens functions (\x y -> x { functions = y })
-
 getLocals :: Store -> Map Var Val
 getLocals = view localL
 
 getGlobals :: Store -> Map Var Val
 getGlobals = view globalL
 
-getFuns :: Store -> Map Var Fun
-getFuns = view funsL
-
 setLocals :: (Map Var Val -> Map Var Val) -> Store -> Store
 setLocals = over localL
 
 setGlobals :: (Map Var Val -> Map Var Val) -> Store -> Store
 setGlobals = over globalL
-
-setFuns :: (Map Var Fun -> Map Var Fun) -> Store -> Store
-setFuns = over funsL
 
 newtype Interp a = Interp {runInterp :: StateT Store (InputT IO) a}
   deriving
