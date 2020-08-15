@@ -31,6 +31,9 @@ endParser =
        <|> skipMany1 (char ')')
        <|> skipMany1 (char '}')
        <|> skipMany1 (char ',')
+       <|> skipMany1 (reserved "then")
+       <|> skipMany1 (reserved "else")
+       <|> skipMany1 (reserved "do")
        <|> eof
        )
 
@@ -151,11 +154,11 @@ algTerm = parens algExprParser <|> Var <$> identifier <|> Val <$> algValParser
 boolTerm :: ParsecT String () Identity Expr
 boolTerm =
   parens boolExprParser
-    <|> Var
-    <$> identifier
+    <|> relExprParser
     <|> Val
     <$> boolValParser
-    <|> relExprParser
+    <|> Var
+    <$> identifier
 
 relExprParser :: ParsecT String () Identity Expr
 relExprParser = do
