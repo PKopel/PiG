@@ -16,7 +16,7 @@ opb = "&&" | "||"
 
 opr = ">" | "<" | "=="
 
-S = x "=" A | {S ";"} S | "{" S "}" | "while" E "do" S | "if" E "then" S ["else" S] | "print" E 
+S = x "=" A | {S ";"} S | "{" S "}" | "while" E "do" S | "if" E "then" S ["else" S] | E | a "(" [ {E ","} E] ")" | "\" a "(" [ {a ","} a] ")" S
 ```
 ## Usage  
 
