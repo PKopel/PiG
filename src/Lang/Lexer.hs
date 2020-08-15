@@ -1,3 +1,5 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+
 module Lang.Lexer where
 
 import           Control.Monad.Identity
@@ -21,12 +23,26 @@ languageDef = emptyDef { Token.commentStart    = "/*"
                        }
 
 reservedNms :: [String]
-reservedNms =
-  ["if", "then", "else", "while", "do", "skip", "true", "false", "print"]
+reservedNms = ["if", "then", "else", "while", "do", "skip", "true", "false"]
 
 reservedOps :: [String]
 reservedOps =
-  ["+", "-", "*", "/", "=", "^", "<", ">", "==", "#", "-<", ">-", "&&", "||"]
+  [ "+"
+  , "-"
+  , "*"
+  , "/"
+  , "\\"
+  , "="
+  , "^"
+  , "<"
+  , ">"
+  , "=="
+  , "#"
+  , "-<"
+  , ">-"
+  , "&&"
+  , "||"
+  ]
 
 lexer :: GenTokenParser String u Identity
 lexer = Token.makeTokenParser languageDef

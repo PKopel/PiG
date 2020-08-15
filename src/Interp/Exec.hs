@@ -5,17 +5,30 @@
 module Interp.Exec where
 
 import           Control.Monad
+import qualified Data.Map                      as Map
 import           Import
 import           Interp.Eval
 import           System.Console.Haskeline
 
 exec :: Stmt -> Interp ()
 exec Skip             = return ()
+exec (Ign e         ) = eval e >> return ()
 exec (x := e        ) = eval e >>= writeVar x
 exec (Seq   []      ) = return ()
 exec (Seq   (s : ss)) = exec s >> exec (Seq ss)
 exec (Print e       ) = eval e >>= print
-exec (If e s1 s2    ) = eval e >>= \case
+exec (FunDef n f    ) = writeFun n f
+exec (FunApp n vs   ) = do
+  fun <- readFun n
+  case fun of
+    None        -> return ()
+    Fun as stmt -> do
+      locals <-
+        Map.fromList <$> zipWithM (\a v -> eval v >>= return . (,) a) as vs
+      withStore $ setLocals (Map.union locals)
+      exec stmt
+      withStore $ setLocals (const Map.empty)
+exec (If e s1 s2) = eval e >>= \case
   AlgVal  v -> if v /= 0 then exec s1 else exec s2
   BoolVal v -> if v then exec s1 else exec s2
   ListVal v -> if length v > 0 then exec s1 else exec s2

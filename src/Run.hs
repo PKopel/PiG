@@ -7,7 +7,6 @@ module Run
   )
 where
 
-import           Data.Map                      as Map
 import           Import
 import           Interp.Exec
 import           Lang.Parser
@@ -17,7 +16,7 @@ run :: RIO App ()
 run = do
   logInfo "We're inside the experimental PiG interpreter!\nhit Ctrl+D to exit"
   settings <- view $ to appSettings
-  liftIO $ runInputT settings $ runLine Map.empty
+  liftIO $ runInputT settings $ runLine emptyStore
 
 runLine :: Store -> InputT IO ()
 runLine store = do

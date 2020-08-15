@@ -24,52 +24,85 @@ progParser = whiteSpace >> stmtParser
 
 endParser :: ParsecT String u Identity ()
 endParser =
-  lookAhead $ whiteSpace <* (skipMany1 semi <|> skipMany1 endOfLine <|> eof)
+  lookAhead
+    $  whiteSpace
+    <* (   skipMany1 semi
+       <|> skipMany1 endOfLine
+       <|> skipMany1 (char ')')
+       <|> skipMany1 (char ',')
+       <|> eof
+       )
 
 stmtParser :: Parser Stmt
-stmtParser = braces stmtParser <|> sequenceOfStmt
- where
-  sequenceOfStmt = do
-    list <- (sepEndBy1 singleStmtParser semi)
-    return $ case list of
-      [stmt] -> stmt
-      _      -> Seq list
+stmtParser = do
+  list <- (sepEndBy1 singleStmtParser semi)
+  return $ case list of
+    [stmt] -> stmt
+    _      -> Seq list
 
 singleStmtParser :: Parser Stmt
 singleStmtParser =
-  try (braces stmtParser)
-    <|> try printStmtParser
+  braces stmtParser
     <|> try ifStmtParser
     <|> try whileStmtParser
     <|> try skipStmtParser
-    <|> assignStmtParser
+    <|> try assignStmtParser
+    <|> try funAppStmtParser
+    <|> funDefStmtParser
+    <|> printStmtParser
 
 ifStmtParser :: Parser Stmt
-ifStmtParser = do
-  cond  <- reserved "if" >> exprParser
-  stmt1 <- reserved "then" >> singleStmtParser
-  stmt2 <- option Skip (reserved "else" >> singleStmtParser)
-  return $ If cond stmt1 stmt2
+ifStmtParser =
+  (do
+      cond  <- reserved "if" >> exprParser
+      stmt1 <- reserved "then" >> singleStmtParser
+      stmt2 <- option Skip (reserved "else" >> singleStmtParser)
+      return $ If cond stmt1 stmt2
+    )
+    <?> "if"
 
 whileStmtParser :: Parser Stmt
-whileStmtParser = do
-  cond <- reserved "while" >> exprParser
-  stmt <- reserved "do" >> singleStmtParser
-  return $ While cond stmt
+whileStmtParser =
+  (do
+      cond <- reserved "while" >> exprParser
+      stmt <- reserved "do" >> singleStmtParser
+      return $ While cond stmt
+    )
+    <?> "while"
 
 assignStmtParser :: Parser Stmt
-assignStmtParser = do
-  var  <- identifier
-  expr <- reservedOp "=" >> exprParser
-  return $ var := expr
+assignStmtParser =
+  (do
+      var  <- identifier
+      expr <- reservedOp "=" >> exprParser
+      return $ var := expr
+    )
+    <?> "assignment"
 
 printStmtParser :: Parser Stmt
-printStmtParser = do
-  expr <- reserved "print" >> exprParser
-  return $ Print expr
+printStmtParser = Print <$> exprParser <?> "print"
 
 skipStmtParser :: Parser Stmt
-skipStmtParser = reserved "skip" >> return Skip
+skipStmtParser = (reserved "skip" >> return Skip) <?> "skip"
+
+funDefStmtParser :: Parser Stmt
+funDefStmtParser =
+  (do
+      name <- reservedOp "\\" >> identifier
+      args <- parens (commaSep identifier)
+      body <- singleStmtParser
+      return $ FunDef name $ Fun args body
+    )
+    <?> "function definition"
+
+funAppStmtParser :: Parser Stmt
+funAppStmtParser =
+  (do
+      name <- identifier
+      args <- parens (commaSep exprParser)
+      return $ FunApp name args
+    )
+    <?> "function application"
 
 algValParser :: Parser Val
 algValParser = AlgVal <$> (try double <|> fromInteger <$> integer)

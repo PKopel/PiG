@@ -6,7 +6,9 @@ module Utils.Util
   ( print
   , isVar
   , readVar
+  , readFun
   , writeVar
+  , writeFun
   , valToList
   , maybeToAlgVal
   , maybeToBoolVal
@@ -58,14 +60,30 @@ isVar _       = (False, "")
 readVar :: Var -> Interp Val
 readVar x = do
   store <- getStore
-  case Map.lookup x store of
-    Nothing -> return Empty
+  case Map.lookup x (getLocals store) of
     Just v  -> return v
+    Nothing -> case Map.lookup x (getGlobals store) of
+      Just v  -> return v
+      Nothing -> return Empty
 
 writeVar :: Var -> Val -> Interp ()
 writeVar x v = do
   store <- getStore
-  putStore $ Map.insert x v store
+  putStore $ if Map.member x (getLocals store)
+    then setLocals (Map.insert x v) store
+    else setGlobals (Map.insert x v) store
+
+readFun :: Var -> Interp Fun
+readFun x = do
+  store <- getStore
+  case Map.lookup x (getFuns store) of
+    Just v  -> return v
+    Nothing -> return None
+
+writeFun :: Var -> Fun -> Interp ()
+writeFun f s = do
+  store <- getStore
+  putStore $ setFuns (Map.insert f s) store
 
 print :: Show a => a -> Interp ()
 print = Interp . lift . outputStrLn . fromString . show
