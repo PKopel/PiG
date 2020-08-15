@@ -45,6 +45,8 @@ algValToMaybe _          = Nothing
 
 boolValToMaybe :: Val -> Maybe Bool
 boolValToMaybe (BoolVal b) = Just b
+boolValToMaybe (AlgVal  a) = Just (a /= 0)
+boolValToMaybe (ListVal l) = Just (length l > 0)
 boolValToMaybe _           = Nothing
 
 listValToMaybe :: Val -> Maybe [Val]
