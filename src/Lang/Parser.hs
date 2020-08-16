@@ -20,7 +20,7 @@ parseProg p = case parse progParser "PiG" p of
   Right prog -> Right prog
 
 progParser :: Parser Prog
-progParser = whiteSpace >> stmtParser
+progParser = Stmt <$> (whiteSpace >> stmtParser) <|> Drct <$> drctParser
 
 endParser :: ParsecT String u Identity ()
 endParser =
@@ -36,6 +36,19 @@ endParser =
        <|> skipMany1 (reserved "do")
        <|> eof
        )
+
+last :: Parser a -> Parser a
+last b = b <* endParser
+
+drctParser :: Parser Drct
+drctParser =
+  try (last $ reserved ":clear" >> return Clear)
+    <|> try (last $ reserved ":exit" >> return Exit)
+    <|> try (last $ reserved ":help" >> return Help)
+    <|> Rm
+    <$> try (last $ reserved ":rm" >> identifier)
+    <|> Load
+    <$> try (last $ reserved ":load" >> stringLiteral)
 
 stmtParser :: Parser Stmt
 stmtParser = do
@@ -131,7 +144,6 @@ exprParser =
     <|> try (last algExprParser)
     <|> try (last funExprParser)
     <|> last listExprParser
-  where last b = b <* endParser
 
 algExprParser :: Parser Expr
 algExprParser = buildExpressionParser algOperators algTerm

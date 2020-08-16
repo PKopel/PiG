@@ -79,7 +79,9 @@ instance Show Val where
 
 type Var = String
 
-type Prog = Stmt
+data Drct = Exit | Clear | Help | Rm Var | Load FilePath
+
+data Prog = Stmt Stmt | Drct Drct
 
 data Store = Store {gVars :: Map Var Val, lVars :: Map Var Val}
 

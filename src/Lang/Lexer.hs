@@ -34,6 +34,11 @@ reservedNms =
   , "true"
   , "false"
   , "null"
+  , ":exit"
+  , ":help"
+  , ":rm"
+  , ":clear"
+  , ":load"
   ]
 
 reservedOps :: [String]
@@ -81,6 +86,9 @@ double = Token.float lexer -- parses a double
 
 integer :: ParsecT String u Identity Integer
 integer = Token.integer lexer -- parses an integer
+
+stringLiteral :: ParsecT String u Identity String
+stringLiteral = Token.stringLiteral lexer -- parses a string
 
 semi :: ParsecT String u Identity String
 semi = Token.semi lexer -- parses a semicolon

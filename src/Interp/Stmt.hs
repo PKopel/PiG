@@ -1,11 +1,10 @@
 {-# LANGUAGE LambdaCase #-}
 
-module Interp where
+module Interp.Stmt where
 
 import           Control.Monad
 import qualified Data.Map                      as Map
 import           Import
-import           System.Console.Haskeline
 
 eval :: Expr -> Interp Val
 eval (Val n) = return n
@@ -133,6 +132,3 @@ exec (While e s) = eval e >>= \case
   BoolVal v -> when v (exec (Seq [s, While e s]))
   ListVal v -> when (length v > 0) (exec (Seq [s, While e s]))
   _         -> return ()
-
-runProg :: Store -> Prog -> InputT IO ((), Store)
-runProg r p = runWithStore (exec p) r
