@@ -1,11 +1,12 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
-module Interp where
+module Interp.Statements where
 
 import           Control.Monad
 import qualified Data.Map                      as Map
 import           Import
-import           System.Console.Haskeline
+import           RIO.List.Partial
 
 eval :: Expr -> Interp Val
 eval (Val n) = return n
@@ -119,7 +120,7 @@ evalFunApp _ _ = return Null
 
 exec :: Stmt -> Interp ()
 exec Skip             = return ()
-exec (x := e        ) = eval e >>= writeVar x
+exec (Assign x e    ) = eval e >>= writeVar x
 exec (Seq   []      ) = return ()
 exec (Seq   (s : ss)) = exec s >> exec (Seq ss)
 exec (Print e       ) = eval e >>= printVal
@@ -133,6 +134,3 @@ exec (While e s) = eval e >>= \case
   BoolVal v -> when v (exec (Seq [s, While e s]))
   ListVal v -> when (length v > 0) (exec (Seq [s, While e s]))
   _         -> return ()
-
-runProg :: Store -> Prog -> InputT IO ((), Store)
-runProg r p = runWithStore (exec p) r

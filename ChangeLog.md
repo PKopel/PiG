@@ -1,5 +1,14 @@
 # Changelog for PiG
 
+### 0.6.1
+* loading files from other files
+
+### 0.6.0
+* saving sequences to files and loading files to interpreter
+
+### 0.5.0
+* interpreter directives: `:help`,`:exit`,`:clear`,`:rm <var name>`,`:load "<file path>"`
+
 ### 0.4.4
 * accesing list elements by index, ex: `list = [1,2]; list(0)`
 
