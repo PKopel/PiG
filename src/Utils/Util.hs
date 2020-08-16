@@ -14,11 +14,13 @@ module Utils.Util
   , algValToMaybe
   , boolValToMaybe
   , listValToMaybe
+  , getElems
   , module Utils.Types
   )
 where
 
-import           Data.Map                      as Map
+import           Data.List
+import qualified Data.Map                      as Map
 import           RIO
 import           System.Console.Haskeline
 import           Utils.Types
@@ -52,6 +54,16 @@ boolValToMaybe _           = Nothing
 listValToMaybe :: Val -> Maybe [Val]
 listValToMaybe (ListVal n) = Just n
 listValToMaybe _           = Nothing
+
+getElems :: (Foldable t, RealFrac a) => [Val] -> t (Maybe a) -> [Val]
+getElems list = foldl'
+  (\acc v -> case v of
+    Nothing -> acc
+    Just d ->
+      let i = round d
+      in  if length list > i then (list !! i) : acc else Null : acc
+  )
+  []
 
 isVar :: Expr -> (Bool, Var)
 isVar (Var x) = (True, x)

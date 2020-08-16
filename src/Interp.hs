@@ -19,35 +19,7 @@ eval (BoolBinary op e1 e2) = evalBoolBin op e1 e2
 eval (RelBinary  op e1 e2) = evalRelBin op e1 e2
 eval (ListBinary op e1 e2) = evalListBin op e1 e2
 eval (ListUnary op e     ) = evalListUn op e
-eval (FunApp    n  vs    ) = do
-  fun <- readVar n
-  case fun of
-    FunVal as stmt ret -> do
-      newLocals <-
-        Map.fromList <$> zipWithM (\a v -> eval v >>= return . (,) a) as vs
-      oldLocals <- getStore >>= return . getLocals
-      withStore $ setLocals (Map.union newLocals)
-      exec stmt
-      retVal <- eval ret
-      withStore $ setLocals
-        ((flip Map.difference) (Map.difference newLocals oldLocals))
-      return retVal
-    ListVal l -> do
-      evs <- foldM (\acc v -> evalAlg v >>= return . (: acc)) [] vs
-      case getElems l evs of
-        [  v    ] -> return v
-        v@(_ : _) -> return $ ListVal v
-        _         -> return Null
-    _ -> return Null
- where
-  getElems list = foldl'
-    (\acc v -> case v of
-      Nothing -> acc
-      Just d ->
-        let i = round d
-        in  if length list > i then (list !! i) : acc else Null : acc
-    )
-    []
+eval (FunApp    n  vs    ) = readVar n >>= evalFunApp vs
 
 evalAlg :: Expr -> Interp (Maybe Double)
 evalAlg e = eval e >>= return . algValToMaybe
@@ -116,13 +88,34 @@ evalListUn RmFirst e = do
   let (iv, x) = isVar e
   evalList e >>= \case
     Just (h : t) -> when iv (writeVar x (ListVal t)) >> return h
-    _            -> return Null
+    _            -> return Null -- not a list or an empty list
 evalListUn RmLast e = do
   let (iv, x) = isVar e
   evalList e >>= \case
     Just l@(_ : _) ->
       when iv (writeVar x (ListVal $ init l)) >> return (last l)
-    _ -> return Null
+    _ -> return Null -- not a list or an empty list
+
+evalFunApp :: [Expr] -> Val -> Interp Val
+evalFunApp vs (FunVal as stmt ret) = do
+  -- execute function of name n with arguments from vs
+  newLocals <-
+    Map.fromList <$> zipWithM (\a v -> eval v >>= return . (,) a) as vs
+  oldLocals <- getStore >>= return . getLocals
+  withStore $ setLocals (Map.union newLocals) -- introducing local variables
+  exec stmt
+  retVal <- eval ret -- value returned from function (must be evaluated before removing local variables)
+  withStore
+    $ setLocals ((flip Map.difference) (Map.difference newLocals oldLocals)) -- removing local variables
+  return retVal
+evalFunApp vs (ListVal l) = do
+  -- get elements from list of name n
+  evs <- foldM (\acc v -> evalAlg v >>= return . (: acc)) [] vs
+  case getElems l evs of
+    [  v    ] -> return v -- one argument in vs, result is a single value
+    v@(_ : _) -> return $ ListVal v -- more than one argument in vs, result is a list
+    _         -> return Null
+evalFunApp _ _ = return Null
 
 exec :: Stmt -> Interp ()
 exec Skip             = return ()
