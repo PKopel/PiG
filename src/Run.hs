@@ -8,8 +8,8 @@ module Run
 where
 
 import           Import
-import qualified Interp.Drct                   as D
-import qualified Interp.Stmt                   as S
+import qualified Interp.Directives             as D
+import qualified Interp.Statements             as S
 import           Lang.Parser
 import           System.Console.Haskeline
 

@@ -28,8 +28,6 @@ instance HasProcessContext App where
   processContextL =
     lens appProcessContext (\x y -> x { appProcessContext = y })
 
-infix 1 :=
-
 data Expr
   = Var Var
   | Val Val
@@ -59,7 +57,7 @@ data AlgBinOp
   deriving (Show)
 
 data Stmt
-  = Var := Expr
+  = Assign Var Expr
   | While Expr Stmt
   | If Expr Stmt Stmt
   | Seq [Stmt]
@@ -79,11 +77,11 @@ instance Show Val where
 
 type Var = String
 
-data Drct = Exit | Clear | Help | Rm Var | Load FilePath
+data Drct = Exit | Clear | Help | Rm Var | Load FilePath deriving (Show)
 
-data Prog = Stmt Stmt | Drct Drct
+data Prog = Stmt Stmt | Drct Drct deriving (Show)
 
-data Store = Store {gVars :: Map Var Val, lVars :: Map Var Val}
+data Store = Store {gVars :: Map Var Val, lVars :: Map Var Val} deriving (Show)
 
 emptyStore :: Store
 emptyStore = Store { gVars = empty, lVars = empty }

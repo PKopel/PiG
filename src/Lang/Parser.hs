@@ -1,17 +1,18 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Lang.Parser where
 
 import           Control.Monad
-import           Import                  hiding ( optional
+import           Import                  hiding ( many
+                                                , optional
                                                 , try
                                                 , (<|>)
                                                 )
 import           Lang.Lexer
 import           Text.Parsec
-import           Text.ParserCombinators.Parsec
-                                         hiding ( try )
+import           Text.Parsec.String
 import           Text.ParserCombinators.Parsec.Expr
 
 parseProg :: String -> Either String Prog
@@ -19,8 +20,13 @@ parseProg p = case parse progParser "PiG" p of
   Left  err  -> Left $ show err
   Right prog -> Right prog
 
+parseFile :: FilePath -> IO (Either String [Prog])
+parseFile f = parseFromFile (sepEndBy1 progParser semi <* eof) f >>= \case
+  Left  err  -> return . Left $ show err
+  Right prog -> return $ Right prog
+
 progParser :: Parser Prog
-progParser = Stmt <$> (whiteSpace >> stmtParser) <|> Drct <$> drctParser
+progParser = whiteSpace >> (Stmt <$> stmtParser <|> Drct <$> drctParser)
 
 endParser :: ParsecT String u Identity ()
 endParser =
@@ -52,7 +58,7 @@ drctParser =
 
 stmtParser :: Parser Stmt
 stmtParser = do
-  list <- (sepEndBy1 singleStmtParser semi)
+  list <- (sepEndBy1 singleStmtParser (semi <|> many1 endOfLine))
   return $ case list of
     [stmt] -> stmt
     _      -> Seq list
@@ -90,7 +96,7 @@ assignStmtParser =
   (do
       var  <- identifier
       expr <- reservedOp "=" >> exprParser
-      return $ var := expr
+      return $ Assign var expr
     )
     <?> "assignment"
 
@@ -122,7 +128,7 @@ funValParser =
       try
           (braces $ do
             body <- stmtParser
-            ret  <- reserved "return" >> exprParser
+            ret  <- reserved "return" >> exprParser <* semi
             return $ FunVal args body ret
           )
         <|> (do

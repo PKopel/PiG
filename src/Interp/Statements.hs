@@ -1,10 +1,12 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
-module Interp.Stmt where
+module Interp.Statements where
 
 import           Control.Monad
 import qualified Data.Map                      as Map
 import           Import
+import           RIO.List.Partial
 
 eval :: Expr -> Interp Val
 eval (Val n) = return n
@@ -118,7 +120,7 @@ evalFunApp _ _ = return Null
 
 exec :: Stmt -> Interp ()
 exec Skip             = return ()
-exec (x := e        ) = eval e >>= writeVar x
+exec (Assign x e    ) = eval e >>= writeVar x
 exec (Seq   []      ) = return ()
 exec (Seq   (s : ss)) = exec s >> exec (Seq ss)
 exec (Print e       ) = eval e >>= printVal

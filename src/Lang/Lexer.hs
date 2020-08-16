@@ -73,13 +73,13 @@ reservedOp :: String -> ParsecT String u Identity ()
 reservedOp = Token.reservedOp lexer -- parses an operator
 
 brackets :: ParsecT String u Identity a -> ParsecT String u Identity a
-brackets = Token.brackets lexer -- parses a sequence in brackets
+brackets p = Token.brackets lexer (skipMany endOfLine *> p) -- parses a sequence in brackets
 
 parens :: ParsecT String u Identity a -> ParsecT String u Identity a
-parens = Token.parens lexer -- parses a sequence in parenthesis
+parens p = Token.parens lexer (skipMany endOfLine *> p) -- parses a sequence in parenthesis
 
 braces :: ParsecT String u Identity a -> ParsecT String u Identity a
-braces = Token.braces lexer -- parses a sequence in braces
+braces p = Token.braces lexer (skipMany endOfLine *> p) -- parses a sequence in braces
 
 double :: ParsecT String u Identity Double
 double = Token.float lexer -- parses a double
@@ -91,10 +91,10 @@ stringLiteral :: ParsecT String u Identity String
 stringLiteral = Token.stringLiteral lexer -- parses a string
 
 semi :: ParsecT String u Identity String
-semi = Token.semi lexer -- parses a semicolon
+semi = Token.semi lexer <* skipMany endOfLine -- parses a semicolon
 
 commaSep :: ParsecT String u Identity a -> ParsecT String u Identity [a]
-commaSep = Token.commaSep lexer -- parses a list separated by comma
+commaSep p = Token.commaSep lexer (skipMany endOfLine *> p) -- parses a list separated by comma
 
 whiteSpace :: ParsecT String u Identity ()
 whiteSpace = Token.whiteSpace lexer -- parses whitespace
