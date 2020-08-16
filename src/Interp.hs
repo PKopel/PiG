@@ -32,7 +32,22 @@ eval (FunApp    n  vs    ) = do
       withStore $ setLocals
         ((flip Map.difference) (Map.difference newLocals oldLocals))
       return retVal
+    ListVal l -> do
+      evs <- foldM (\acc v -> evalAlg v >>= return . (: acc)) [] vs
+      case getElems l evs of
+        [  v    ] -> return v
+        v@(_ : _) -> return $ ListVal v
+        _         -> return Null
     _ -> return Null
+ where
+  getElems list = foldl'
+    (\acc v -> case v of
+      Nothing -> acc
+      Just d ->
+        let i = round d
+        in  if length list > i then (list !! i) : acc else Null : acc
+    )
+    []
 
 evalAlg :: Expr -> Interp (Maybe Double)
 evalAlg e = eval e >>= return . algValToMaybe
