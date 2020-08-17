@@ -7,6 +7,7 @@ module Run
   )
 where
 
+import           Data.Version
 import           Import
 import qualified Interp.Directives             as D
 import qualified Interp.Statements             as S
@@ -15,11 +16,19 @@ import           System.Console.Haskeline
 
 run :: RIO App ()
 run = do
-  logInfo
-    "We're inside the experimental PiG interpreter!\n\
-    \type ':help' for more information "
+  version  <- view $ to appVersion
   settings <- view $ to appSettings
-  liftIO $ runInputT settings $ runLine emptyStore
+  options  <- view $ to appOptions
+  logInfo
+    (  "We're inside the experimental PiG interpreter!\nversion: "
+    <> fromString (showVersion version)
+    <> "\ntype ':help' for more information "
+    )
+  liftIO $ runInputT settings $ store options >>= runLine
+ where
+  store ops = case optionsLoad ops of
+    []   -> return emptyStore
+    file -> runWithStore (D.exec (Load file)) emptyStore >>= return . snd
 
 runLine :: Store -> InputT IO ()
 runLine store = do

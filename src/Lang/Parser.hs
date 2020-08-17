@@ -193,9 +193,9 @@ relExprParser = do
 
 relation :: ParsecT String u Identity RelBinOp
 relation =
-  (reservedOp ">" >> return Greater)
-    <|> (reservedOp "<" >> return Less)
-    <|> (reservedOp "==" >> return Equal)
+  (reservedOp ">" >> return (>))
+    <|> (reservedOp "<" >> return (<))
+    <|> (reservedOp "==" >> return (==))
 
 listTerm :: ParsecT String () Identity Expr
 listTerm =

@@ -15,6 +15,8 @@ module Utils.Util
   , boolValToMaybe
   , listValToMaybe
   , getElems
+  , (>-)
+  , (-<)
   , module Utils.Types
   )
 where
@@ -87,3 +89,11 @@ writeVar x v = do
 
 printVal :: Show a => a -> Interp ()
 printVal = Interp . lift . outputStrLn . fromString . show
+
+(>-) :: [Val] -> (Val, [Val])
+(>-) (h : t) = (h, t)
+(>-) l       = (Null, l)
+
+(-<) :: [Val] -> (Val, [Val])
+(-<) l@(_ : _) = (last l, init l)
+(-<) l         = (Null, l)

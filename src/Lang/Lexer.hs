@@ -102,27 +102,27 @@ whiteSpace = Token.whiteSpace lexer -- parses whitespace
 algOperators :: [[Operator Char st Expr]]
 algOperators =
   [ [Prefix (reservedOp "-" >> return (Neg))]
-  , [Infix (reservedOp "^" >> return (AlgBinary Power)) AssocLeft]
-  , [ Infix (reservedOp "*" >> return (AlgBinary Multiply)) AssocLeft
-    , Infix (reservedOp "/" >> return (AlgBinary Divide))   AssocLeft
+  , [Infix (reservedOp "^" >> return (AlgBinary (**))) AssocLeft]
+  , [ Infix (reservedOp "*" >> return (AlgBinary (*))) AssocLeft
+    , Infix (reservedOp "/" >> return (AlgBinary (/))) AssocLeft
     ]
-  , [ Infix (reservedOp "+" >> return (AlgBinary Add))      AssocLeft
-    , Infix (reservedOp "-" >> return (AlgBinary Subtract)) AssocLeft
+  , [ Infix (reservedOp "+" >> return (AlgBinary (+))) AssocLeft
+    , Infix (reservedOp "-" >> return (AlgBinary (-))) AssocLeft
     ]
   ]
 
 boolOperators :: [[Operator Char st Expr]]
 boolOperators =
   [ [Prefix (reservedOp "-" >> return (Neg))]
-  , [ Infix (reservedOp "&&" >> return (BoolBinary And)) AssocLeft
-    , Infix (reservedOp "||" >> return (BoolBinary Or))  AssocLeft
+  , [ Infix (reservedOp "&&" >> return (BoolBinary (&&))) AssocLeft
+    , Infix (reservedOp "||" >> return (BoolBinary (||))) AssocLeft
     ]
   ]
 
 listOperators :: [[Operator Char st Expr]]
 listOperators =
-  [ [ Prefix (reservedOp ">-" >> return (ListUnary RmFirst))
-    , Prefix (reservedOp "-<" >> return (ListUnary RmLast))
+  [ [ Prefix (reservedOp ">-" >> return (ListUnary (>-)))
+    , Prefix (reservedOp "-<" >> return (ListUnary (-<)))
     ]
-  , [Infix (reservedOp "#" >> return (ListBinary Concat)) AssocLeft]
+  , [Infix (reservedOp "#" >> return (ListBinary (++))) AssocLeft]
   ]

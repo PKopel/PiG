@@ -6,19 +6,22 @@ module Utils.Types where
 import           Control.Monad.State
 import           Data.List
 import           Data.Map
+import           Data.Version                   ( Version )
 import           RIO
 import           RIO.Process
 import           System.Console.Haskeline
 
 data Options = Options
-  { optionsVerbose :: !Bool
+  { optionsVerbose :: !Bool,
+    optionsLoad :: !String
   }
 
 data App = App
   { appLogFunc :: !LogFunc,
     appProcessContext :: !ProcessContext,
     appOptions :: !Options,
-    appSettings :: !(Settings IO)
+    appSettings :: !(Settings IO),
+    appVersion :: !Version
   }
 
 instance HasLogFunc App where
@@ -38,23 +41,16 @@ data Expr
   | ListUnary ListUnOp Expr
   | ListBinary ListBinOp Expr Expr
   | FunApp Var [Expr]
-  deriving (Show)
 
-data BoolBinOp = And | Or deriving (Show)
+type BoolBinOp = Bool -> Bool -> Bool
 
-data RelBinOp = Greater | Less | Equal deriving (Show)
+type RelBinOp = Double -> Double -> Bool
 
-data ListBinOp = Concat deriving (Show)
+type ListBinOp = [Val] -> [Val] -> [Val]
 
-data ListUnOp = RmFirst | RmLast deriving (Show)
+type ListUnOp = [Val] -> (Val, [Val])
 
-data AlgBinOp
-  = Add
-  | Subtract
-  | Multiply
-  | Divide
-  | Power
-  deriving (Show)
+type AlgBinOp = Double -> Double -> Double
 
 data Stmt
   = Assign Var Expr
@@ -63,7 +59,6 @@ data Stmt
   | Seq [Stmt]
   | Print Expr
   | Skip
-  deriving (Show)
 
 data Val = AlgVal Double | BoolVal Bool | ListVal [Val] | FunVal [Var] Stmt Expr | Null
 
@@ -79,7 +74,7 @@ type Var = String
 
 data Drct = Exit | Clear | Help | Rm Var | Load FilePath deriving (Show)
 
-data Prog = Stmt Stmt | Drct Drct deriving (Show)
+data Prog = Stmt Stmt | Drct Drct
 
 data Store = Store {gVars :: Map Var Val, lVars :: Map Var Val} deriving (Show)
 

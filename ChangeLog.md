@@ -1,5 +1,9 @@
 # Changelog for PiG
 
+### 0.6.2
+* new cli option `[-f|--file FILE]` for loading files on start of interpreter
+* simplified types
+
 ### 0.6.1
 * loading files from other files
 

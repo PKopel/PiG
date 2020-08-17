@@ -6,7 +6,6 @@ module Interp.Statements where
 import           Control.Monad
 import qualified Data.Map                      as Map
 import           Import
-import           RIO.List.Partial
 
 eval :: Expr -> Interp Val
 eval (Val n) = return n
@@ -32,70 +31,36 @@ evalList :: Expr -> Interp (Maybe [Val])
 evalList e = eval e >>= return . listValToMaybe
 
 evalAlgBin :: AlgBinOp -> Expr -> Expr -> Interp Val
-evalAlgBin Add e1 e2 = do
+evalAlgBin op e1 e2 = do
   v1 <- evalAlg e1
   v2 <- evalAlg e2
-  return . maybeToAlgVal $ (+) <$> v1 <*> v2
-evalAlgBin Subtract e1 e2 = do
-  v1 <- evalAlg e1
-  v2 <- evalAlg e2
-  return . maybeToAlgVal $ (-) <$> v1 <*> v2
-evalAlgBin Multiply e1 e2 = do
-  v1 <- evalAlg e1
-  v2 <- evalAlg e2
-  return . maybeToAlgVal $ (*) <$> v1 <*> v2
-evalAlgBin Power e1 e2 = do
-  v1 <- evalAlg e1
-  v2 <- evalAlg e2
-  return . maybeToAlgVal $ (**) <$> v1 <*> v2
-evalAlgBin Divide e1 e2 = do
-  v1 <- evalAlg e1
-  v2 <- evalAlg e2
-  return . maybeToAlgVal $ if v2 == Just 0 then Nothing else (/) <$> v1 <*> v2
+  return . maybeToAlgVal $ op <$> v1 <*> v2
 
 evalBoolBin :: BoolBinOp -> Expr -> Expr -> Interp Val
-evalBoolBin And e1 e2 = do
+evalBoolBin op e1 e2 = do
   v1 <- evalBool e1
   v2 <- evalBool e2
-  return . maybeToBoolVal $ (&&) <$> v1 <*> v2
-evalBoolBin Or e1 e2 = do
-  v1 <- evalBool e1
-  v2 <- evalBool e2
-  return . maybeToBoolVal $ (||) <$> v1 <*> v2
+  return . maybeToBoolVal $ op <$> v1 <*> v2
 
 evalRelBin :: RelBinOp -> Expr -> Expr -> Interp Val
-evalRelBin Greater e1 e2 = do
+evalRelBin op e1 e2 = do
   v1 <- evalAlg e1
   v2 <- evalAlg e2
-  return . maybeToBoolVal $ (>) <$> v1 <*> v2
-evalRelBin Less e1 e2 = do
-  v1 <- evalAlg e1
-  v2 <- evalAlg e2
-  return . maybeToBoolVal $ (<) <$> v1 <*> v2
-evalRelBin Equal e1 e2 = do
-  v1 <- evalAlg e1
-  v2 <- evalAlg e2
-  return . maybeToBoolVal $ (==) <$> v1 <*> v2
+  return . maybeToBoolVal $ op <$> v1 <*> v2
 
 evalListBin :: ListBinOp -> Expr -> Expr -> Interp Val
-evalListBin Concat e1 e2 = do
+evalListBin op e1 e2 = do
   l <- eval e1
   v <- eval e2
-  return . maybeToListVal $ (++) <$> toMaybeList l <*> toMaybeList v
+  return . maybeToListVal $ op <$> toMaybeList l <*> toMaybeList v
   where toMaybeList = Just . valToList
 
 evalListUn :: ListUnOp -> Expr -> Interp Val
-evalListUn RmFirst e = do
+evalListUn op e = do
   let (iv, x) = isVar e
-  evalList e >>= \case
-    Just (h : t) -> when iv (writeVar x (ListVal t)) >> return h
-    _            -> return Null -- not a list or an empty list
-evalListUn RmLast e = do
-  let (iv, x) = isVar e
-  evalList e >>= \case
-    Just l@(_ : _) ->
-      when iv (writeVar x (ListVal $ init l)) >> return (last l)
-    _ -> return Null -- not a list or an empty list
+  evalList e >>= return . fmap op >>= \case
+    Just (h, t) -> when iv (writeVar x (ListVal t)) >> return h
+    _           -> return Null
 
 evalFunApp :: [Expr] -> Val -> Interp Val
 evalFunApp vs (FunVal as stmt ret) = do
