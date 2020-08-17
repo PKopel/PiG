@@ -30,6 +30,7 @@ Supported operators are:
 * **[RIO](https://hackage.haskell.org/package/rio)**
 * **[Parsec](https://hackage.haskell.org/package/parsec)**
 * **[Haskeline](https://hackage.haskell.org/package/haskeline)**
+* **[pretty-terminal](https://github.com/loganmac/pretty-terminal)**
 
 ### Author
 

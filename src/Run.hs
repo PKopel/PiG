@@ -13,6 +13,7 @@ import qualified Interp.Directives             as D
 import qualified Interp.Statements             as S
 import           Lang.Parser
 import           System.Console.Haskeline
+import           System.Console.Pretty
 
 run :: RIO App ()
 run = do
@@ -32,7 +33,7 @@ run = do
 
 runLine :: Store -> InputT IO ()
 runLine store = do
-  line <- getInputLine "PiG> "
+  line <- getInputLine $ (style Faint . color Magenta) "PiG" <> "> "
   case parseProg <$> line of
     Nothing           -> return ()
     Just (Left  err ) -> outputStrLn err >> runLine store

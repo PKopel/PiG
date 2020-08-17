@@ -1,5 +1,9 @@
 # Changelog for PiG
 
+### 0.6.4
+* colors in interpreter
+* fixed crash on loading file that can't be read
+
 ### 0.6.3
 * list literals can now contain expressions, expressions can contain function application
 * fixed variable scopes in functions
