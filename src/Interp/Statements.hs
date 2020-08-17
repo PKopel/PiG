@@ -19,7 +19,8 @@ eval (BoolBinary op e1 e2) = evalBoolBin op e1 e2
 eval (RelBinary  op e1 e2) = evalRelBin op e1 e2
 eval (ListBinary op e1 e2) = evalListBin op e1 e2
 eval (ListUnary op e     ) = evalListUn op e
-eval (FunApp    n  vs    ) = readVar n >>= evalFunApp vs
+eval (ListLiteral es     ) = ListVal <$> mapM eval es
+eval (FunApp n vs        ) = readVar n >>= evalFunApp vs
 
 evalAlg :: Expr -> Interp (Maybe Double)
 evalAlg e = eval e >>= return . algValToMaybe
@@ -57,6 +58,7 @@ evalListBin op e1 e2 = do
 
 evalListUn :: ListUnOp -> Expr -> Interp Val
 evalListUn op e = do
+  writeVar <- getWriteFun
   let (iv, x) = isVar e
   evalList e >>= return . fmap op >>= \case
     Just (h, t) -> when iv (writeVar x (ListVal t)) >> return h
@@ -67,12 +69,14 @@ evalFunApp vs (FunVal as stmt ret) = do
   -- execute function of name n with arguments from vs
   newLocals <-
     Map.fromList <$> zipWithM (\a v -> eval v >>= return . (,) a) as vs
-  oldLocals <- getStore >>= return . getLocals
-  withStore $ setLocals (Map.union newLocals) -- introducing local variables
+  oldLocals   <- getStore >>= return . getLocals
+  oldWriteVar <- getWriteFun
+  withStore $ setLocals (const newLocals) -- introducing local variables
+  putWriteFun writeLocVar -- from now variables are written to local store
   exec stmt
+  putWriteFun oldWriteVar
   retVal <- eval ret -- value returned from function (must be evaluated before removing local variables)
-  withStore
-    $ setLocals ((flip Map.difference) (Map.difference newLocals oldLocals)) -- removing local variables
+  withStore $ setLocals (const oldLocals) -- removing local variables
   return retVal
 evalFunApp vs (ListVal l) = do
   -- get elements from list of name n
@@ -84,8 +88,11 @@ evalFunApp vs (ListVal l) = do
 evalFunApp _ _ = return Null
 
 exec :: Stmt -> Interp ()
-exec Skip             = return ()
-exec (Assign x e    ) = eval e >>= writeVar x
+exec Skip         = return ()
+exec (Assign x e) = do
+  v        <- eval e
+  writeVar <- getWriteFun
+  writeVar x v
 exec (Seq   []      ) = return ()
 exec (Seq   (s : ss)) = exec s >> exec (Seq ss)
 exec (Print e       ) = eval e >>= printVal

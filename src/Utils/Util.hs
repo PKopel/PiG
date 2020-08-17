@@ -6,8 +6,10 @@ module Utils.Util
   ( printVal
   , isVar
   , readVar
-  , writeVar
+  , writeGlobVar
+  , writeLocVar
   , valToList
+  , runWithStore
   , maybeToAlgVal
   , maybeToBoolVal
   , maybeToListVal
@@ -15,17 +17,52 @@ module Utils.Util
   , boolValToMaybe
   , listValToMaybe
   , getElems
+  , getStore
+  , getWriteFun
+  , putStore
+  , putWriteFun
+  , withStore
   , (>-)
   , (-<)
   , module Utils.Types
   )
 where
 
+import           Control.Monad.State
 import           Data.List
 import qualified Data.Map                      as Map
 import           RIO
 import           System.Console.Haskeline
 import           Utils.Types
+
+getStore :: Interp Store
+getStore = get >>= return . snd
+
+getWriteFun :: Interp WriteFun
+getWriteFun = get >>= return . fst
+
+putStore :: Store -> Interp ()
+putStore s' = do
+  (w, _) <- get
+  put (w, s')
+
+putWriteFun :: WriteFun -> Interp ()
+putWriteFun w' = do
+  (_, s) <- get
+  put (w', s)
+
+withStore :: (Store -> Store) -> Interp ()
+withStore f = getStore >>= putStore . f
+
+runInterpWithStore
+  :: Interp a -> (WriteFun, Store) -> InputT IO (a, (WriteFun, Store))
+runInterpWithStore = runStateT . runInterp
+
+runWithStore :: Interp a -> Store -> InputT IO (a, Store)
+runWithStore interp store =
+  runInterpWithStore interp (writeGlobVar, store)
+    >>= return
+    .   ((,) <$> fst <*> (snd . snd))
 
 valToList :: Val -> [Val]
 valToList (ListVal vs) = vs
@@ -80,12 +117,15 @@ readVar x = do
       Just v  -> return v
       Nothing -> return Null
 
-writeVar :: Var -> Val -> Interp ()
-writeVar x v = do
+writeGlobVar :: WriteFun
+writeGlobVar x v = do
   store <- getStore
-  putStore $ if Map.member x (getLocals store)
-    then setLocals (Map.insert x v) store
-    else setGlobals (Map.insert x v) store
+  putStore $ setGlobals (Map.insert x v) store
+
+writeLocVar :: WriteFun
+writeLocVar x v = do
+  store <- getStore
+  putStore $ setLocals (Map.insert x v) store
 
 printVal :: Show a => a -> Interp ()
 printVal = Interp . lift . outputStrLn . fromString . show

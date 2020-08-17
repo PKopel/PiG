@@ -40,6 +40,7 @@ data Expr
   | AlgBinary AlgBinOp Expr Expr
   | ListUnary ListUnOp Expr
   | ListBinary ListBinOp Expr Expr
+  | ListLiteral [Expr]
   | FunApp Var [Expr]
 
 type BoolBinOp = Bool -> Bool -> Bool
@@ -51,6 +52,8 @@ type ListBinOp = [Val] -> [Val] -> [Val]
 type ListUnOp = [Val] -> (Val, [Val])
 
 type AlgBinOp = Double -> Double -> Double
+
+type WriteFun = Var -> Val -> Interp ()
 
 data Stmt
   = Assign Var Expr
@@ -99,23 +102,11 @@ setLocals = over localL
 setGlobals :: (Map Var Val -> Map Var Val) -> Store -> Store
 setGlobals = over globalL
 
-newtype Interp a = Interp {runInterp :: StateT Store (InputT IO) a}
+newtype Interp a = Interp {runInterp :: StateT (WriteFun, Store) (InputT IO) a}
   deriving
     ( Functor,
       Applicative,
       Monad,
       MonadIO,
-      MonadState Store
+      MonadState (WriteFun, Store)
     )
-
-getStore :: Interp Store
-getStore = get
-
-putStore :: Store -> Interp ()
-putStore = put
-
-withStore :: (Store -> Store) -> Interp ()
-withStore f = getStore >>= putStore . f
-
-runWithStore :: Interp a -> Store -> InputT IO (a, Store)
-runWithStore = runStateT . runInterp

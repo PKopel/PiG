@@ -1,5 +1,9 @@
 # Changelog for PiG
 
+### 0.6.3
+* list literals can now contain expressions, expressions can contain function application
+* fixed variable scopes in functions
+
 ### 0.6.2
 * new cli option `[-f|--file FILE]` for loading files on start of interpreter
 * simplified types

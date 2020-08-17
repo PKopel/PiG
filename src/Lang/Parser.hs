@@ -36,6 +36,7 @@ endParser =
        <|> skipMany1 endOfLine
        <|> skipMany1 (char ')')
        <|> skipMany1 (char '}')
+       <|> skipMany1 (char ']')
        <|> skipMany1 (char ',')
        <|> skipMany1 (reserved "then")
        <|> skipMany1 (reserved "else")
@@ -138,11 +139,11 @@ funValParser =
     )
     <?> "function definition"
 
-listValParser :: Parser Val
+listValParser :: Parser Expr
 listValParser =
-  ListVal
-    <$> (brackets . commaSep) (listValParser <|> boolValParser <|> algValParser)
-    <|> (reserved "null" >> return Null)
+  ListLiteral
+    <$> (brackets . commaSep) exprParser
+    <|> (reserved "null" >> return (Val Null))
 
 exprParser :: Parser Expr
 exprParser =
@@ -173,7 +174,13 @@ funAppParser =
     <?> "function application"
 
 algTerm :: ParsecT String () Identity Expr
-algTerm = parens algExprParser <|> Var <$> identifier <|> Val <$> algValParser
+algTerm =
+  parens algExprParser
+    <|> try funAppParser
+    <|> Var
+    <$> identifier
+    <|> Val
+    <$> algValParser
 
 boolTerm :: ParsecT String () Identity Expr
 boolTerm =
@@ -181,6 +188,7 @@ boolTerm =
     <|> relExprParser
     <|> Val
     <$> boolValParser
+    <|> try funAppParser
     <|> Var
     <$> identifier
 
@@ -200,8 +208,8 @@ relation =
 listTerm :: ParsecT String () Identity Expr
 listTerm =
   parens listExprParser
+    <|> try funAppParser
     <|> Var
     <$> identifier
-    <|> Val
-    <$> listValParser
+    <|> listValParser
     <|> (try algExprParser <|> boolExprParser)
