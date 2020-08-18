@@ -7,7 +7,7 @@ sort = (a) => {
             c = >- a;
             if c > p then gt = gt # c else ls = ls # c;
         };
-        x = sort(ls, l-1) # p # sort(gt, l-1); 
+        x = sort(ls) # p # sort(gt); 
     } else x = [];
     return x;
 };
