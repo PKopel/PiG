@@ -57,11 +57,21 @@ drctParser =
     <|> Load
     <$> try (last $ reserved ":load" >> stringLiteral)
 
+exprParser :: Parser Expr
+exprParser =
+  try (last boolExprParser)
+    <|> try (last algExprParser)
+    <|> try (last funExprParser)
+    <|> try (last assignExprParser)
+    <|> try (last ifExprParser)
+    <|> try (last whileExprParser)
+    <|> last listExprParser
+
 seqExprParser :: Parser Expr
 seqExprParser = Seq <$> (sepEndBy1 singleExprParser (semi <|> many1 endOfLine))
 
 singleExprParser :: Parser Expr
-singleExprParser = braces exprParser <|> try exprParser <|> printExprParser
+singleExprParser = braces seqExprParser <|> try exprParser <|> printExprParser
 
 ifExprParser :: Parser Expr
 ifExprParser =
@@ -115,16 +125,6 @@ listValParser =
   ListLiteral
     <$> (brackets . commaSep) exprParser
     <|> (reserved "null" >> return (Val Null))
-
-exprParser :: Parser Expr
-exprParser =
-  try (last boolExprParser)
-    <|> try (last algExprParser)
-    <|> try (last funExprParser)
-    <|> try (last assignExprParser)
-    <|> try (last ifExprParser)
-    <|> try (last whileExprParser)
-    <|> last listExprParser
 
 algExprParser :: Parser Expr
 algExprParser = buildExpressionParser algOperators algTerm
