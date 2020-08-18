@@ -15,7 +15,7 @@ quick = (a) => {
             c = >- a;
             if c > p then gt = gt # c else ls = ls # c;
         };
-        x = sort(ls) # p # sort(gt); 
+        x = quick(ls) # p # quick(gt); 
     } else x = [];
     return x;
 };
