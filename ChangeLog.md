@@ -1,5 +1,8 @@
 # Changelog for PiG
 
+### 0.6.5 
+* assignment is now an expression
+
 ### 0.6.4
 * colors in interpreter
 * fixed crash on loading file that can't be read

@@ -21,6 +21,11 @@ eval (ListBinary op e1 e2) = evalListBin op e1 e2
 eval (ListUnary op e     ) = evalListUn op e
 eval (ListLiteral es     ) = ListVal <$> mapM eval es
 eval (FunApp n vs        ) = readVar n >>= evalFunApp vs
+eval (Assign x e         ) = do
+  v        <- eval e
+  writeVar <- getWriteFun
+  writeVar x v
+  return v
 
 evalAlg :: Expr -> Interp (Maybe Double)
 evalAlg e = eval e >>= return . algValToMaybe
@@ -88,11 +93,7 @@ evalFunApp vs (ListVal l) = do
 evalFunApp _ _ = return Null
 
 exec :: Stmt -> Interp ()
-exec Skip         = return ()
-exec (Assign x e) = do
-  v        <- eval e
-  writeVar <- getWriteFun
-  writeVar x v
+exec Skip             = return ()
 exec (Seq   []      ) = return ()
 exec (Seq   (s : ss)) = exec s >> exec (Seq ss)
 exec (Print e       ) = eval e >>= printVal
