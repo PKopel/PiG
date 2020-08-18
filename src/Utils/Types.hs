@@ -5,7 +5,6 @@ module Utils.Types where
 
 import           Control.Monad.State
 import           Data.List
-import           Data.Map
 import           Data.Version                   ( Version )
 import           RIO
 import           RIO.Process
@@ -48,9 +47,9 @@ type BoolBinOp = Bool -> Bool -> Bool
 
 type RelBinOp = Double -> Double -> Bool
 
-type ListBinOp = [Val] -> [Val] -> [Val]
+type ListBinOp = Seq Val -> Seq Val -> Seq Val
 
-type ListUnOp = [Val] -> (Val, [Val])
+type ListUnOp = Seq Val -> (Val, Seq Val)
 
 type AlgBinOp = Double -> Double -> Double
 
@@ -64,13 +63,13 @@ data Stmt
   | Ign Expr
   | Skip
 
-data Val = AlgVal Double | BoolVal Bool | ListVal [Val] | FunVal [Var] Stmt Expr | Null
+data Val = AlgVal Double | BoolVal Bool | ListVal (Seq Val) | FunVal [Var] Stmt Expr | Null
 
 instance Show Val where
   show (AlgVal  v    ) = show v
   show (BoolVal True ) = "true"
   show (BoolVal False) = "false"
-  show (ListVal v    ) = '[' : intercalate ", " (show <$> v) ++ "]"
+  show (ListVal v    ) = '[' : intercalate ", " (toList $ show <$> v) ++ "]"
   show (FunVal _ _ _ ) = "function"
   show Null            = "null"
 
@@ -83,7 +82,7 @@ data Prog = Stmt Stmt | Drct Drct
 data Store = Store {gVars :: Map Var Val, lVars :: Map Var Val} deriving (Show)
 
 emptyStore :: Store
-emptyStore = Store { gVars = empty, lVars = empty }
+emptyStore = Store { gVars = mempty, lVars = mempty }
 
 globalL :: Lens' Store (Map Var Val)
 globalL = lens gVars (\x y -> x { gVars = y })

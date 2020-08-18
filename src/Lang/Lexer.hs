@@ -125,5 +125,5 @@ listOperators =
   [ [ Prefix (reservedOp ">-" >> return (ListUnary (>-)))
     , Prefix (reservedOp "-<" >> return (ListUnary (-<)))
     ]
-  , [Infix (reservedOp "#" >> return (ListBinary (++))) AssocLeft]
+  , [Infix (reservedOp "#" >> return (ListBinary (<>))) AssocLeft]
   ]
