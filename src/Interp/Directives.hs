@@ -5,21 +5,20 @@ module Interp.Directives where
 
 import           Data.Map
 import           Import                  hiding ( try )
-import qualified Interp.Statements             as S
+import           Interp.Statements
 import           Lang.Parser
 import           System.Console.Haskeline
 import           System.IO.Error
 
-execProg :: Store -> Prog -> InputT IO ((), Store)
-execProg store (Stmt p) = runWithStore (S.exec p) store
+execProg :: Store -> Prog -> InputT IO Store
+execProg store (Stmt p) = runWithStore (eval p) store
 execProg store (Drct p) = runWithStore (exec p) store
 
 execFile :: FilePath -> Store -> InputT IO Store
 execFile file store = (lift . tryIOError) (parseFile file) >>= \case
-  Left  err        -> outputStrLn (show err) >> return store
-  Right (Left err) -> outputStrLn err >> return store
-  Right (Right prog) ->
-    foldM (\str stmt -> execProg str stmt >>= return . snd) store prog
+  Left  err          -> outputStrLn (show err) >> return store
+  Right (Left  err ) -> outputStrLn err >> return store
+  Right (Right prog) -> foldM (\str stmt -> execProg str stmt) store prog
 
 exec :: Drct -> Interp ()
 exec Exit  = return ()

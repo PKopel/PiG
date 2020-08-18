@@ -37,6 +37,10 @@ data Expr
   | Assign Var (Maybe Expr) Expr
   | ListLiteral [Expr]
   | FunApp Var [Expr]
+  | While Expr Expr
+  | If Expr Expr Expr
+  | Seq [Expr]
+  | Print [Expr]
   | BoolBinary BoolBinOp Expr Expr
   | RelBinary RelBinOp Expr Expr
   | AlgBinary AlgBinOp Expr Expr
@@ -55,29 +59,21 @@ type AlgBinOp = Double -> Double -> Double
 
 type WriteFun = Var -> Val -> Interp ()
 
-data Stmt
-  = While Expr Stmt
-  | If Expr Stmt Stmt
-  | Seq [Stmt]
-  | Print [Expr]
-  | Ign Expr
-  | Skip
-
-data Val = AlgVal Double | BoolVal Bool | ListVal (Seq Val) | FunVal [Var] Stmt Expr | Null
+data Val = AlgVal Double | BoolVal Bool | ListVal (Seq Val) | FunVal [Var] Expr | Null
 
 instance Show Val where
   show (AlgVal  v    ) = show v
   show (BoolVal True ) = "true"
   show (BoolVal False) = "false"
   show (ListVal v    ) = '[' : intercalate ", " (toList $ show <$> v) ++ "]"
-  show (FunVal _ _ _ ) = "function"
+  show (FunVal _ _   ) = "function"
   show Null            = "null"
 
 type Var = String
 
 data Drct = Exit | Clear | Help | Rm Var | Load FilePath deriving (Show)
 
-data Prog = Stmt Stmt | Drct Drct
+data Prog = Stmt Expr | Drct Drct
 
 data Store = Store {gVars :: Map Var Val, lVars :: Map Var Val} deriving (Show)
 

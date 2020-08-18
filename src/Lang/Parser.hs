@@ -26,7 +26,7 @@ parseFile f = parseFromFile (sepEndBy1 progParser semi <* eof) f >>= \case
   Right prog -> return $ Right prog
 
 progParser :: Parser Prog
-progParser = whiteSpace >> (Stmt <$> stmtParser <|> Drct <$> drctParser)
+progParser = whiteSpace >> (Stmt <$> seqExprParser <|> Drct <$> drctParser)
 
 endParser :: ParsecT String u Identity ()
 endParser =
@@ -57,50 +57,44 @@ drctParser =
     <|> Load
     <$> try (last $ reserved ":load" >> stringLiteral)
 
-stmtParser :: Parser Stmt
-stmtParser = do
-  list <- (sepEndBy1 singleStmtParser (semi <|> many1 endOfLine))
-  return $ case list of
-    [stmt] -> stmt
-    _      -> Seq list
+exprParser :: Parser Expr
+exprParser =
+  try (last boolExprParser)
+    <|> try (last algExprParser)
+    <|> try (last funExprParser)
+    <|> try (last assignExprParser)
+    <|> try (last ifExprParser)
+    <|> try (last whileExprParser)
+    <|> last listExprParser
 
-singleStmtParser :: Parser Stmt
-singleStmtParser =
-  braces stmtParser
-    <|> try ifStmtParser
-    <|> try whileStmtParser
-    <|> try skipStmtParser
-    <|> try ignStmtParser
-    <|> printStmtParser
+seqExprParser :: Parser Expr
+seqExprParser = Seq <$> (sepEndBy1 singleExprParser (semi <|> many1 endOfLine))
 
-ifStmtParser :: Parser Stmt
-ifStmtParser =
+singleExprParser :: Parser Expr
+singleExprParser = braces seqExprParser <|> try exprParser <|> printExprParser
+
+ifExprParser :: Parser Expr
+ifExprParser =
   (do
       cond  <- reserved "if" >> exprParser
-      stmt1 <- reserved "then" >> singleStmtParser
-      stmt2 <- option Skip (reserved "else" >> singleStmtParser)
+      stmt1 <- reserved "then" >> singleExprParser
+      stmt2 <- option (Val Null) (reserved "else" >> singleExprParser)
       return $ If cond stmt1 stmt2
     )
     <?> "if"
 
-whileStmtParser :: Parser Stmt
-whileStmtParser =
+whileExprParser :: Parser Expr
+whileExprParser =
   (do
       cond <- reserved "while" >> exprParser
-      stmt <- reserved "do" >> singleStmtParser
+      stmt <- reserved "do" >> singleExprParser
       return $ While cond stmt
     )
     <?> "while"
 
-ignStmtParser :: Parser Stmt
-ignStmtParser = Ign <$> exprParser <?> "expression ignoring result"
-
-printStmtParser :: Parser Stmt
-printStmtParser =
+printExprParser :: Parser Expr
+printExprParser =
   Print <$> (reserved "print" >> parens (commaSep exprParser)) <?> "print"
-
-skipStmtParser :: Parser Stmt
-skipStmtParser = (reserved "skip" >> return Skip) <?> "skip"
 
 algValParser :: Parser Val
 algValParser =
@@ -121,16 +115,8 @@ funValParser =
   (do
       args <- parens (commaSep identifier)
       reservedOp "=>"
-      try
-          (braces $ do
-            body <- stmtParser
-            ret  <- reserved "return" >> exprParser <* semi
-            return $ FunVal args body ret
-          )
-        <|> (do
-              ret <- exprParser
-              return $ FunVal args Skip ret
-            )
+      body <- singleExprParser
+      return $ FunVal args body
     )
     <?> "function definition"
 
@@ -139,14 +125,6 @@ listValParser =
   ListLiteral
     <$> (brackets . commaSep) exprParser
     <|> (reserved "null" >> return (Val Null))
-
-exprParser :: Parser Expr
-exprParser =
-  try (last boolExprParser)
-    <|> try (last algExprParser)
-    <|> try (last funExprParser)
-    <|> try (last assignExprParser)
-    <|> last listExprParser
 
 algExprParser :: Parser Expr
 algExprParser = buildExpressionParser algOperators algTerm

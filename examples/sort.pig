@@ -4,7 +4,7 @@ length = (a) => {
         i = i + 1;
         >- a;
     };
-    return i; 
+    i; 
 };
 
 quick = (a) => {
@@ -17,7 +17,7 @@ quick = (a) => {
         };
         x = quick(ls) # p # quick(gt); 
     } else x = [];
-    return x;
+    x;
 };
 
 bubble = (a) => {
@@ -35,5 +35,5 @@ bubble = (a) => {
         };
         i = i + 1;
     };
-    return a;
+    a;
 }

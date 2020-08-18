@@ -9,8 +9,8 @@ where
 
 import           Data.Version
 import           Import
-import qualified Interp.Directives             as D
-import qualified Interp.Statements             as S
+import           Interp.Directives
+import           Interp.Statements
 import           Lang.Parser
 import           System.Console.Haskeline
 import           System.Console.Pretty
@@ -29,7 +29,7 @@ run = do
  where
   store ops = case optionsLoad ops of
     []   -> return emptyStore
-    file -> runWithStore (D.exec (Load file)) emptyStore >>= return . snd
+    file -> runWithStore (exec (Load file)) emptyStore
 
 runLine :: Store -> InputT IO ()
 runLine store = do
@@ -42,8 +42,8 @@ runLine store = do
 runProg :: Store -> Prog -> InputT IO ()
 runProg store (Stmt p) =
   let p' = case p of
-        Ign e -> Print [e]
-        other -> other
-  in  runWithStore (S.exec p') store >>= runLine . snd
+        Seq [e] -> Print [e]
+        other   -> other
+  in  runWithStore (eval p') store >>= runLine
 runProg _     (Drct Exit) = return ()
-runProg store (Drct p   ) = runWithStore (D.exec p) store >>= runLine . snd
+runProg store (Drct p   ) = runWithStore (exec p) store >>= runLine
