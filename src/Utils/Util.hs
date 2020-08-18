@@ -4,7 +4,7 @@
 
 module Utils.Util
   ( printVal
-  , printNl
+  , printString
   , isVar
   , readVar
   , writeGlobVar
@@ -17,6 +17,7 @@ module Utils.Util
   , algValToMaybe
   , boolValToMaybe
   , listValToMaybe
+  , replaceAtIndex
   , getElems
   , getStore
   , getWriteFun
@@ -105,6 +106,12 @@ getElems list = foldl'
   )
   []
 
+replaceAtIndex :: a -> [a] -> Int -> [a]
+replaceAtIndex _ [] _ = []
+replaceAtIndex item ls n | n < length ls = a ++ (item : tail b)
+                         | otherwise     = ls
+  where (a, b) = splitAt n ls
+
 isVar :: Expr -> (Bool, Var)
 isVar (Var x) = (True, x)
 isVar _       = (False, "")
@@ -131,8 +138,8 @@ writeLocVar x v = do
 printVal :: Show a => a -> Interp ()
 printVal = Interp . lift . outputStr . show
 
-printNl :: Interp ()
-printNl = Interp . lift . outputStrLn $ ""
+printString :: String -> Interp ()
+printString = Interp . lift . outputStr
 
 (>-) :: [Val] -> (Val, [Val])
 (>-) (h : t) = (h, t)

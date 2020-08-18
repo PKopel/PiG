@@ -21,11 +21,22 @@ eval (ListBinary op e1 e2) = evalListBin op e1 e2
 eval (ListUnary op e     ) = evalListUn op e
 eval (ListLiteral es     ) = ListVal <$> mapM eval es
 eval (FunApp n vs        ) = readVar n >>= evalFunApp vs
-eval (Assign x e         ) = do
+eval (Assign x i e       ) = do
   v        <- eval e
   writeVar <- getWriteFun
-  writeVar x v
+  readVar x >>= \case
+    ListVal l -> evalMaybeInt i >>= \case
+      Nothing  -> writeVar x v
+      Just ind -> writeVar x . ListVal $ replaceAtIndex v l ind
+    _ -> writeVar x v
   return v
+
+evalMaybeInt :: Maybe Expr -> Interp (Maybe Int)
+evalMaybeInt Nothing  = return Nothing
+evalMaybeInt (Just e) = eval e >>= return . algValToInt
+ where
+  algValToInt v = algValToMaybe v >>= conv
+  conv d = if d == fromInteger (round d) then Just (round d) else Nothing
 
 evalAlg :: Expr -> Interp (Maybe Double)
 evalAlg e = eval e >>= return . algValToMaybe
@@ -97,7 +108,7 @@ exec Skip             = return ()
 exec (Seq   []      ) = return ()
 exec (Seq   (s : ss)) = exec s >> exec (Seq ss)
 exec (Ign   e       ) = eval e >> return ()
-exec (Print e       ) = mapM eval e >>= mapM printVal >> printNl
+exec (Print e       ) = mapM eval e >>= mapM printVal >> printString "\n"
 exec (If e s1 s2    ) = eval e >>= \case
   AlgVal  v -> if v /= 0 then exec s1 else exec s2
   BoolVal v -> if v then exec s1 else exec s2

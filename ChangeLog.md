@@ -1,5 +1,8 @@
 # Changelog for PiG
 
+### 0.6.6
+* replacing nth element in list by `list(n) = expr`
+
 ### 0.6.5 
 * assignment is now an expression
 * `print` is back, now as a function, but plain expressions in interpreter are still shown after evaluation
