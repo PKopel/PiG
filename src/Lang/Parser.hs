@@ -172,9 +172,10 @@ funAppParser =
 assignExprParser :: Parser Expr
 assignExprParser =
   (do
-      var  <- identifier
-      expr <- reservedOp "=" >> exprParser
-      return $ Assign var expr
+      var   <- identifier
+      index <- option Nothing (Just <$> parens exprParser)
+      expr  <- reservedOp "=" >> exprParser
+      return $ Assign var index expr
     )
     <?> "assignment"
 

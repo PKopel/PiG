@@ -35,7 +35,7 @@ data Expr
   = Var Var
   | Val Val
   | Neg Expr
-  | Assign Var Expr
+  | Assign Var (Maybe Expr) Expr
   | ListLiteral [Expr]
   | FunApp Var [Expr]
   | BoolBinary BoolBinOp Expr Expr
