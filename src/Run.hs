@@ -40,6 +40,10 @@ runLine store = do
     Just (Right prog) -> runProg store prog
 
 runProg :: Store -> Prog -> InputT IO ()
-runProg store (Stmt p   ) = runWithStore (S.exec p) store >>= runLine . snd
+runProg store (Stmt p) =
+  let p' = case p of
+        Ign e -> Print [e]
+        other -> other
+  in  runWithStore (S.exec p') store >>= runLine . snd
 runProg _     (Drct Exit) = return ()
 runProg store (Drct p   ) = runWithStore (D.exec p) store >>= runLine . snd

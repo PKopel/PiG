@@ -35,13 +35,14 @@ data Expr
   = Var Var
   | Val Val
   | Neg Expr
+  | Assign Var Expr
+  | ListLiteral [Expr]
+  | FunApp Var [Expr]
   | BoolBinary BoolBinOp Expr Expr
   | RelBinary RelBinOp Expr Expr
   | AlgBinary AlgBinOp Expr Expr
   | ListUnary ListUnOp Expr
   | ListBinary ListBinOp Expr Expr
-  | ListLiteral [Expr]
-  | FunApp Var [Expr]
 
 type BoolBinOp = Bool -> Bool -> Bool
 
@@ -56,11 +57,11 @@ type AlgBinOp = Double -> Double -> Double
 type WriteFun = Var -> Val -> Interp ()
 
 data Stmt
-  = Assign Var Expr
-  | While Expr Stmt
+  = While Expr Stmt
   | If Expr Stmt Stmt
   | Seq [Stmt]
-  | Print Expr
+  | Print [Expr]
+  | Ign Expr
   | Skip
 
 data Val = AlgVal Double | BoolVal Bool | ListVal [Val] | FunVal [Var] Stmt Expr | Null

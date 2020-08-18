@@ -70,7 +70,7 @@ singleStmtParser =
     <|> try ifStmtParser
     <|> try whileStmtParser
     <|> try skipStmtParser
-    <|> try assignStmtParser
+    <|> try ignStmtParser
     <|> printStmtParser
 
 ifStmtParser :: Parser Stmt
@@ -92,17 +92,12 @@ whileStmtParser =
     )
     <?> "while"
 
-assignStmtParser :: Parser Stmt
-assignStmtParser =
-  (do
-      var  <- identifier
-      expr <- reservedOp "=" >> exprParser
-      return $ Assign var expr
-    )
-    <?> "assignment"
+ignStmtParser :: Parser Stmt
+ignStmtParser = Ign <$> exprParser <?> "expression ignoring result"
 
 printStmtParser :: Parser Stmt
-printStmtParser = Print <$> exprParser <?> "print"
+printStmtParser =
+  Print <$> (reserved "print" >> parens (commaSep exprParser)) <?> "print"
 
 skipStmtParser :: Parser Stmt
 skipStmtParser = (reserved "skip" >> return Skip) <?> "skip"
@@ -150,6 +145,7 @@ exprParser =
   try (last boolExprParser)
     <|> try (last algExprParser)
     <|> try (last funExprParser)
+    <|> try (last assignExprParser)
     <|> last listExprParser
 
 algExprParser :: Parser Expr
@@ -172,6 +168,15 @@ funAppParser =
       return $ FunApp name args
     )
     <?> "function application"
+
+assignExprParser :: Parser Expr
+assignExprParser =
+  (do
+      var  <- identifier
+      expr <- reservedOp "=" >> exprParser
+      return $ Assign var expr
+    )
+    <?> "assignment"
 
 algTerm :: ParsecT String () Identity Expr
 algTerm =

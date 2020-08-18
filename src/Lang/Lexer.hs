@@ -31,6 +31,7 @@ reservedNms =
   , "do"
   , "skip"
   , "return"
+  , "print"
   , "true"
   , "false"
   , "null"

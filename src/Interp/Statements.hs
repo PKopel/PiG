@@ -21,6 +21,11 @@ eval (ListBinary op e1 e2) = evalListBin op e1 e2
 eval (ListUnary op e     ) = evalListUn op e
 eval (ListLiteral es     ) = ListVal <$> mapM eval es
 eval (FunApp n vs        ) = readVar n >>= evalFunApp vs
+eval (Assign x e         ) = do
+  v        <- eval e
+  writeVar <- getWriteFun
+  writeVar x v
+  return v
 
 evalAlg :: Expr -> Interp (Maybe Double)
 evalAlg e = eval e >>= return . algValToMaybe
@@ -72,9 +77,9 @@ evalFunApp vs (FunVal as stmt ret) = do
   oldLocals   <- getStore >>= return . getLocals
   oldWriteVar <- getWriteFun
   withStore $ setLocals (const newLocals) -- introducing local variables
-  putWriteFun writeLocVar -- from now variables are written to local store
+  putWriteFun writeLocVar -- from now variables are declared in local scope
   exec stmt
-  putWriteFun oldWriteVar
+  putWriteFun oldWriteVar -- end of local scope
   retVal <- eval ret -- value returned from function (must be evaluated before removing local variables)
   withStore $ setLocals (const oldLocals) -- removing local variables
   return retVal
@@ -88,14 +93,11 @@ evalFunApp vs (ListVal l) = do
 evalFunApp _ _ = return Null
 
 exec :: Stmt -> Interp ()
-exec Skip         = return ()
-exec (Assign x e) = do
-  v        <- eval e
-  writeVar <- getWriteFun
-  writeVar x v
+exec Skip             = return ()
 exec (Seq   []      ) = return ()
 exec (Seq   (s : ss)) = exec s >> exec (Seq ss)
-exec (Print e       ) = eval e >>= printVal
+exec (Ign   e       ) = eval e >> return ()
+exec (Print e       ) = mapM eval e >>= mapM printVal >> printNl
 exec (If e s1 s2    ) = eval e >>= \case
   AlgVal  v -> if v /= 0 then exec s1 else exec s2
   BoolVal v -> if v then exec s1 else exec s2
