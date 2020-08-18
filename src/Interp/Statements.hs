@@ -23,22 +23,20 @@ eval (ListBinary op e1 e2) = evalListBin op e1 e2
 eval (ListUnary op e     ) = evalListUn op e
 eval (ListLiteral es     ) = ListVal . Seq.fromList <$> mapM eval es
 eval (FunApp n vs        ) = readVar n >>= evalFunApp vs
-eval (Assign x i e       ) = do
+eval (Assign x Nothing e ) = do
+  v        <- eval e
+  writeVar <- getWriteFun
+  writeVar x v
+  return v
+eval (Assign x (Just i) e) = do
   v        <- eval e
   writeVar <- getWriteFun
   readVar x >>= \case
-    ListVal l -> evalMaybeInt i >>= \case
+    ListVal l -> evalAlg i >>= \case
       Nothing  -> writeVar x v
-      Just ind -> writeVar x . ListVal $ Seq.update ind v l
+      Just ind -> writeVar x . ListVal $ Seq.update (round ind) v l
     _ -> writeVar x v
   return v
-
-evalMaybeInt :: Maybe Expr -> Interp (Maybe Int)
-evalMaybeInt Nothing  = return Nothing
-evalMaybeInt (Just e) = eval e >>= return . algValToInt
- where
-  algValToInt v = algValToMaybe v >>= conv
-  conv d = if d == fromInteger (round d) then Just (round d) else Nothing
 
 evalAlg :: Expr -> Interp (Maybe Double)
 evalAlg e = eval e >>= return . algValToMaybe
@@ -98,7 +96,7 @@ evalFunApp vs (FunVal as stmt ret) = do
   return retVal
 evalFunApp vs (ListVal l) = do
   -- get elements from list of name n
-  evs <- foldM (\acc v -> evalMaybeInt v >>= return . (: acc)) [] (pure <$> vs)
+  evs <- foldM (\acc v -> evalAlg v >>= return . (: acc)) [] vs
   case getElems l evs of
     v  :<|    Empty -> return v -- one argument in vs, result is a single value
     v@(_ :<| _)     -> return $ ListVal v -- more than one argument in vs, result is a list
