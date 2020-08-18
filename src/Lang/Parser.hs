@@ -70,6 +70,7 @@ singleStmtParser =
     <|> try ifStmtParser
     <|> try whileStmtParser
     <|> try skipStmtParser
+    <|> try ignStmtParser
     <|> printStmtParser
 
 ifStmtParser :: Parser Stmt
@@ -91,8 +92,12 @@ whileStmtParser =
     )
     <?> "while"
 
+ignStmtParser :: Parser Stmt
+ignStmtParser = Ign <$> exprParser <?> "expression ignoring result"
+
 printStmtParser :: Parser Stmt
-printStmtParser = Print <$> exprParser <?> "print"
+printStmtParser =
+  Print <$> (reserved "print" >> parens (commaSep exprParser)) <?> "print"
 
 skipStmtParser :: Parser Stmt
 skipStmtParser = (reserved "skip" >> return Skip) <?> "skip"

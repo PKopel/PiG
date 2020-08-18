@@ -2,6 +2,7 @@
 
 ### 0.6.5 
 * assignment is now an expression
+* `print` is back, now as a function, but plain expressions in interpreter are still shown after evaluation
 
 ### 0.6.4
 * colors in interpreter

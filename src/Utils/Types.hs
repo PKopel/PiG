@@ -60,7 +60,8 @@ data Stmt
   = While Expr Stmt
   | If Expr Stmt Stmt
   | Seq [Stmt]
-  | Print Expr
+  | Print [Expr]
+  | Ign Expr
   | Skip
 
 data Val = AlgVal Double | BoolVal Bool | ListVal [Val] | FunVal [Var] Stmt Expr | Null

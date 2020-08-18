@@ -4,6 +4,7 @@
 
 module Utils.Util
   ( printVal
+  , printNl
   , isVar
   , readVar
   , writeGlobVar
@@ -128,7 +129,10 @@ writeLocVar x v = do
   putStore $ setLocals (Map.insert x v) store
 
 printVal :: Show a => a -> Interp ()
-printVal = Interp . lift . outputStrLn . fromString . show
+printVal = Interp . lift . outputStr . show
+
+printNl :: Interp ()
+printNl = Interp . lift . outputStrLn $ ""
 
 (>-) :: [Val] -> (Val, [Val])
 (>-) (h : t) = (h, t)
