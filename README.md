@@ -16,7 +16,7 @@ y = 10.2
 z = [x,y]
 v = y + 2
 t = (a) => a
-s = (a,b) => { c = a + b; return c}
+s = (a,b) => { c = a + b; c}
 ```
 
 One can also write statements like `when ... do ...`, `if ... then ... [else ...]` and sequences of statements separated by `;`, 
