@@ -1,11 +1,12 @@
 # PiG
 
-Interpreter for a very simple language.
+Interpreter for a simple language.
 
 ## Usage  
 
 * Run `stack exec -- PiG` to start interpreter
-* With `stack exec -- PiG --verbose` to start interpreter with more logging.
+* With `stack exec -- PiG -f|--file <file path>` to start interpreter with <file> loaded.
+* With `stack exec -- PiG --help` to see more info.
 
 Inside of the interpreter one can declare variables (true/false, numbers, lists and lambdas), like in the example:
 
@@ -24,7 +25,11 @@ optionaly enclosed in braces. Writing single expression will effect in writing r
 Supported operators are:
 * `+`, `-`, `*`, `/` and `^` for numbers
 * `-`, `||`, `&&` for booleans
-* `<>`, `-<`, `>-` for lists
+* `<>`, `-<`, `>-` for lists (`>-` removes and returns first element, `-<` the last one)
+
+It is also possible to load file via `:load "<file path>"`.
+
+See [examples](https://github.com/PKopel/PiG/tree/master/examples) for more info.
 
 ### Dependencies
 * **[RIO](https://hackage.haskell.org/package/rio)**
