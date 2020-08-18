@@ -6,5 +6,5 @@ factorial = (n) => {
             y = y + 1;
         };
     }
-    return x;
+    x;
 }

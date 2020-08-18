@@ -7,7 +7,7 @@ main = () => {
     y = fun(x);
     z = fun2(x,y);
     t = fun3(x,y,z);
-    return x + y + z + t;
+    x + y + z + t;
 };
 
 main();
