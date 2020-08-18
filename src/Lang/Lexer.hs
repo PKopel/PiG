@@ -29,8 +29,6 @@ reservedNms =
   , "else"
   , "while"
   , "do"
-  , "skip"
-  , "return"
   , "print"
   , "true"
   , "false"

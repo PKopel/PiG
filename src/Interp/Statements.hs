@@ -23,7 +23,18 @@ eval (ListBinary op e1 e2) = evalListBin op e1 e2
 eval (ListUnary op e     ) = evalListUn op e
 eval (ListLiteral es     ) = ListVal . Seq.fromList <$> mapM eval es
 eval (FunApp n vs        ) = readVar n >>= evalFunApp vs
-eval (Assign x Nothing e ) = do
+eval (Print e) =
+  mapM eval e >>= mapM printVal >> printString "\n" >> return Null
+eval (Seq []      ) = return Null
+eval (Seq [s     ]) = eval s
+eval (Seq (s : ss)) = eval s >> eval (Seq ss)
+eval (If c e1 e2  ) = eval c >>= \case
+  AlgVal  v -> if v /= 0 then eval e1 else eval e2
+  BoolVal v -> if v then eval e1 else eval e2
+  ListVal v -> if not (Seq.null v) then eval e1 else eval e2
+  _         -> return Null
+eval (While e s         ) = ListVal <$> evalWhile e s Empty
+eval (Assign x Nothing e) = do
   v        <- eval e
   writeVar <- getWriteFun
   writeVar x v
@@ -81,7 +92,7 @@ evalListUn op e = do
     _           -> return Null
 
 evalFunApp :: [Expr] -> Val -> Interp Val
-evalFunApp vs (FunVal as stmt ret) = do
+evalFunApp vs (FunVal as body) = do
   -- execute function of name n with arguments from vs
   newLocals <-
     Map.fromList <$> zipWithM (\a v -> eval v >>= return . (,) a) as vs
@@ -89,9 +100,8 @@ evalFunApp vs (FunVal as stmt ret) = do
   oldWriteVar <- getWriteFun
   withStore $ setLocals (const newLocals) -- introducing local variables
   putWriteFun writeLocVar -- from now variables are declared in local scope
-  exec stmt
+  retVal <- eval body
   putWriteFun oldWriteVar -- end of local scope
-  retVal <- eval ret -- value returned from function (must be evaluated before removing local variables)
   withStore $ setLocals (const oldLocals) -- removing local variables
   return retVal
 evalFunApp vs (ListVal l) = do
@@ -103,19 +113,12 @@ evalFunApp vs (ListVal l) = do
     _               -> return Null
 evalFunApp _ _ = return Null
 
-exec :: Stmt -> Interp ()
-exec Skip             = return ()
-exec (Seq   []      ) = return ()
-exec (Seq   (s : ss)) = exec s >> exec (Seq ss)
-exec (Ign   e       ) = eval e >> return ()
-exec (Print e       ) = mapM eval e >>= mapM printVal >> printString "\n"
-exec (If e s1 s2    ) = eval e >>= \case
-  AlgVal  v -> if v /= 0 then exec s1 else exec s2
-  BoolVal v -> if v then exec s1 else exec s2
-  ListVal v -> if not (Seq.null v) then exec s1 else exec s2
-  _         -> return ()
-exec (While e s) = eval e >>= \case
-  AlgVal  v -> when (v /= 0) (exec (Seq [s, While e s]))
-  BoolVal v -> when v (exec (Seq [s, While e s]))
-  ListVal v -> when (length v > 0) (exec (Seq [s, While e s]))
-  _         -> return ()
+evalWhile :: Expr -> Expr -> Seq Val -> Interp (Seq Val)
+evalWhile e s acc = eval e >>= \case
+  AlgVal  v -> while $ v /= 0
+  BoolVal v -> while v
+  ListVal v -> while $ not (Seq.null v)
+  _         -> return acc
+ where
+  while cond =
+    if cond then eval s >>= evalWhile e s . (acc Seq.|>) else return acc

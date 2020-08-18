@@ -57,15 +57,9 @@ putWriteFun w' = do
 withStore :: (Store -> Store) -> Interp ()
 withStore f = getStore >>= putStore . f
 
-runInterpWithStore
-  :: Interp a -> (WriteFun, Store) -> InputT IO (a, (WriteFun, Store))
-runInterpWithStore = runStateT . runInterp
-
-runWithStore :: Interp a -> Store -> InputT IO (a, Store)
+runWithStore :: Interp a -> Store -> InputT IO Store
 runWithStore interp store =
-  runInterpWithStore interp (writeGlobVar, store)
-    >>= return
-    .   ((,) <$> fst <*> (snd . snd))
+  (runStateT . runInterp) interp (writeGlobVar, store) >>= return . snd . snd
 
 valToList :: Val -> Seq Val
 valToList (ListVal vs) = vs
