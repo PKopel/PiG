@@ -35,19 +35,15 @@ eval (If c e1 e2  ) = eval c >>= \case
   _         -> return Null
 eval (While e s         ) = ListVal <$> evalWhile e s Empty
 eval (Assign x Nothing e) = do
-  v        <- eval e
-  writeVar <- getWriteFun
+  v <- eval e
   writeVar x v
-  return v
 eval (Assign x (Just i) e) = do
-  v        <- eval e
-  writeVar <- getWriteFun
+  v <- eval e
   readVar x >>= \case
     ListVal l -> evalAlg i >>= \case
       Nothing  -> writeVar x v
       Just ind -> writeVar x . ListVal $ Seq.update (round ind) v l
     _ -> writeVar x v
-  return v
 
 evalAlg :: Expr -> Interp (Maybe Double)
 evalAlg e = eval e >>= return . algValToMaybe
@@ -85,10 +81,9 @@ evalListBin op e1 e2 = do
 
 evalListUn :: ListUnOp -> Expr -> Interp Val
 evalListUn op e = do
-  writeVar <- getWriteFun
   let (iv, x) = isVar e
   evalList e >>= return . fmap op >>= \case
-    Just (h, t) -> when iv (writeVar x (ListVal t)) >> return h
+    Just (h, t) -> when iv (writeVar x (ListVal t) >> return ()) >> return h
     _           -> return Null
 
 evalFunApp :: [Expr] -> Val -> Interp Val
@@ -96,13 +91,13 @@ evalFunApp vs (FunVal as body) = do
   -- execute function of name n with arguments from vs
   newLocals <-
     Map.fromList <$> zipWithM (\a v -> eval v >>= return . (,) a) as vs
-  oldLocals   <- getStore >>= return . getLocals
-  oldWriteVar <- getWriteFun
-  withStore $ setLocals (const newLocals) -- introducing local variables
-  putWriteFun writeLocVar -- from now variables are declared in local scope
+  oldLocals <- getStore >>= return . view (scope localL)
+  oldScope  <- getScope
+  withStore $ (over . scope) localL (const newLocals) -- introducing local variables
+  setScope localL -- from now variables are declared in local scope
   retVal <- eval body
-  putWriteFun oldWriteVar -- end of local scope
-  withStore $ setLocals (const oldLocals) -- removing local variables
+  setScope oldScope -- end of local scope
+  withStore $ (over . scope) localL (const oldLocals) -- removing local variables
   return retVal
 evalFunApp vs (ListVal l) = do
   -- get elements from list of name n

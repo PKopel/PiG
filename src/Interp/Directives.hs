@@ -22,7 +22,7 @@ execFile file store = (lift . tryIOError) (parseFile file) >>= \case
 
 exec :: Drct -> Interp ()
 exec Exit  = return ()
-exec Clear = withStore . setGlobals $ const empty
+exec Clear = withStore $ (over . scope) globalL (const empty)
 exec Help =
   printString
     "PiG interpreter directives: \n\
@@ -31,5 +31,5 @@ exec Help =
     \':clear' - remove all variables\n\
     \':rm <name>' - remove variable <name>\n\
     \':load \"<file path>\"' - execute program from <file path>\n"
-exec (Rm   var ) = withStore . setGlobals $ delete var
+exec (Rm   var ) = withStore $ (over . scope) globalL (delete var)
 exec (Load file) = getStore >>= Interp . lift . execFile file >>= putStore

@@ -7,8 +7,7 @@ module Utils.Util
   , printString
   , isVar
   , readVar
-  , writeGlobVar
-  , writeLocVar
+  , writeVar
   , valToList
   , runWithStore
   , maybeToAlgVal
@@ -19,9 +18,9 @@ module Utils.Util
   , listValToMaybe
   , getElems
   , getStore
-  , getWriteFun
+  , getScope
   , putStore
-  , putWriteFun
+  , setScope
   , withStore
   , (>-)
   , (-<)
@@ -41,16 +40,16 @@ import           Utils.Types
 getStore :: Interp Store
 getStore = get >>= return . snd
 
-getWriteFun :: Interp WriteFun
-getWriteFun = get >>= return . fst
+getScope :: Interp Scope
+getScope = get >>= return . fst
 
 putStore :: Store -> Interp ()
 putStore s' = do
   (w, _) <- get
   put (w, s')
 
-putWriteFun :: WriteFun -> Interp ()
-putWriteFun w' = do
+setScope :: Scope -> Interp ()
+setScope w' = do
   (_, s) <- get
   put (w', s)
 
@@ -59,7 +58,7 @@ withStore f = getStore >>= putStore . f
 
 runWithStore :: Interp a -> Store -> InputT IO Store
 runWithStore interp store =
-  (runStateT . runInterp) interp (writeGlobVar, store) >>= return . snd . snd
+  (runStateT . runInterp) interp (globalL, store) >>= return . snd . snd
 
 valToList :: Val -> Seq Val
 valToList (ListVal vs) = vs
@@ -107,21 +106,17 @@ isVar _       = (False, "")
 readVar :: Var -> Interp Val
 readVar x = do
   store <- getStore
-  case Map.lookup x (getLocals store) of
+  case Map.lookup x (view (scope localL) store) of
     Just v  -> return v
-    Nothing -> case Map.lookup x (getGlobals store) of
+    Nothing -> case Map.lookup x (view (scope globalL) store) of
       Just v  -> return v
       Nothing -> return Null
 
-writeGlobVar :: WriteFun
-writeGlobVar x v = do
-  store <- getStore
-  putStore $ setGlobals (Map.insert x v) store
-
-writeLocVar :: WriteFun
-writeLocVar x v = do
-  store <- getStore
-  putStore $ setLocals (Map.insert x v) store
+writeVar :: Var -> Val -> Interp Val
+writeVar x v = do
+  s <- getScope
+  withStore $ (over $ scope s) (Map.insert x v)
+  return v
 
 printVal :: Show a => a -> Interp ()
 printVal = Interp . lift . outputStr . show

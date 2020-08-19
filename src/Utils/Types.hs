@@ -1,4 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Utils.Types where
@@ -57,8 +58,6 @@ type ListUnOp = Seq Val -> (Val, Seq Val)
 
 type AlgBinOp = Double -> Double -> Double
 
-type WriteFun = Var -> Val -> Interp ()
-
 data Val = AlgVal Double | BoolVal Bool | ListVal (Seq Val) | FunVal [Var] Expr | Null
 
 instance Show Val where
@@ -71,38 +70,30 @@ instance Show Val where
 
 type Var = String
 
+newtype Scope = Scope {scope :: Lens' Store Bindings}
+
+type Bindings = Map Var Val
+
 data Drct = Exit | Clear | Help | Rm Var | Load FilePath deriving (Show)
 
 data Prog = Stmt Expr | Drct Drct
 
-data Store = Store {gVars :: Map Var Val, lVars :: Map Var Val} deriving (Show)
+data Store = Store {globalS :: Bindings, localS :: Bindings} deriving (Show)
 
 emptyStore :: Store
-emptyStore = Store { gVars = mempty, lVars = mempty }
+emptyStore = Store { globalS = mempty, localS = mempty }
 
-globalL :: Lens' Store (Map Var Val)
-globalL = lens gVars (\x y -> x { gVars = y })
+globalL :: Scope
+globalL = Scope $ lens globalS (\x y -> x { globalS = y })
 
-localL :: Lens' Store (Map Var Val)
-localL = lens lVars (\x y -> x { lVars = y })
+localL :: Scope
+localL = Scope $ lens localS (\x y -> x { localS = y })
 
-getLocals :: Store -> Map Var Val
-getLocals = view localL
-
-getGlobals :: Store -> Map Var Val
-getGlobals = view globalL
-
-setLocals :: (Map Var Val -> Map Var Val) -> Store -> Store
-setLocals = over localL
-
-setGlobals :: (Map Var Val -> Map Var Val) -> Store -> Store
-setGlobals = over globalL
-
-newtype Interp a = Interp {runInterp :: StateT (WriteFun, Store) (InputT IO) a}
+newtype Interp a = Interp {runInterp :: StateT (Scope, Store) (InputT IO) a}
   deriving
     ( Functor,
       Applicative,
       Monad,
       MonadIO,
-      MonadState (WriteFun, Store)
+      MonadState (Scope, Store)
     )
