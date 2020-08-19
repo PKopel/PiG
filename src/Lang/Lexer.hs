@@ -2,63 +2,61 @@
 
 module Lang.Lexer where
 
-import Control.Monad.Identity
-import Import
-import Text.Parsec
-import Text.ParserCombinators.Parsec.Expr
-import Text.ParserCombinators.Parsec.Language
-import Text.ParserCombinators.Parsec.Token
-  ( GenTokenParser,
-  )
-import qualified Text.ParserCombinators.Parsec.Token as Token
+import           Control.Monad.Identity
+import           Import
+import           Text.Parsec
+import           Text.ParserCombinators.Parsec.Expr
+import           Text.ParserCombinators.Parsec.Language
+import           Text.ParserCombinators.Parsec.Token
+                                                ( GenTokenParser )
+import qualified Text.ParserCombinators.Parsec.Token
+                                               as Token
 
 languageDef :: GenLanguageDef String u Identity
-languageDef =
-  emptyDef
-    { Token.commentStart = "/*",
-      Token.commentEnd = "*/",
-      Token.commentLine = "//",
-      Token.identStart = letter,
-      Token.identLetter = alphaNum,
-      Token.reservedNames = reservedNms,
-      Token.reservedOpNames = reservedOps
-    }
+languageDef = emptyDef { Token.commentStart    = "/*"
+                       , Token.commentEnd      = "*/"
+                       , Token.commentLine     = "//"
+                       , Token.identStart      = letter
+                       , Token.identLetter     = alphaNum
+                       , Token.reservedNames   = reservedNms
+                       , Token.reservedOpNames = reservedOps
+                       }
 
 reservedNms :: [String]
 reservedNms =
-  [ "if",
-    "then",
-    "else",
-    "while",
-    "do",
-    "print",
-    "true",
-    "false",
-    "null",
-    ":exit",
-    ":help",
-    ":rm",
-    ":clear",
-    ":load"
+  [ "if"
+  , "then"
+  , "else"
+  , "while"
+  , "do"
+  , "print"
+  , "true"
+  , "false"
+  , "null"
+  , ":exit"
+  , ":help"
+  , ":rm"
+  , ":clear"
+  , ":load"
   ]
 
 reservedOps :: [String]
 reservedOps =
-  [ "+",
-    "-",
-    "*",
-    "/",
-    "=>",
-    "=",
-    "^",
-    "<",
-    ">",
-    "==",
-    "#",
-    "-<",
-    ">-",
-    "&&",
-    "||"
+  [ "+"
+  , "-"
+  , "*"
+  , "/"
+  , "=>"
+  , "="
+  , "^"
+  , "<"
+  , ">"
+  , "=="
+  , "#"
+  , "-<"
+  , ">-"
+  , "&&"
+  , "||"
   ]
 
 lexer :: GenTokenParser String u Identity
@@ -102,28 +100,44 @@ whiteSpace = Token.whiteSpace lexer -- parses whitespace
 
 algOperators :: [[Operator Char st Expr]]
 algOperators =
-  [ [Prefix (reservedOp "-" >> return (Unary (negate :: Double -> Double)))],
-    [Infix (reservedOp "^" >> return (Binary ((**) :: Double -> Double -> Double))) AssocLeft],
-    [ Infix (reservedOp "*" >> return (Binary ((*) :: Double -> Double -> Double))) AssocLeft,
-      Infix (reservedOp "/" >> return (Binary ((/) :: Double -> Double -> Double))) AssocLeft
-    ],
-    [ Infix (reservedOp "+" >> return (Binary ((+) :: Double -> Double -> Double))) AssocLeft,
-      Infix (reservedOp "-" >> return (Binary ((-) :: Double -> Double -> Double))) AssocLeft
+  [ [Prefix (reservedOp "-" >> return (Unary (negate :: Double -> Double)))]
+  , [ Infix
+        (reservedOp "^" >> return (Binary ((**) :: Double -> Double -> Double)))
+        AssocLeft
+    ]
+  , [ Infix
+      (reservedOp "*" >> return (Binary ((*) :: Double -> Double -> Double)))
+      AssocLeft
+    , Infix
+      (reservedOp "/" >> return (Binary ((/) :: Double -> Double -> Double)))
+      AssocLeft
+    ]
+  , [ Infix
+      (reservedOp "+" >> return (Binary ((+) :: Double -> Double -> Double)))
+      AssocLeft
+    , Infix
+      (reservedOp "-" >> return (Binary ((-) :: Double -> Double -> Double)))
+      AssocLeft
     ]
   ]
 
 boolOperators :: [[Operator Char st Expr]]
 boolOperators =
-  [ [Prefix (reservedOp "-" >> return (Unary not))],
-    [ Infix (reservedOp "&&" >> return (Binary (&&))) AssocLeft,
-      Infix (reservedOp "||" >> return (Binary (||))) AssocLeft
+  [ [Prefix (reservedOp "-" >> return (Unary not))]
+  , [ Infix (reservedOp "&&" >> return (Binary (&&))) AssocLeft
+    , Infix (reservedOp "||" >> return (Binary (||))) AssocLeft
     ]
   ]
 
 listOperators :: [[Operator Char st Expr]]
 listOperators =
-  [ [ Prefix (reservedOp ">-" >> return (Unary (>-))),
-      Prefix (reservedOp "-<" >> return (Unary (-<)))
-    ],
-    [Infix (reservedOp "#" >> return (Binary ((<>) :: Seq Val -> Seq Val -> Seq Val))) AssocLeft]
+  [ [ Prefix (reservedOp ">-" >> return (Unary (>-)))
+    , Prefix (reservedOp "-<" >> return (Unary (-<)))
+    ]
+  , [ Infix
+        (  reservedOp "#"
+        >> return (Binary ((<>) :: Seq Val -> Seq Val -> Seq Val))
+        )
+        AssocLeft
+    ]
   ]
