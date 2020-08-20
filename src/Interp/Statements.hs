@@ -15,9 +15,8 @@ eval (Val n          ) = return n
 eval (Var x          ) = readVar x
 eval (Binary op e1 e2) = (appBin op) <$> eval e1 <*> eval e2
 eval (Unary op e     ) = (appUn op) <$> eval e >>= \case
-  ListVal (h :<| t) ->
-    let (iv, x) = isVar e
-    in  when iv (writeVar x (ListVal t) >> return ()) >> return h
+  ListVal (h :<| t :<| Empty) ->
+    let (iv, x) = isVar e in when iv (writeVar x t >> return ()) >> return h
   other -> return other
 eval (ListLiteral es) = ListVal . Seq.fromList <$> mapM eval es
 eval (FunApp n vs   ) = readVar n >>= evalFunApp vs

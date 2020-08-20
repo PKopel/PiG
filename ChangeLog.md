@@ -1,5 +1,14 @@
 # Changelog for PiG
 
+### 0.8.0
+* reworked type system with more flexible operators and less boilerplate
+
+### 0.7.1
+* changed Store related functions to use more lenses
+
+### 0.7.0
+* changed Store type to simplify scoping
+
 ### 0.6.6
 * replacing nth element in list by `list(n) = expr`
 
