@@ -13,9 +13,9 @@ quick = (a) => {
         ls = gt = [];
         while a do {
             c = >- a;
-            if c > p then gt = gt # c else ls = ls # c;
+            if c > p then gt = gt <> c else ls = ls <> c;
         };
-        x = quick(ls) # p # quick(gt); 
+        x = quick(ls) <> p <> quick(gt); 
     } else x = [];
     x;
 };

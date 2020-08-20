@@ -52,7 +52,9 @@ reservedOps =
   , "<"
   , ">"
   , "=="
-  , "#"
+  , "!="
+  , "<>"
+  , "><"
   , "-<"
   , ">-"
   , "&&"
@@ -88,6 +90,9 @@ integer = Token.integer lexer -- parses an integer
 
 stringLiteral :: ParsecT String u Identity String
 stringLiteral = Token.stringLiteral lexer -- parses a string
+
+charLiteral :: ParsecT String u Identity Char
+charLiteral = Token.charLiteral lexer -- parses a char
 
 semi :: ParsecT String u Identity String
 semi = Token.semi lexer <* skipMany endOfLine -- parses a semicolon
@@ -135,8 +140,27 @@ listOperators =
     , Prefix (reservedOp "-<" >> return (Unary (-<)))
     ]
   , [ Infix
-        (  reservedOp "#"
+        (  reservedOp "<>"
         >> return (Binary ((<>) :: Seq Val -> Seq Val -> Seq Val))
+        )
+        AssocLeft
+    ]
+  ]
+
+{-
+eqOperators :: [[Operator Char st Expr]]
+eqOperators =
+  [ [ Infix (reservedOp "==" >> return (Binary ((==) :: Val -> Val -> Bool)))
+            AssocLeft
+    , Infix (reservedOp "!=" >> return (Binary ((/=) :: Val -> Val -> Bool)))
+            AssocLeft
+    ]
+  ]-}
+
+strOperators :: [[Operator Char st Expr]]
+strOperators =
+  [ [ Infix
+        (reservedOp "><" >> return (Binary ((<>) :: String -> String -> String))
         )
         AssocLeft
     ]

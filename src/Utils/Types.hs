@@ -53,14 +53,18 @@ instance UnAppToVal (Seq Val -> (Val, Seq Val)) where
 class BinAppToVal op where
   appBin :: op -> Val -> Val -> Val
 
+instance BinAppToVal (Val -> Val -> Bool) where
+  appBin op a b = BoolVal $ op a b
+
 instance BinAppToVal (Bool -> Bool -> Bool) where
   appBin op a b = BoolVal $ op (toBool a) (toBool b)
    where
-    toBool (BoolVal v ) = v
-    toBool (AlgVal  v ) = v /= 0
-    toBool (ListVal v ) = not (null v)
-    toBool (FunVal _ _) = True
-    toBool Null         = False
+    toBool (BoolVal v) = v
+    toBool (AlgVal  v) = v /= 0
+    toBool (ListVal v) = not (null v)
+    toBool (StrVal  v) = not (null v)
+    toBool Null        = False
+    toBool _           = True
 
 instance BinAppToVal (Double -> Double -> Bool) where
   appBin op (AlgVal a) (AlgVal b) = BoolVal $ op a b
@@ -70,11 +74,26 @@ instance BinAppToVal (Double -> Double -> Double) where
   appBin op (AlgVal a) (AlgVal b) = AlgVal $ op a b
   appBin _  _          _          = Null
 
+instance BinAppToVal (String -> String -> String) where
+  appBin op a b = StrVal $ op (toStr a) (toStr b)
+   where
+    toStr (FunVal _ _) = ""
+    toStr v            = show v
+
 instance BinAppToVal (Seq.Seq Val -> Seq.Seq Val -> Seq.Seq Val) where
   appBin op a b = ListVal $ op (toSeq a) (toSeq b)
    where
     toSeq (ListVal v) = v
     toSeq v           = Seq.singleton v
+
+data Prog = Stmt Expr | Drct Drct
+
+data Drct
+  = Exit
+  | Clear
+  | Help
+  | Rm Var
+  | Load FilePath
 
 data Expr
   = Var Var
@@ -89,25 +108,36 @@ data Expr
   | forall op. (BinAppToVal op) => Binary op Expr Expr
   | forall op. (UnAppToVal op) => Unary op Expr
 
-data Val = AlgVal Double | BoolVal Bool | ListVal (Seq Val) | FunVal [Var] Expr | Null
+instance Eq Expr where
+  (Var v1) == (Var v2) = v1 == v2
+  (Val v1) == (Val v2) = v1 == v2
+  _        == _        = False
+
+data Val
+  = AlgVal Double
+  | BoolVal Bool
+  | CharVal Char
+  | StrVal String
+  | ListVal (Seq Val)
+  | FunVal [Var] Expr
+  | Null
+  deriving (Eq)
 
 instance Show Val where
   show (AlgVal  v    ) = show v
+  show (CharVal v    ) = [v]
   show (BoolVal True ) = "true"
   show (BoolVal False) = "false"
+  show (StrVal  v    ) = v
   show (ListVal v    ) = '[' : intercalate ", " (toList $ show <$> v) ++ "]"
   show (FunVal _ _   ) = "function"
   show Null            = "null"
 
 type Var = String
 
-newtype Scope = Scope {scope :: Lens' Store Bindings}
-
 type Bindings = Map Var Val
 
-data Drct = Exit | Clear | Help | Rm Var | Load FilePath deriving (Show)
-
-data Prog = Stmt Expr | Drct Drct
+newtype Scope = Scope {scope :: Lens' Store Bindings}
 
 data Store = Store {globalS :: Bindings, localS :: Bindings} deriving (Show)
 

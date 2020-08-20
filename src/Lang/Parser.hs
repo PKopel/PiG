@@ -59,12 +59,13 @@ drctParser =
 
 exprParser :: Parser Expr
 exprParser =
-  try (last boolExprParser)
-    <|> try (last algExprParser)
-    <|> try (last funExprParser)
-    <|> try (last assignExprParser)
+  try (last assignExprParser)
     <|> try (last ifExprParser)
     <|> try (last whileExprParser)
+    <|> try (last boolExprParser)
+    <|> try (last algExprParser)
+    <|> try (last funExprParser)
+    <|> try (last strExprParser)
     <|> last listExprParser
 
 seqExprParser :: Parser Expr
@@ -126,6 +127,12 @@ listValParser =
     <$> (brackets . commaSep) exprParser
     <|> (reserved "null" >> return (Val Null))
 
+charValParser :: Parser Val
+charValParser = CharVal <$> charLiteral
+
+strValParser :: Parser Val
+strValParser = StrVal <$> stringLiteral
+
 algExprParser :: Parser Expr
 algExprParser = buildExpressionParser algOperators algTerm
 
@@ -134,6 +141,9 @@ boolExprParser = buildExpressionParser boolOperators boolTerm
 
 listExprParser :: Parser Expr
 listExprParser = buildExpressionParser listOperators listTerm
+
+strExprParser :: Parser Expr
+strExprParser = buildExpressionParser strOperators strTerm
 
 funExprParser :: Parser Expr
 funExprParser = try funAppParser <|> Val <$> funValParser
@@ -157,6 +167,25 @@ assignExprParser =
     )
     <?> "assignment"
 
+listTerm :: ParsecT String () Identity Expr
+listTerm =
+  parens exprParser
+    <|> try funAppParser
+    <|> Var
+    <$> identifier
+    <|> listValParser
+
+strTerm :: ParsecT String () Identity Expr
+strTerm =
+  parens exprParser
+    <|> try funAppParser
+    <|> Val
+    <$> strValParser
+    <|> Val
+    <$> charValParser
+    <|> Var
+    <$> identifier
+
 algTerm :: ParsecT String () Identity Expr
 algTerm =
   parens algExprParser
@@ -168,11 +197,11 @@ algTerm =
 
 boolTerm :: ParsecT String () Identity Expr
 boolTerm =
-  parens boolExprParser
+  parens exprParser
     <|> relExprParser
+    <|> try funAppParser
     <|> Val
     <$> boolValParser
-    <|> try funAppParser
     <|> Var
     <$> identifier
 
@@ -188,12 +217,3 @@ relation =
   (reservedOp ">" >> return (>))
     <|> (reservedOp "<" >> return (<))
     <|> (reservedOp "==" >> return (==))
-
-listTerm :: ParsecT String () Identity Expr
-listTerm =
-  parens listExprParser
-    <|> try funAppParser
-    <|> Var
-    <$> identifier
-    <|> listValParser
-    <|> (try algExprParser <|> boolExprParser)
