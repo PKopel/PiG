@@ -78,8 +78,6 @@ instance BinAppToVal (String -> String -> String) where
   appBin op a b = StrVal $ op (toStr a) (toStr b)
     where
       toStr (FunVal _ _) = ""
-      toStr (CharVal v) = [v]
-      toStr (StrVal v) = v
       toStr v = show v
 
 instance BinAppToVal (Seq.Seq Val -> Seq.Seq Val -> Seq.Seq Val) where
@@ -127,10 +125,10 @@ data Val
 
 instance Show Val where
   show (AlgVal v) = show v
-  show (CharVal v) = ['\'', v, '\'']
+  show (CharVal v) = [v]
   show (BoolVal True) = "true"
   show (BoolVal False) = "false"
-  show (StrVal v) = '\"' : v ++ "\""
+  show (StrVal v) = v
   show (ListVal v) = '[' : intercalate ", " (toList $ show <$> v) ++ "]"
   show (FunVal _ _) = "function"
   show Null = "null"
