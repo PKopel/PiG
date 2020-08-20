@@ -59,14 +59,15 @@ drctParser =
 
 exprParser :: Parser Expr
 exprParser =
-  try (last assignExprParser)
-    <|> try (last ifExprParser)
-    <|> try (last whileExprParser)
-    <|> try (last boolExprParser)
+  try (last boolExprParser)
+    <|> try (last eqExprParser)
     <|> try (last algExprParser)
     <|> try (last funExprParser)
     <|> try (last strExprParser)
-    <|> last listExprParser
+    <|> try (last listExprParser)
+    <|> try (last assignExprParser)
+    <|> try (last ifExprParser)
+    <|> try (last whileExprParser)
 
 seqExprParser :: Parser Expr
 seqExprParser = Seq <$> (sepEndBy1 singleExprParser (semi <|> many1 endOfLine))
@@ -137,7 +138,11 @@ algExprParser :: Parser Expr
 algExprParser = buildExpressionParser algOperators algTerm
 
 boolExprParser :: Parser Expr
-boolExprParser = buildExpressionParser boolOperators boolTerm
+boolExprParser =
+  buildExpressionParser boolOperators (boolTerm <|> eqExprParser)
+
+eqExprParser :: Parser Expr
+eqExprParser = buildExpressionParser eqOperators eqTerm
 
 listExprParser :: Parser Expr
 listExprParser = buildExpressionParser listOperators listTerm
@@ -171,9 +176,9 @@ listTerm :: ParsecT String () Identity Expr
 listTerm =
   parens exprParser
     <|> try funAppParser
+    <|> listValParser
     <|> Var
     <$> identifier
-    <|> listValParser
 
 strTerm :: ParsecT String () Identity Expr
 strTerm =
@@ -190,20 +195,23 @@ algTerm :: ParsecT String () Identity Expr
 algTerm =
   parens algExprParser
     <|> try funAppParser
-    <|> Var
-    <$> identifier
     <|> Val
     <$> algValParser
+    <|> Var
+    <$> identifier
 
 boolTerm :: ParsecT String () Identity Expr
 boolTerm =
   parens exprParser
-    <|> relExprParser
+    <|> try relExprParser
     <|> try funAppParser
     <|> Val
     <$> boolValParser
     <|> Var
     <$> identifier
+
+eqTerm :: ParsecT String () Identity Expr
+eqTerm = try boolTerm <|> try algTerm <|> try strTerm <|> listTerm
 
 relExprParser :: ParsecT String () Identity Expr
 relExprParser = do
@@ -213,7 +221,4 @@ relExprParser = do
   return $ Binary op a1 a2
 
 relation :: ParsecT String u Identity (Double -> Double -> Bool)
-relation =
-  (reservedOp ">" >> return (>))
-    <|> (reservedOp "<" >> return (<))
-    <|> (reservedOp "==" >> return (==))
+relation = (reservedOp ">" >> return (>)) <|> (reservedOp "<" >> return (<))

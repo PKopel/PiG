@@ -147,7 +147,6 @@ listOperators =
     ]
   ]
 
-{-
 eqOperators :: [[Operator Char st Expr]]
 eqOperators =
   [ [ Infix (reservedOp "==" >> return (Binary ((==) :: Val -> Val -> Bool)))
@@ -155,7 +154,7 @@ eqOperators =
     , Infix (reservedOp "!=" >> return (Binary ((/=) :: Val -> Val -> Bool)))
             AssocLeft
     ]
-  ]-}
+  ]
 
 strOperators :: [[Operator Char st Expr]]
 strOperators =
