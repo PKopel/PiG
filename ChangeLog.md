@@ -1,5 +1,11 @@
 # Changelog for PiG
 
+### 0.10.0
+* '==', '!=', '>' and '<' working for every type except for lambdas
+
+### 0.9.0
+* chars and strings
+
 ### 0.8.0
 * reworked type system with more flexible operators and less boilerplate
 
