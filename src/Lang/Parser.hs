@@ -4,47 +4,45 @@
 
 module Lang.Parser where
 
-import Control.Monad
-import Import hiding
-  ( many,
-    optional,
-    try,
-    (<|>),
-  )
-import Lang.Lexer
-import Text.Parsec
-import Text.Parsec.String
-import Text.ParserCombinators.Parsec.Expr
+import           Control.Monad
+import           Import                  hiding ( many
+                                                , optional
+                                                , try
+                                                , (<|>)
+                                                )
+import           Lang.Lexer
+import           Text.Parsec
+import           Text.Parsec.String
+import           Text.ParserCombinators.Parsec.Expr
 
 parseProg :: String -> Either String Prog
 parseProg p = case parse progParser "PiG" p of
-  Left err -> Left $ show err
+  Left  err  -> Left $ show err
   Right prog -> Right prog
 
 parseFile :: FilePath -> IO (Either String [Prog])
-parseFile f =
-  parseFromFile (sepEndBy1 progParser semi <* eof) f >>= \case
-    Left err -> return . Left $ show err
-    Right prog -> return $ Right prog
+parseFile f = parseFromFile (sepEndBy1 progParser semi <* eof) f >>= \case
+  Left  err  -> return . Left $ show err
+  Right prog -> return $ Right prog
 
 progParser :: Parser Prog
 progParser = whiteSpace >> (Stmt <$> seqExprParser <|> Drct <$> drctParser)
 
 endParser :: ParsecT String u Identity ()
 endParser =
-  lookAhead $
-    whiteSpace
-      <* ( skipMany1 semi
-             <|> skipMany1 endOfLine
-             <|> skipMany1 (char ')')
-             <|> skipMany1 (char '}')
-             <|> skipMany1 (char ']')
-             <|> skipMany1 (char ',')
-             <|> skipMany1 (reserved "then")
-             <|> skipMany1 (reserved "else")
-             <|> skipMany1 (reserved "do")
-             <|> eof
-         )
+  lookAhead
+    $  whiteSpace
+    <* (   skipMany1 semi
+       <|> skipMany1 endOfLine
+       <|> skipMany1 (char ')')
+       <|> skipMany1 (char '}')
+       <|> skipMany1 (char ']')
+       <|> skipMany1 (char ',')
+       <|> skipMany1 (reserved "then")
+       <|> skipMany1 (reserved "else")
+       <|> skipMany1 (reserved "do")
+       <|> eof
+       )
 
 last :: Parser a -> Parser a
 last b = b <* endParser
@@ -61,13 +59,13 @@ drctParser =
 
 exprParser :: Parser Expr
 exprParser =
-  try (last boolExprParser)
+  try (last assignExprParser)
+    <|> try (last ifExprParser)
+    <|> try (last whileExprParser)
+    <|> try (last boolExprParser)
     <|> try (last algExprParser)
     <|> try (last funExprParser)
     <|> try (last strExprParser)
-    <|> try (last assignExprParser)
-    <|> try (last ifExprParser)
-    <|> try (last whileExprParser)
     <|> last listExprParser
 
 seqExprParser :: Parser Expr
@@ -78,21 +76,21 @@ singleExprParser = braces seqExprParser <|> try exprParser <|> printExprParser
 
 ifExprParser :: Parser Expr
 ifExprParser =
-  ( do
-      cond <- reserved "if" >> exprParser
+  (do
+      cond  <- reserved "if" >> exprParser
       stmt1 <- reserved "then" >> singleExprParser
       stmt2 <- option (Val Null) (reserved "else" >> singleExprParser)
       return $ If cond stmt1 stmt2
-  )
+    )
     <?> "if"
 
 whileExprParser :: Parser Expr
 whileExprParser =
-  ( do
+  (do
       cond <- reserved "while" >> exprParser
       stmt <- reserved "do" >> singleExprParser
       return $ While cond stmt
-  )
+    )
     <?> "while"
 
 printExprParser :: Parser Expr
@@ -108,19 +106,19 @@ algValParser =
 boolValParser :: Parser Val
 boolValParser =
   BoolVal
-    <$> ( try (reserved "true" >> return True)
-            <|> try (reserved "false" >> return False)
+    <$> (   try (reserved "true" >> return True)
+        <|> try (reserved "false" >> return False)
         )
     <|> (reserved "null" >> return Null)
 
 funValParser :: Parser Val
 funValParser =
-  ( do
+  (do
       args <- parens (commaSep identifier)
       reservedOp "=>"
       body <- singleExprParser
       return $ FunVal args body
-  )
+    )
     <?> "function definition"
 
 listValParser :: Parser Expr
@@ -147,41 +145,46 @@ listExprParser = buildExpressionParser listOperators listTerm
 strExprParser :: Parser Expr
 strExprParser = buildExpressionParser strOperators strTerm
 
-charExprParser :: Parser Expr
-charExprParser = Val <$> charValParser
-
-strTerm :: ParsecT String () Identity Expr
-strTerm =
-  parens strExprParser
-    <|> try algExprParser
-    <|> try boolExprParser
-    <|> try charExprParser
-    <|> try funAppParser
-    <|> Val <$> strValParser
-    <|> Var <$> identifier
-    <|> try listExprParser
-
 funExprParser :: Parser Expr
 funExprParser = try funAppParser <|> Val <$> funValParser
 
 funAppParser :: Parser Expr
 funAppParser =
-  ( do
+  (do
       name <- identifier
       args <- parens (commaSep exprParser)
       return $ FunApp name args
-  )
+    )
     <?> "function application"
 
 assignExprParser :: Parser Expr
 assignExprParser =
-  ( do
-      var <- identifier
+  (do
+      var   <- identifier
       index <- option (Val Null) (parens exprParser)
-      expr <- reservedOp "=" >> exprParser
+      expr  <- reservedOp "=" >> exprParser
       return $ Assign var index expr
-  )
+    )
     <?> "assignment"
+
+listTerm :: ParsecT String () Identity Expr
+listTerm =
+  parens exprParser
+    <|> try funAppParser
+    <|> Var
+    <$> identifier
+    <|> listValParser
+
+strTerm :: ParsecT String () Identity Expr
+strTerm =
+  parens exprParser
+    <|> try funAppParser
+    <|> Val
+    <$> strValParser
+    <|> Val
+    <$> charValParser
+    <|> Var
+    <$> identifier
 
 algTerm :: ParsecT String () Identity Expr
 algTerm =
@@ -194,11 +197,11 @@ algTerm =
 
 boolTerm :: ParsecT String () Identity Expr
 boolTerm =
-  parens boolExprParser
+  parens exprParser
     <|> relExprParser
+    <|> try funAppParser
     <|> Val
     <$> boolValParser
-    <|> try funAppParser
     <|> Var
     <$> identifier
 
@@ -214,14 +217,3 @@ relation =
   (reservedOp ">" >> return (>))
     <|> (reservedOp "<" >> return (<))
     <|> (reservedOp "==" >> return (==))
-
-listTerm :: ParsecT String () Identity Expr
-listTerm =
-  parens listExprParser
-    <|> try funAppParser
-    <|> Var
-    <$> identifier
-    <|> listValParser
-    <|> try algExprParser
-    <|> try boolExprParser
-    <|> strExprParser
