@@ -6,13 +6,13 @@
 
 module Utils.Types where
 
-import Control.Monad.State
-import Data.List
-import qualified Data.Sequence as Seq
-import Data.Version (Version)
-import RIO
-import RIO.Process
-import System.Console.Haskeline
+import           Control.Monad.State
+import           Data.List
+import qualified Data.Sequence                 as Seq
+import           Data.Version                   ( Version )
+import           RIO
+import           RIO.Process
+import           System.Console.Haskeline
 
 data Options = Options
   { optionsVerbose :: !Bool,
@@ -28,22 +28,22 @@ data App = App
   }
 
 instance HasLogFunc App where
-  logFuncL = lens appLogFunc (\x y -> x {appLogFunc = y})
+  logFuncL = lens appLogFunc (\x y -> x { appLogFunc = y })
 
 instance HasProcessContext App where
   processContextL =
-    lens appProcessContext (\x y -> x {appProcessContext = y})
+    lens appProcessContext (\x y -> x { appProcessContext = y })
 
 class UnAppToVal op where
   appUn :: op -> Val -> Val
 
 instance UnAppToVal (Double -> Double) where
   appUn op (AlgVal a) = AlgVal $ op a
-  appUn _ _ = Null
+  appUn _  _          = Null
 
 instance UnAppToVal (Bool -> Bool) where
   appUn op (BoolVal a) = BoolVal $ op a
-  appUn _ _ = Null
+  appUn _  _           = Null
 
 instance UnAppToVal (Seq Val -> (Val, Seq Val)) where
   appUn op (ListVal a) =
@@ -58,33 +58,33 @@ instance BinAppToVal (Val -> Val -> Bool) where
 
 instance BinAppToVal (Bool -> Bool -> Bool) where
   appBin op a b = BoolVal $ op (toBool a) (toBool b)
-    where
-      toBool (BoolVal v) = v
-      toBool (AlgVal v) = v /= 0
-      toBool (ListVal v) = not (null v)
-      toBool (StrVal v) = not (null v)
-      toBool Null = False
-      toBool _ = True
+   where
+    toBool (BoolVal v) = v
+    toBool (AlgVal  v) = v /= 0
+    toBool (ListVal v) = not (null v)
+    toBool (StrVal  v) = not (null v)
+    toBool Null        = False
+    toBool _           = True
 
 instance BinAppToVal (Double -> Double -> Bool) where
   appBin op (AlgVal a) (AlgVal b) = BoolVal $ op a b
-  appBin _ _ _ = Null
+  appBin _  _          _          = Null
 
 instance BinAppToVal (Double -> Double -> Double) where
   appBin op (AlgVal a) (AlgVal b) = AlgVal $ op a b
-  appBin _ _ _ = Null
+  appBin _  _          _          = Null
 
 instance BinAppToVal (String -> String -> String) where
   appBin op a b = StrVal $ op (toStr a) (toStr b)
-    where
-      toStr (FunVal _ _) = ""
-      toStr v = show v
+   where
+    toStr (FunVal _ _) = ""
+    toStr v            = show v
 
 instance BinAppToVal (Seq.Seq Val -> Seq.Seq Val -> Seq.Seq Val) where
   appBin op a b = ListVal $ op (toSeq a) (toSeq b)
-    where
-      toSeq (ListVal v) = v
-      toSeq v = Seq.singleton v
+   where
+    toSeq (ListVal v) = v
+    toSeq v           = Seq.singleton v
 
 data Prog = Stmt Expr | Drct Drct
 
@@ -111,7 +111,7 @@ data Expr
 instance Eq Expr where
   (Var v1) == (Var v2) = v1 == v2
   (Val v1) == (Val v2) = v1 == v2
-  _ == _ = False
+  _        == _        = False
 
 data Val
   = AlgVal Double
@@ -124,14 +124,14 @@ data Val
   deriving (Eq)
 
 instance Show Val where
-  show (AlgVal v) = show v
-  show (CharVal v) = [v]
-  show (BoolVal True) = "true"
+  show (AlgVal  v    ) = show v
+  show (CharVal v    ) = [v]
+  show (BoolVal True ) = "true"
   show (BoolVal False) = "false"
-  show (StrVal v) = v
-  show (ListVal v) = '[' : intercalate ", " (toList $ show <$> v) ++ "]"
-  show (FunVal _ _) = "function"
-  show Null = "null"
+  show (StrVal  v    ) = v
+  show (ListVal v    ) = '[' : intercalate ", " (toList $ show <$> v) ++ "]"
+  show (FunVal _ _   ) = "function"
+  show Null            = "null"
 
 type Var = String
 
@@ -142,13 +142,13 @@ newtype Scope = Scope {scope :: Lens' Store Bindings}
 data Store = Store {globalS :: Bindings, localS :: Bindings} deriving (Show)
 
 emptyStore :: Store
-emptyStore = Store {globalS = mempty, localS = mempty}
+emptyStore = Store { globalS = mempty, localS = mempty }
 
 globalL :: Scope
-globalL = Scope $ lens globalS (\x y -> x {globalS = y})
+globalL = Scope $ lens globalS (\x y -> x { globalS = y })
 
 localL :: Scope
-localL = Scope $ lens localS (\x y -> x {localS = y})
+localL = Scope $ lens localS (\x y -> x { localS = y })
 
 newtype Interp a = Interp {runInterp :: StateT (Scope, Store) (InputT IO) a}
   deriving
