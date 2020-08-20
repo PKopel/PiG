@@ -149,7 +149,11 @@ listOperators =
 
 eqOperators :: [[Operator Char st Expr]]
 eqOperators =
-  [ [ Infix (reservedOp "==" >> return (Binary ((==) :: Val -> Val -> Bool)))
+  [ [ Infix (reservedOp ">" >> return (Binary ((>) :: Val -> Val -> Bool)))
+            AssocLeft
+    , Infix (reservedOp "<" >> return (Binary ((<) :: Val -> Val -> Bool)))
+            AssocLeft
+    , Infix (reservedOp "==" >> return (Binary ((==) :: Val -> Val -> Bool)))
             AssocLeft
     , Infix (reservedOp "!=" >> return (Binary ((/=) :: Val -> Val -> Bool)))
             AssocLeft

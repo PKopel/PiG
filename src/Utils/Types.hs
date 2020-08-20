@@ -70,6 +70,11 @@ instance BinAppToVal (Double -> Double -> Bool) where
   appBin op (AlgVal a) (AlgVal b) = BoolVal $ op a b
   appBin _  _          _          = Null
 
+instance BinAppToVal (String -> String -> Bool) where
+  appBin op (StrVal  a) (StrVal  b) = BoolVal $ op a b
+  appBin op (CharVal a) (CharVal b) = BoolVal $ op [a] [b]
+  appBin _  _           _           = Null
+
 instance BinAppToVal (Double -> Double -> Double) where
   appBin op (AlgVal a) (AlgVal b) = AlgVal $ op a b
   appBin _  _          _          = Null
@@ -113,6 +118,11 @@ instance Eq Expr where
   (Val v1) == (Val v2) = v1 == v2
   _        == _        = False
 
+instance Ord Expr where
+  (Var v1) <= (Var v2) = v1 <= v2
+  (Val v1) <= (Val v2) = v1 <= v2
+  _        <= _        = False
+
 data Val
   = AlgVal Double
   | BoolVal Bool
@@ -121,7 +131,7 @@ data Val
   | ListVal (Seq Val)
   | FunVal [Var] Expr
   | Null
-  deriving (Eq)
+  deriving (Eq, Ord)
 
 instance Show Val where
   show (AlgVal  v    ) = show v

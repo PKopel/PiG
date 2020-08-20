@@ -1,5 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Lang.Parser where
@@ -60,7 +61,7 @@ drctParser =
 exprParser :: Parser Expr
 exprParser =
   try (last boolExprParser)
-    <|> try (last eqExprParser)
+    <|> try (last relExprParser)
     <|> try (last algExprParser)
     <|> try (last funExprParser)
     <|> try (last strExprParser)
@@ -139,10 +140,10 @@ algExprParser = buildExpressionParser algOperators algTerm
 
 boolExprParser :: Parser Expr
 boolExprParser =
-  buildExpressionParser boolOperators (boolTerm <|> eqExprParser)
+  buildExpressionParser boolOperators (boolTerm <|> relExprParser)
 
-eqExprParser :: Parser Expr
-eqExprParser = buildExpressionParser eqOperators eqTerm
+relExprParser :: Parser Expr
+relExprParser = buildExpressionParser eqOperators relTerm
 
 listExprParser :: Parser Expr
 listExprParser = buildExpressionParser listOperators listTerm
@@ -203,22 +204,11 @@ algTerm =
 boolTerm :: ParsecT String () Identity Expr
 boolTerm =
   parens exprParser
-    <|> try relExprParser
     <|> try funAppParser
     <|> Val
     <$> boolValParser
     <|> Var
     <$> identifier
 
-eqTerm :: ParsecT String () Identity Expr
-eqTerm = try boolTerm <|> try algTerm <|> try strTerm <|> listTerm
-
-relExprParser :: ParsecT String () Identity Expr
-relExprParser = do
-  a1 <- algExprParser
-  op <- relation
-  a2 <- algExprParser
-  return $ Binary op a1 a2
-
-relation :: ParsecT String u Identity (Double -> Double -> Bool)
-relation = (reservedOp ">" >> return (>)) <|> (reservedOp "<" >> return (<))
+relTerm :: ParsecT String () Identity Expr
+relTerm = try boolTerm <|> try algTerm <|> try strTerm <|> listTerm
