@@ -100,28 +100,44 @@ whiteSpace = Token.whiteSpace lexer -- parses whitespace
 
 algOperators :: [[Operator Char st Expr]]
 algOperators =
-  [ [Prefix (reservedOp "-" >> return (Neg))]
-  , [Infix (reservedOp "^" >> return (AlgBinary (**))) AssocLeft]
-  , [ Infix (reservedOp "*" >> return (AlgBinary (*))) AssocLeft
-    , Infix (reservedOp "/" >> return (AlgBinary (/))) AssocLeft
+  [ [Prefix (reservedOp "-" >> return (Unary (negate :: Double -> Double)))]
+  , [ Infix
+        (reservedOp "^" >> return (Binary ((**) :: Double -> Double -> Double)))
+        AssocLeft
     ]
-  , [ Infix (reservedOp "+" >> return (AlgBinary (+))) AssocLeft
-    , Infix (reservedOp "-" >> return (AlgBinary (-))) AssocLeft
+  , [ Infix
+      (reservedOp "*" >> return (Binary ((*) :: Double -> Double -> Double)))
+      AssocLeft
+    , Infix
+      (reservedOp "/" >> return (Binary ((/) :: Double -> Double -> Double)))
+      AssocLeft
+    ]
+  , [ Infix
+      (reservedOp "+" >> return (Binary ((+) :: Double -> Double -> Double)))
+      AssocLeft
+    , Infix
+      (reservedOp "-" >> return (Binary ((-) :: Double -> Double -> Double)))
+      AssocLeft
     ]
   ]
 
 boolOperators :: [[Operator Char st Expr]]
 boolOperators =
-  [ [Prefix (reservedOp "-" >> return (Neg))]
-  , [ Infix (reservedOp "&&" >> return (BoolBinary (&&))) AssocLeft
-    , Infix (reservedOp "||" >> return (BoolBinary (||))) AssocLeft
+  [ [Prefix (reservedOp "-" >> return (Unary not))]
+  , [ Infix (reservedOp "&&" >> return (Binary (&&))) AssocLeft
+    , Infix (reservedOp "||" >> return (Binary (||))) AssocLeft
     ]
   ]
 
 listOperators :: [[Operator Char st Expr]]
 listOperators =
-  [ [ Prefix (reservedOp ">-" >> return (ListUnary (>-)))
-    , Prefix (reservedOp "-<" >> return (ListUnary (-<)))
+  [ [ Prefix (reservedOp ">-" >> return (Unary (>-)))
+    , Prefix (reservedOp "-<" >> return (Unary (-<)))
     ]
-  , [Infix (reservedOp "#" >> return (ListBinary (<>))) AssocLeft]
+  , [ Infix
+        (  reservedOp "#"
+        >> return (Binary ((<>) :: Seq Val -> Seq Val -> Seq Val))
+        )
+        AssocLeft
+    ]
   ]

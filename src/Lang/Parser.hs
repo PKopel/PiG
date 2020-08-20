@@ -151,7 +151,7 @@ assignExprParser :: Parser Expr
 assignExprParser =
   (do
       var   <- identifier
-      index <- option Nothing (Just <$> parens exprParser)
+      index <- option (Val Null) (parens exprParser)
       expr  <- reservedOp "=" >> exprParser
       return $ Assign var index expr
     )
@@ -181,9 +181,9 @@ relExprParser = do
   a1 <- algExprParser
   op <- relation
   a2 <- algExprParser
-  return $ RelBinary op a1 a2
+  return $ Binary op a1 a2
 
-relation :: ParsecT String u Identity RelBinOp
+relation :: ParsecT String u Identity (Double -> Double -> Bool)
 relation =
   (reservedOp ">" >> return (>))
     <|> (reservedOp "<" >> return (<))

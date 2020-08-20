@@ -8,14 +8,7 @@ module Utils.Util
   , isVar
   , readVar
   , writeVar
-  , valToList
   , runWithStore
-  , maybeToAlgVal
-  , maybeToBoolVal
-  , maybeToListVal
-  , algValToMaybe
-  , boolValToMaybe
-  , listValToMaybe
   , getElems
   , getStore
   , getScope
@@ -60,42 +53,11 @@ runWithStore :: Interp a -> Store -> InputT IO Store
 runWithStore interp store =
   (runStateT . runInterp) interp (globalL, store) >>= return . snd . snd
 
-valToList :: Val -> Seq Val
-valToList (ListVal vs) = vs
-valToList v            = Seq.singleton v
-
-maybeToAlgVal :: Maybe Double -> Val
-maybeToAlgVal Nothing  = Null
-maybeToAlgVal (Just v) = AlgVal v
-
-maybeToBoolVal :: Maybe Bool -> Val
-maybeToBoolVal Nothing  = Null
-maybeToBoolVal (Just v) = BoolVal v
-
-maybeToListVal :: Maybe (Seq Val) -> Val
-maybeToListVal Nothing  = Null
-maybeToListVal (Just v) = ListVal v
-
-algValToMaybe :: Val -> Maybe Double
-algValToMaybe (AlgVal n) = Just n
-algValToMaybe _          = Nothing
-
-boolValToMaybe :: Val -> Maybe Bool
-boolValToMaybe (BoolVal b) = Just b
-boolValToMaybe (AlgVal  a) = Just (a /= 0)
-boolValToMaybe (ListVal l) = Just (length l > 0)
-boolValToMaybe _           = Nothing
-
-listValToMaybe :: Val -> Maybe (Seq Val)
-listValToMaybe (ListVal n) = Just n
-listValToMaybe _           = Nothing
-
-getElems :: (Foldable t) => (Seq Val) -> t (Maybe Double) -> (Seq Val)
+getElems :: (Foldable t) => (Seq Val) -> t Double -> (Seq Val)
 getElems list = foldl'
-  (\acc v ->
-    case (Seq.<|) <$> (join $ (list Seq.!?) . round <$> v) <*> pure acc of
-      Nothing   -> acc
-      Just acc' -> acc'
+  (\acc v -> case (Seq.<|) <$> ((list Seq.!?) $ round v) <*> pure acc of
+    Nothing   -> acc
+    Just acc' -> acc'
   )
   Seq.empty
 
