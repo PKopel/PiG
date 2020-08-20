@@ -197,10 +197,29 @@ boolTerm =
   parens boolExprParser
     <|> relExprParser
     <|> Val
-    <$> boolValParser
+    <$> try boolValParser
     <|> try funAppParser
     <|> Var
-    <$> identifier
+    <$> try identifier
+
+-- <|> eqExprParser
+
+eqExprParser :: ParsecT String () Identity Expr
+eqExprParser = do
+  a1 <- parser
+  op <- equality
+  a2 <- parser
+  return $ Binary op a1 a2
+  where
+    parser =
+      try algExprParser
+        <|> try listExprParser
+        <|> try strExprParser
+        <|> try assignExprParser
+        <|> boolExprParser
+
+equality :: ParsecT String u Identity (Val -> Val -> Bool)
+equality = (reservedOp "==" >> return (==)) <|> (reservedOp "!=" >> return (/=))
 
 relExprParser :: ParsecT String () Identity Expr
 relExprParser = do
