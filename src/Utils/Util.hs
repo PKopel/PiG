@@ -3,7 +3,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Utils.Util
-  ( printVal
+  ( readVal
+  , printVal
   , printString
   , isVar
   , readVar
@@ -28,6 +29,7 @@ import           Data.Sequence                  ( Seq(..) )
 import qualified Data.Sequence                 as Seq
 import           RIO
 import           System.Console.Haskeline
+import           System.IO
 import           Utils.Types
 
 getStore :: Interp Store
@@ -55,7 +57,7 @@ runWithStore interp store =
 
 getElems :: (Foldable t) => (Seq Val) -> t Double -> (Seq Val)
 getElems list = foldl'
-  (\acc v -> case (Seq.<|) <$> ((list Seq.!?) $ round v) <*> pure acc of
+  (\acc v -> case (Seq.<|) <$> list Seq.!? (round v) <*> pure acc of
     Nothing   -> acc
     Just acc' -> acc'
   )
@@ -79,6 +81,9 @@ writeVar x v = do
   s <- getScope
   withStore $ (over $ scope s) (Map.insert x v)
   return v
+
+readVal :: Interp String
+readVal = Interp . lift . lift $ getLine
 
 printVal :: Show a => a -> Interp ()
 printVal = Interp . lift . outputStr . show

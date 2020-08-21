@@ -30,6 +30,7 @@ reservedNms =
   , "while"
   , "do"
   , "print"
+  , "read"
   , "true"
   , "false"
   , "null"
