@@ -78,21 +78,17 @@ singleExprParser = braces seqExprParser <|> try exprParser <|> printExprParser
 
 ifExprParser :: Parser Expr
 ifExprParser =
-  (do
-      cond  <- reserved "if" >> exprParser
-      stmt1 <- reserved "then" >> singleExprParser
-      stmt2 <- option (Val Null) (reserved "else" >> singleExprParser)
-      return $ If cond stmt1 stmt2
-    )
+  If
+    <$> (reserved "if" >> exprParser)
+    <*> (reserved "then" >> singleExprParser)
+    <*> option (Val Null) (reserved "else" >> singleExprParser)
     <?> "if"
 
 whileExprParser :: Parser Expr
 whileExprParser =
-  (do
-      cond <- reserved "while" >> exprParser
-      stmt <- reserved "do" >> singleExprParser
-      return $ While cond stmt
-    )
+  While
+    <$> (reserved "while" >> exprParser)
+    <*> (reserved "do" >> singleExprParser)
     <?> "while"
 
 printExprParser :: Parser Expr
@@ -115,12 +111,9 @@ boolValParser =
 
 funValParser :: Parser Val
 funValParser =
-  (do
-      args <- parens (commaSep identifier)
-      reservedOp "=>"
-      body <- singleExprParser
-      return $ FunVal args body
-    )
+  FunVal
+    <$> parens (commaSep identifier)
+    <*> (reservedOp "=>" >> singleExprParser)
     <?> "function definition"
 
 listValParser :: Parser Expr
@@ -142,9 +135,6 @@ boolExprParser :: Parser Expr
 boolExprParser =
   buildExpressionParser boolOperators (boolTerm <|> relExprParser)
 
-relExprParser :: Parser Expr
-relExprParser = buildExpressionParser eqOperators relTerm
-
 listExprParser :: Parser Expr
 listExprParser = buildExpressionParser listOperators listTerm
 
@@ -156,22 +146,33 @@ funExprParser = try funAppParser <|> Val <$> funValParser
 
 funAppParser :: Parser Expr
 funAppParser =
-  (do
-      name <- identifier
-      args <- parens (commaSep exprParser)
-      return $ FunApp name args
-    )
+  FunApp
+    <$> identifier
+    <*> parens (commaSep exprParser)
     <?> "function application"
 
 assignExprParser :: Parser Expr
 assignExprParser =
-  (do
-      var   <- identifier
-      index <- option (Val Null) (parens exprParser)
-      expr  <- reservedOp "=" >> exprParser
-      return $ Assign var index expr
-    )
+  Assign
+    <$> identifier
+    <*> option (Val Null) (parens exprParser)
+    <*> (reservedOp "=" >> exprParser)
     <?> "assignment"
+
+relExprParser :: Parser Expr
+relExprParser =
+  try
+      (do
+        e1   <- relTerm
+        rel  <- relation
+        e2   <- try $ lookAhead relTerm
+        next <- option (Val Null) (try $ last relExprParser)
+        let cur = Binary rel e1 e2
+        return $ case next of
+          Val Null -> cur
+          other    -> Binary (&&) cur other
+      )
+    <|> relTerm
 
 listTerm :: ParsecT String () Identity Expr
 listTerm =
@@ -212,3 +213,10 @@ boolTerm =
 
 relTerm :: ParsecT String () Identity Expr
 relTerm = try boolTerm <|> try algTerm <|> try strTerm <|> listTerm
+
+relation :: ParsecT String u Identity (Val -> Val -> Bool)
+relation =
+  (reservedOp ">" >> return (>))
+    <|> (reservedOp "<" >> return (<))
+    <|> (reservedOp "==" >> return (==))
+    <|> (reservedOp "!=" >> return (/=))
