@@ -1,5 +1,8 @@
 # Changelog for PiG
 
+### 0.10.1
+* chains of relations, like '1 < 2 > 3', are now handled properly
+
 ### 0.10.0
 * '==', '!=', '>' and '<' working for every type except for lambdas
 
