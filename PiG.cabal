@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 663b64e75ac0f3fcdcf2a28bc8397711577c1f04f13693144529bcca1f683ff9
+-- hash: 26d6aed1b78dfb04a885166c7ed49c30c55f1f2652e68345c5802790dd7148e8
 
 name:           PiG
-version:        0.10.1
+version:        0.10.2
 description:    Please see the README on Github at <https://github.com/PKopel/PiG#readme>
 homepage:       https://github.com/PKopel/PiG#readme
 bug-reports:    https://github.com/PKopel/PiG/issues
@@ -41,9 +41,11 @@ library
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints
   build-depends:
-      base >=4.11 && <10
+      QuickCheck
+    , base >=4.11 && <10
     , containers
     , haskeline
+    , hspec
     , mtl
     , parsec
     , pretty-terminal
@@ -59,9 +61,11 @@ executable PiG
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       PiG
+    , QuickCheck
     , base >=4.11 && <10
     , containers
     , haskeline
+    , hspec
     , mtl
     , optparse-simple
     , parsec
@@ -80,6 +84,7 @@ test-suite PiG-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       PiG
+    , QuickCheck
     , base >=4.11 && <10
     , containers
     , haskeline

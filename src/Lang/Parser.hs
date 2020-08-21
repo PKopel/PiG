@@ -6,6 +6,7 @@
 module Lang.Parser where
 
 import           Control.Monad
+import           Data.Sequence
 import           Import                  hiding ( many
                                                 , optional
                                                 , try
@@ -25,6 +26,11 @@ parseFile :: FilePath -> IO (Either String [Prog])
 parseFile f = parseFromFile (sepEndBy1 progParser semi <* eof) f >>= \case
   Left  err  -> return . Left $ show err
   Right prog -> return $ Right prog
+
+parseLitVal :: String -> Either String Val
+parseLitVal s = case parse litValParser "PiG" s of
+  Left  err -> Left $ show err
+  Right lit -> Right lit
 
 progParser :: Parser Prog
 progParser = whiteSpace >> (Stmt <$> seqExprParser <|> Drct <$> drctParser)
@@ -69,12 +75,13 @@ exprParser =
     <|> try (last assignExprParser)
     <|> try (last ifExprParser)
     <|> try (last whileExprParser)
+    <|> try readExprParser
 
 seqExprParser :: Parser Expr
 seqExprParser = Seq <$> (sepEndBy1 singleExprParser (semi <|> many1 endOfLine))
 
 singleExprParser :: Parser Expr
-singleExprParser = braces seqExprParser <|> try exprParser <|> printExprParser
+singleExprParser = braces seqExprParser <|> try printExprParser <|> exprParser
 
 ifExprParser :: Parser Expr
 ifExprParser =
@@ -94,6 +101,20 @@ whileExprParser =
 printExprParser :: Parser Expr
 printExprParser =
   Print <$> (reserved "print" >> parens (commaSep exprParser)) <?> "print"
+
+readExprParser :: Parser Expr
+readExprParser = reserved "read" >> return Read
+
+litValParser :: Parser Val
+litValParser =
+  listValParser
+    <|> (   algValParser
+        <|> boolValParser
+        <|> CharVal
+        <$> try (anyChar <* notFollowedBy anyChar)
+        <|> StrVal
+        <$> many1 anyChar
+        )
 
 algValParser :: Parser Val
 algValParser =
@@ -116,8 +137,15 @@ funValParser =
     <*> (reservedOp "=>" >> singleExprParser)
     <?> "function definition"
 
-listValParser :: Parser Expr
+listValParser :: Parser Val
 listValParser =
+  ListVal
+    .   fromList
+    <$> (brackets . commaSep) listValParser
+    <|> (reserved "null" >> return Null)
+
+listLitParser :: Parser Expr
+listLitParser =
   ListLiteral
     <$> (brackets . commaSep) exprParser
     <|> (reserved "null" >> return (Val Null))
@@ -169,8 +197,8 @@ relExprParser =
         next <- option (Val Null) (try $ last relExprParser)
         let cur = Binary rel e1 e2
         return $ case next of
-          Val Null -> cur
-          other    -> Binary (&&) cur other
+          Val _ -> cur
+          other -> Binary (&&) cur other
       )
     <|> relTerm
 
@@ -178,7 +206,7 @@ listTerm :: ParsecT String () Identity Expr
 listTerm =
   parens exprParser
     <|> try funAppParser
-    <|> listValParser
+    <|> listLitParser
     <|> Var
     <$> identifier
 

@@ -110,6 +110,7 @@ data Expr
   | If Expr Expr Expr
   | Seq [Expr]
   | Print [Expr]
+  | Read
   | forall op. (BinAppToVal op) => Binary op Expr Expr
   | forall op. (UnAppToVal op) => Unary op Expr
 
@@ -122,6 +123,22 @@ instance Ord Expr where
   (Var v1) <= (Var v2) = v1 <= v2
   (Val v1) <= (Val v2) = v1 <= v2
   _        <= _        = False
+
+instance Show Expr where
+  show (Var v       ) = "Var " <> v
+  show (Val v       ) = "Val " <> show v
+  show (Assign a b c) = intercalate " " ["Assign", a, show b, show c]
+  show (ListLiteral v) =
+    "ListLiteral" ++ '[' : intercalate ", " (show <$> v) ++ "]"
+  show (FunApp a b) =
+    "FunApp " <> a ++ '(' : intercalate ", " (show <$> b) ++ ")"
+  show (Print b  )    = "Print" ++ '(' : intercalate ", " (show <$> b) ++ ")"
+  show (While a b)    = intercalate " " ["While", show a, show b]
+  show (If a b c )    = intercalate " " ["If", show a, show b, show c]
+  show (Seq v    )    = "Seq " ++ '{' : intercalate "; " (show <$> v) ++ "}"
+  show Read           = "Read"
+  show (Binary _ a b) = intercalate " " ["Binary", show a, show b]
+  show (Unary _ a   ) = "Unary " <> show a
 
 data Val
   = AlgVal Double
