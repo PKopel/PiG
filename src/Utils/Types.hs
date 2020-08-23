@@ -66,15 +66,6 @@ instance BinAppToVal (Bool -> Bool -> Bool) where
     toBool Null        = False
     toBool _           = True
 
-instance BinAppToVal (Double -> Double -> Bool) where
-  appBin op (AlgVal a) (AlgVal b) = BoolVal $ op a b
-  appBin _  _          _          = Null
-
-instance BinAppToVal (String -> String -> Bool) where
-  appBin op (StrVal  a) (StrVal  b) = BoolVal $ op a b
-  appBin op (CharVal a) (CharVal b) = BoolVal $ op [a] [b]
-  appBin _  _           _           = Null
-
 instance BinAppToVal (Double -> Double -> Double) where
   appBin op (AlgVal a) (AlgVal b) = AlgVal $ op a b
   appBin _  _          _          = Null
