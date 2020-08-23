@@ -25,18 +25,18 @@ run = do
     <> fromString (showVersion version)
     <> "\ntype ':help' for more information "
     )
-  liftIO $ runInputT settings $ store options >>= runLine
+  liftIO $ runInputT settings $ store options >>= runLine Green
  where
   store ops = case optionsLoad ops of
     []   -> return emptyStore
     file -> runWithStore (exec (Load file)) emptyStore
 
-runLine :: Store -> InputT IO ()
-runLine store = do
-  line <- getInputLine $ (style Faint . color Magenta) "PiG" <> "> "
+runLine :: Color -> Store -> InputT IO ()
+runLine colour store = do
+  line <- getInputLine $ (style Faint . color colour) "PiG" <> "> "
   case parseProg <$> line of
     Nothing           -> return ()
-    Just (Left  err ) -> outputStrLn err >> runLine store
+    Just (Left  err ) -> outputStrLn err >> runLine Red store
     Just (Right prog) -> runProg store prog
 
 runProg :: Store -> Prog -> InputT IO ()
@@ -44,6 +44,6 @@ runProg store (Stmt p) =
   let p' = case p of
         Seq [e] -> Print [e]
         other   -> other
-  in  runWithStore (eval p') store >>= runLine
+  in  runWithStore (eval p') store >>= runLine Green
 runProg _     (Drct Exit) = return ()
-runProg store (Drct p   ) = runWithStore (exec p) store >>= runLine
+runProg store (Drct p   ) = runWithStore (exec p) store >>= runLine Green
