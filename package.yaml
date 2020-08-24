@@ -28,6 +28,7 @@ dependencies:
 - haskeline
 - pretty-terminal
 - hspec
+- hspec-core
 - QuickCheck
 
 ghc-options:

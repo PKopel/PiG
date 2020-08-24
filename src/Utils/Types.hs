@@ -106,8 +106,18 @@ data Expr
   | forall op. (UnAppToVal op) => Unary op Expr
 
 instance Eq Expr where
-  (Var v1) == (Var v2) = v1 == v2
-  (Val v1) == (Val v2) = v1 == v2
+  (Assign a b c) == (Assign d e f) = a == d && b == e && c == f
+  (If a b c) == (If d e f) = a == d && b == e && c == f
+  (FunApp a b) == (FunApp d e) = a == d && b == e
+  (While a b) == (While d e) = a == d && b == e
+  (Binary _ a b) == (Binary _ d e) = a == d && b == e
+  (Unary _ a) == (Unary _ d) = a == d
+  (Var a) == (Var d) = a == d
+  (Val a) == (Val d) = a == d
+  (Seq a) == (Seq d) = a == d
+  (Print a) == (Print d) = a == d
+  (ListLiteral a) == (ListLiteral d) = a == d
+  Read == Read = True
   _ == _ = False
 
 instance Ord Expr where
@@ -148,7 +158,8 @@ instance Show Val where
   show (BoolVal False) = "false"
   show (StrVal v) = v
   show (ListVal v) = '[' : intercalate ", " (toList $ show <$> v) ++ "]"
-  show (FunVal _ _) = "function"
+  show (FunVal n v) =
+    '(' : intercalate ", " (show <$> n) ++ ")" ++ " => " ++ show v
   show Null = "null"
 
 type Var = String
@@ -156,6 +167,9 @@ type Var = String
 type Bindings = Map Var Val
 
 newtype Scope = Scope {scope :: Lens' Store Bindings}
+
+instance Show Scope where
+  show _ = "scope"
 
 data Store = Store {globalS :: Bindings, localS :: Bindings} deriving (Show)
 

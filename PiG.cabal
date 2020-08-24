@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f894ee228ef68bff108ea43f3feda6feed87978dbcaae2a65a0830777dc39dc1
+-- hash: 297b22f757b033c1e77747a66eeec595dda386521985620f2752fb202066b96c
 
 name:           PiG
 version:        0.10.2
@@ -46,6 +46,7 @@ library
     , containers
     , haskeline
     , hspec
+    , hspec-core
     , mtl
     , parsec
     , pretty-terminal
@@ -66,6 +67,7 @@ executable PiG
     , containers
     , haskeline
     , hspec
+    , hspec-core
     , mtl
     , optparse-simple
     , parsec
@@ -90,6 +92,7 @@ test-suite PiG-test
     , containers
     , haskeline
     , hspec
+    , hspec-core
     , mtl
     , parsec
     , pretty-terminal
