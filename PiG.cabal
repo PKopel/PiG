@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 26d6aed1b78dfb04a885166c7ed49c30c55f1f2652e68345c5802790dd7148e8
+-- hash: f894ee228ef68bff108ea43f3feda6feed87978dbcaae2a65a0830777dc39dc1
 
 name:           PiG
 version:        0.10.2
@@ -77,6 +77,7 @@ test-suite PiG-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      TypesSpec
       UtilSpec
       Paths_PiG
   hs-source-dirs:
