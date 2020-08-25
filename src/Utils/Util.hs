@@ -55,7 +55,7 @@ runWithStore :: Interp a -> Store -> InputT IO Store
 runWithStore interp store =
   (runStateT . runInterp) interp (globalL, store) >>= return . snd . snd
 
-getElems :: (Foldable t) => (Seq Val) -> t Double -> (Seq Val)
+getElems :: (Foldable t) => Seq Val -> t Double -> Seq Val
 getElems list = foldl'
   (\acc v -> case (Seq.<|) <$> list Seq.!? (round v) <*> pure acc of
     Nothing   -> acc

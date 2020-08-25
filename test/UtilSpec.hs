@@ -8,7 +8,6 @@ where
 import           Control.Monad.State
 import           Import                  hiding ( assert )
 import           System.Console.Haskeline
-import           System.IO
 import           Test.Hspec
 import           Test.Hspec.Core.QuickCheck     ( modifyMaxSuccess )
 import           Test.QuickCheck
@@ -22,7 +21,6 @@ interpToProp i s =
 prop_getStore :: (Scope, Store) -> Property
 prop_getStore ss@(_, st) = monadicIO $ do
   st' <- interpToProp getStore ss
-  run . putStrLn $ "-"
   assert (st == st')
 
 prop_getScope :: (Scope, Store) -> Property
@@ -49,11 +47,24 @@ prop_withStore ss@(_, st) = monadicIO $ do
   st' <- interpToProp (withStore id >> getStore) ss
   assert (st == st')
 
+prop_getElems :: [Integer] -> Seq Val -> Bool
+prop_getElems ids seqv =
+  getElems seqv ids'
+    == getElems seqv ids''
+    && getElems seqv ids'
+    == getElems seqv ids'''
+ where
+  ids'   = fromInteger <$> ids
+  ids''  = ((+ 0.49) . fromInteger) <$> ids
+  ids''' = ((subtract 0.49) . fromInteger) <$> ids
+
 spec :: Spec
 spec = do
-  modifyMaxSuccess (const 1) $ describe "Utils.Util" $ do
-    it "Utils.Util.getStore" $ property prop_getStore
-    it "Utils.Util.getScope" $ property prop_getScope
-    it "Utils.Util.putStore" $ property prop_putStore
-    it "Utils.Util.setScope" $ property prop_setScope
-    it "Utils.Util.withStore" $ property prop_withStore
+  describe "Utils.Util" $ do
+    modifyMaxSuccess (const 1) $ do
+      it "Utils.Util.getStore" $ property prop_getStore
+      it "Utils.Util.getScope" $ property prop_getScope
+      it "Utils.Util.putStore" $ property prop_putStore
+      it "Utils.Util.setScope" $ property prop_setScope
+      it "Utils.Util.withStore" $ property prop_withStore
+      it "Utils.Util.getElems" $ property prop_getElems
