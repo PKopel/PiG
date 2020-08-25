@@ -103,7 +103,7 @@ printExprParser =
   Print <$> (reserved "print" >> parens (commaSep exprParser)) <?> "print"
 
 readExprParser :: Parser Expr
-readExprParser = reserved "read" >> return Read
+readExprParser = reserved "read()" >> return Read
 
 litValParser :: Parser Val
 litValParser =

@@ -6,7 +6,7 @@ guessing = () => {
         if (c = even(h - l)/2) == 0 then c = 1;
         x = l + c;
         print("is your number equal ", x, "?");
-        ans = read;
+        ans = read();
         if ans == "less" then h = x; 
         if ans == "more" then l = x;
     };
