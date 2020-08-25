@@ -103,11 +103,11 @@ printExprParser =
   Print <$> (reserved "print" >> parens (commaSep exprParser)) <?> "print"
 
 readExprParser :: Parser Expr
-readExprParser = reserved "read()" >> return Read
+readExprParser = reserved "read" >> string "()" >> return Read
 
 litValParser :: Parser Val
 litValParser =
-  listValParser
+  listValParser litValParser
     <|> (   algValParser
         <|> boolValParser
         <|> CharVal
@@ -115,6 +115,14 @@ litValParser =
         <|> StrVal
         <$> many1 anyChar
         )
+
+valParser :: Parser Val
+valParser =
+  listValParser valParser
+    <|> algValParser
+    <|> boolValParser
+    <|> strValParser
+    <|> charValParser
 
 algValParser :: Parser Val
 algValParser =
@@ -137,11 +145,11 @@ funValParser =
     <*> (reservedOp "=>" >> singleExprParser)
     <?> "function definition"
 
-listValParser :: Parser Val
-listValParser =
+listValParser :: Parser Val -> Parser Val
+listValParser vp =
   ListVal
     .   fromList
-    <$> (brackets . commaSep) listValParser
+    <$> (brackets . commaSep) vp
     <|> (reserved "null" >> return Null)
 
 listLitParser :: Parser Expr
@@ -207,6 +215,8 @@ listTerm =
   parens exprParser
     <|> try funAppParser
     <|> listLitParser
+    <|> Val
+    <$> valParser
     <|> Var
     <$> identifier
 
@@ -214,10 +224,9 @@ strTerm :: ParsecT String () Identity Expr
 strTerm =
   parens exprParser
     <|> try funAppParser
+    <|> listLitParser
     <|> Val
-    <$> strValParser
-    <|> Val
-    <$> charValParser
+    <$> valParser
     <|> Var
     <$> identifier
 
