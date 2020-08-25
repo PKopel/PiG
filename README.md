@@ -32,7 +32,8 @@ There are two build-in functions provided: `print(arg1,...,argn)` which prints a
 Build-in operators are:
 * `+`, `-`, `*`, `/` and `^` for numbers
 * `-`, `||`, `&&` for booleans
-* `<>`, `-<`, `>-` for lists (`>-` removes and returns first element, `-<` the last one)
+* `<>`, `-<`, `>-` for lists (`>-` removes and returns first element, `-<` the last one, `<>` concatenates second argument to the end of the first one, works with any type but results always in a list)
+* `><` for strings (attaches second argument at the end of the firs one, works with any type but results always in a string)
 
 Interpreter also provides five directives:
 * `:load "<file path>"` to load file
