@@ -158,9 +158,8 @@ instance Show Val where
   show (BoolVal False) = "false"
   show (StrVal  v    ) = v
   show (ListVal v    ) = '[' : intercalate ", " (toList $ show <$> v) ++ "]"
-  show (FunVal n v) =
-    '(' : intercalate ", " (show <$> n) ++ ")" ++ " => " ++ show v
-  show Null = "null"
+  show (FunVal n _) = '(' : intercalate ", " (show <$> n) ++ ")" ++ " => func"
+  show Null            = "null"
 
 type Var = String
 

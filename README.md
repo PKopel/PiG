@@ -10,7 +10,7 @@ Interpreter for a simple language.
 
 ## Language
 
-In PiG, everything is an expression. Allowed are:
+In PiG, everything is an expression:
 
 * literal values: 
     * `null`
