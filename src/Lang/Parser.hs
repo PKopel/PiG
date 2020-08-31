@@ -106,19 +106,11 @@ readExprParser :: Parser Expr
 readExprParser = reserved "read" >> string "()" >> return Read
 
 litValParser :: Parser Val
-litValParser =
-  listValParser litValParser
-    <|> (   algValParser
-        <|> boolValParser
-        <|> CharVal
-        <$> try (anyChar <* notFollowedBy anyChar)
-        <|> StrVal
-        <$> many1 anyChar
-        )
+litValParser = algValParser <|> StrVal <$> many1 anyChar
 
 valParser :: Parser Val
 valParser =
-  listValParser valParser
+  listValParser
     <|> algValParser
     <|> boolValParser
     <|> strValParser
@@ -145,11 +137,11 @@ funValParser =
     <*> (reservedOp "=>" >> singleExprParser)
     <?> "function definition"
 
-listValParser :: Parser Val -> Parser Val
-listValParser vp =
+listValParser :: Parser Val
+listValParser =
   ListVal
     .   fromList
-    <$> (brackets . commaSep) vp
+    <$> (brackets . commaSep) valParser
     <|> (reserved "null" >> return Null)
 
 listLitParser :: Parser Expr

@@ -27,7 +27,7 @@ In PiG, everything is an expression. Allowed are:
 * function application, in form `<name>(<arg1>,...,<argn>)`
 * expressions with build-in operators
 
-There are two build-in functions provided: `print(arg1,...,argn)` which prints all its arguments followed to stdout and starts a new line, and `read()`, which reads one literal value from stdin.
+There are two build-in functions provided: `print(arg1,...,argn)` which prints all its arguments followed to stdout and starts a new line, and `read()`, which reads one literal value (number or string) from stdin.
 
 Build-in operators are:
 * `+`, `-`, `*`, `/` and `^` for numbers

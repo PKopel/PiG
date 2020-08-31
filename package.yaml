@@ -1,14 +1,14 @@
-name:                PiG
-version:             0.10.2
-github:              PKopel/PiG
-license:             BSD3
-author:              Paweł Kopel
-maintainer:          pawel.kopel2@gmail.com
-copyright:           2020 Paweł Kopel
+name: PiG
+version: 0.10.3
+github: PKopel/PiG
+license: BSD3
+author: Paweł Kopel
+maintainer: pawel.kopel2@gmail.com
+copyright: 2020 Paweł Kopel
 
 extra-source-files:
-- README.md
-- ChangeLog.md
+  - README.md
+  - ChangeLog.md
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
@@ -17,53 +17,53 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on Github at <https://github.com/PKopel/PiG#readme>
+description: Please see the README on Github at <https://github.com/PKopel/PiG#readme>
 
 dependencies:
-- base >= 4.11 && < 10
-- rio >= 0.1.12.0
-- containers
-- mtl
-- parsec
-- haskeline
-- pretty-terminal
-- hspec
-- hspec-core
-- QuickCheck
+  - base >= 4.11 && < 10
+  - rio >= 0.1.12.0
+  - containers
+  - mtl
+  - parsec
+  - haskeline
+  - pretty-terminal
+  - hspec
+  - hspec-core
+  - QuickCheck
 
 ghc-options:
-- -Wall
-- -Wcompat
-- -Widentities
-- -Wincomplete-record-updates
-- -Wincomplete-uni-patterns
-- -Wpartial-fields
-- -Wredundant-constraints
+  - -Wall
+  - -Wcompat
+  - -Widentities
+  - -Wincomplete-record-updates
+  - -Wincomplete-uni-patterns
+  - -Wpartial-fields
+  - -Wredundant-constraints
 
 library:
   source-dirs: src
 
 executables:
   PiG:
-    main:                Main.hs
-    source-dirs:         app
+    main: Main.hs
+    source-dirs: app
     dependencies:
-    - PiG
-    - optparse-simple
+      - PiG
+      - optparse-simple
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
 
 tests:
   PiG-test:
-    main:                Spec.hs
-    source-dirs:         test
+    main: Spec.hs
+    source-dirs: test
     dependencies:
-    - PiG
-    - hspec
+      - PiG
+      - hspec
 
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
