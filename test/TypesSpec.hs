@@ -35,11 +35,11 @@ instance Arbitrary Val where
     , FunVal <$> arbitrary <*> arbitrary
     ]
 
-instance Arbitrary Store where
+instance Arbitrary Scopes where
   arbitrary = do
     g <- arbitrary
     l <- arbitrary
-    return Store { globalS = g, localS = l }
+    return Scopes { globalS = g, localS = l }
 
 instance Arbitrary Scope where
   arbitrary = elements [globalL, localL]

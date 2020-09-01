@@ -34,6 +34,22 @@ instance HasProcessContext App where
   processContextL =
     lens appProcessContext (\x y -> x { appProcessContext = y })
 
+class Container c where
+  (!?) :: c a -> Int -> Maybe a
+  (|>) :: c a -> a -> c a
+  (<|) :: a -> c a -> c a
+
+instance Container Seq.Seq where
+  (!?) = (Seq.!?)
+  (|>) = (Seq.|>)
+  (<|) = (Seq.<|)
+
+instance Container [] where
+  l !? i | length l < i = Nothing
+         | otherwise    = Just (l !! i)
+  (<|) = (:)
+  l |> a = l ++ [a]
+
 class UnAppToVal op where
   appUn :: op -> Val -> Val
 
@@ -166,18 +182,20 @@ type Var = String
 
 type Bindings = Map Var Val
 
-newtype Scope = Scope {scope :: Lens' Store Bindings}
+newtype Scope = Scope {scope :: Lens' Scopes Bindings}
 
 instance Show Scope where
   show _ = "scope"
 
-data Store = Store {globalS :: Bindings, localS :: Bindings} deriving (Show)
+data Scopes = Scopes {globalS :: Bindings, localS :: Bindings} deriving (Show)
 
-instance Eq Store where
+instance Eq Scopes where
   s1 == s2 = (globalS s1 == globalS s2) && (localS s1 == localS s2)
 
-emptyStore :: Store
-emptyStore = Store { globalS = mempty, localS = mempty }
+type Store = Either () Scopes
+
+emptyStore :: Scopes
+emptyStore = Scopes { globalS = mempty, localS = mempty }
 
 globalL :: Scope
 globalL = Scope $ lens globalS (\x y -> x { globalS = y })
