@@ -1,5 +1,11 @@
 # Changelog for PiG
 
+### 0.11.0
+* `:exit` directive working properly in files
+
+### 0.10.4
+* fixed using directives in files
+
 ### 0.10.3
 * simplified `read()`
 

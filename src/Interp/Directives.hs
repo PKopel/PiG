@@ -21,7 +21,7 @@ execFile file store = (lift . tryIOError) (parseFile file) >>= \case
   Right (Right prog) -> foldM (\str stmt -> execProg str stmt) store prog
 
 exec :: Drct -> Interp ()
-exec Exit  = return ()
+exec Exit  = putStore (Left ())
 exec Clear = withStore $ (over . scope) globalL (const empty)
 exec Help =
   printString

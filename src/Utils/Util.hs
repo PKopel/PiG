@@ -26,7 +26,6 @@ import           Control.Monad.State
 import           Data.List
 import qualified Data.Map                      as Map
 import           Data.Sequence                  ( Seq(..) )
-import qualified Data.Sequence                 as Seq
 import           RIO
 import           System.Console.Haskeline
 import           System.IO
@@ -48,33 +47,36 @@ setScope w' = do
   (_, s) <- get
   put (w', s)
 
-withStore :: (Store -> Store) -> Interp ()
-withStore f = getStore >>= putStore . f
+withStore :: (Scopes -> Scopes) -> Interp ()
+withStore f = getStore >>= \case
+  Right store -> putStore . Right . f $ store
+  _           -> return ()
 
 runWithStore :: Interp a -> Store -> InputT IO Store
-runWithStore interp store =
+runWithStore interp store@(Right _) =
   (runStateT . runInterp) interp (globalL, store) >>= return . snd . snd
+runWithStore _ _ = return (Left ())
 
-getElems :: (Foldable t) => Seq Val -> t Double -> Seq Val
+getElems :: (Foldable t, Container s, Monoid (s a)) => s a -> t Double -> s a
 getElems list = foldl'
-  (\acc v -> case (Seq.<|) <$> list Seq.!? (round v) <*> pure acc of
+  (\acc v -> case (<|) <$> list !? (round v) <*> pure acc of
     Nothing   -> acc
     Just acc' -> acc'
   )
-  Seq.empty
+  mempty
 
 isVar :: Expr -> (Bool, Var)
 isVar (Var x) = (True, x)
 isVar _       = (False, "")
 
 readVar :: Var -> Interp Val
-readVar x = do
-  store <- getStore
-  case Map.lookup x (view (scope localL) store) of
+readVar x = getStore >>= \case
+  Right store -> case Map.lookup x (view (scope localL) store) of
     Just v  -> return v
     Nothing -> case Map.lookup x (view (scope globalL) store) of
       Just v  -> return v
       Nothing -> return Null
+  _ -> return Null
 
 writeVar :: Var -> Val -> Interp Val
 writeVar x v = do

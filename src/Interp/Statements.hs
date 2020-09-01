@@ -44,32 +44,43 @@ eval (Assign x i e) = do
     _ -> writeVar x v
 
 evalFunApp :: [Expr] -> Val -> Interp Val
--- execute function of name n with arguments from vs
-evalFunApp vs (FunVal as body) = do
-  newLocals <-
-    Map.fromList <$> zipWithM (\a v -> eval v >>= return . (,) a) as vs
-  oldLocals <- getStore >>= return . view (scope localL)
-  oldScope  <- getScope
-  withStore $ (over . scope) localL (const newLocals) -- introducing local variables
-  setScope localL -- from now variables are declared in local scope
-  retVal <- eval body
-  setScope oldScope -- end of local scope
-  withStore $ (over . scope) localL (const oldLocals) -- removing local variables
-  return retVal
--- get elements from list of name n
+-- execute function with arguments from vs
+evalFunApp vs (FunVal as body) = getStore >>= \case
+  Right s -> do
+    let oldLocals = view (scope localL) s
+    newLocals <-
+      Map.fromList <$> zipWithM (\a v -> eval v >>= return . (,) a) as vs
+    oldScope <- getScope
+    withStore $ (over . scope) localL (const newLocals) -- introducing local variables
+    setScope localL -- from now variables are declared in local scope
+    retVal <- eval body
+    setScope oldScope -- end of local scope
+    withStore $ (over . scope) localL (const oldLocals) -- removing local variables
+    return retVal
+  _ -> return Null
+-- get elements from list
 evalFunApp vs (ListVal l) = do
-  evs <- foldM
-    (\acc v -> eval v >>= \case
-      AlgVal av -> return (av : acc)
-      _         -> return acc
-    )
-    []
-    vs
+  evs <- evalDoubleList vs
   case getElems l evs of
     v  :<|    Empty -> return v -- one argument in vs, result is a single value
     v@(_ :<| _)     -> return $ ListVal v -- more than one argument in vs, result is a list
     _               -> return Null
+-- get chars from string
+evalFunApp vs (StrVal l) = do
+  evs <- evalDoubleList vs
+  case getElems l evs of
+    [  v    ] -> return $ CharVal v -- one argument in vs, result is a single char
+    v@(_ : _) -> return $ StrVal v -- more than one argument in vs, result is a string
+    _         -> return Null
 evalFunApp _ _ = return Null
+
+evalDoubleList :: [Expr] -> Interp [Double]
+evalDoubleList = foldM
+  (\acc v -> eval v >>= \case
+    AlgVal av -> return (av : acc)
+    _         -> return acc
+  )
+  []
 
 evalWhile :: Expr -> Expr -> Seq Val -> Interp (Seq Val)
 evalWhile e s acc = eval e >>= \case

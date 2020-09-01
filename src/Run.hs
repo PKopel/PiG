@@ -20,16 +20,20 @@ run = do
   version  <- view $ to appVersion
   settings <- view $ to appSettings
   options  <- view $ to appOptions
-  logInfo
-    (  "We're inside the experimental PiG interpreter!\nversion: "
-    <> fromString (showVersion version)
-    <> "\ntype ':help' for more information "
-    )
-  liftIO $ runInputT settings $ store options >>= runLine Green
+  store    <- liftIO $ runInputT settings $ startStore options
+  case store of
+    Left  _ -> return ()
+    Right _ -> do
+      logInfo
+        (  "We're inside the experimental PiG interpreter!\nversion: "
+        <> fromString (showVersion version)
+        <> "\ntype ':help' for more information "
+        )
+      liftIO $ runInputT settings $ runLine Green store
  where
-  store ops = case optionsLoad ops of
-    []   -> return emptyStore
-    file -> runWithStore (exec (Load file)) emptyStore
+  startStore ops = case optionsLoad ops of
+    []   -> return $ Right emptyStore
+    file -> runWithStore (exec (Load file)) $ Right emptyStore
 
 runLine :: Color -> Store -> InputT IO ()
 runLine colour store = do

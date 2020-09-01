@@ -24,11 +24,12 @@ prop_getStore ss@(_, st) = monadicIO $ do
   assert (st == st')
 
 prop_getScope :: (Scope, Store) -> Property
-prop_getScope ss@(sc, st) = monadicIO $ do
+prop_getScope ss@(sc, Right st) = monadicIO $ do
   sc' <- interpToProp getScope ss
   let v  = view (scope sc) st
       v' = view (scope sc') st
   assert (v == v')
+prop_getScope _ = property True
 
 prop_putStore :: (Scope, Store) -> Store -> Property
 prop_putStore ss st = monadicIO $ do
@@ -36,11 +37,12 @@ prop_putStore ss st = monadicIO $ do
   assert (st == st')
 
 prop_setScope :: (Scope, Store) -> Scope -> Property
-prop_setScope ss@(_, st) sc = monadicIO $ do
+prop_setScope ss@(_, Right st) sc = monadicIO $ do
   sc' <- interpToProp (setScope sc >> getScope) ss
   let v  = view (scope sc) st
       v' = view (scope sc') st
   assert (v == v')
+prop_setScope _ _ = property True
 
 prop_withStore :: (Scope, Store) -> Property
 prop_withStore ss@(_, st) = monadicIO $ do
