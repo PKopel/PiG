@@ -21,4 +21,6 @@ even = (a) => {
     if x > a then x - 2 else x;
 };
 
-guessing()
+guessing();
+
+:exit

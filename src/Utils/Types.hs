@@ -82,7 +82,7 @@ instance BinAppToVal (Seq.Seq Val -> Seq.Seq Val -> Seq.Seq Val) where
     toSeq (ListVal v) = v
     toSeq v           = Seq.singleton v
 
-data Prog = Stmt Expr | Drct Drct
+data Prog = Stmt Expr | Drct Drct deriving (Show)
 
 data Drct
   = Exit
@@ -90,6 +90,7 @@ data Drct
   | Help
   | Rm Var
   | Load FilePath
+  deriving (Show)
 
 data Expr
   = Var Var

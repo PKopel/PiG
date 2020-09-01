@@ -23,7 +23,7 @@ parseProg p = case parse progParser "PiG" p of
   Right prog -> Right prog
 
 parseFile :: FilePath -> IO (Either String [Prog])
-parseFile f = parseFromFile (sepEndBy1 progParser semi <* eof) f >>= \case
+parseFile f = parseFromFile (many1 progParser <* eof) f >>= \case
   Left  err  -> return . Left $ show err
   Right prog -> return $ Right prog
 
@@ -33,7 +33,7 @@ parseLitVal s = case parse litValParser "PiG" s of
   Right lit -> Right lit
 
 progParser :: Parser Prog
-progParser = whiteSpace >> (Stmt <$> seqExprParser <|> Drct <$> drctParser)
+progParser = whiteSpace *> (Drct <$> drctParser <|> Stmt <$> seqExprParser)
 
 endParser :: ParsecT String u Identity ()
 endParser =
@@ -56,13 +56,13 @@ last b = b <* endParser
 
 drctParser :: Parser Drct
 drctParser =
-  try (last $ reserved ":clear" >> return Clear)
-    <|> try (last $ reserved ":exit" >> return Exit)
-    <|> try (last $ reserved ":help" >> return Help)
+  try (last $ reserved ":clear" *> return Clear)
+    <|> try (last $ reserved ":exit" *> return Exit)
+    <|> try (last $ reserved ":help" *> return Help)
     <|> Rm
-    <$> try (last $ reserved ":rm" >> identifier)
+    <$> try (last $ reserved ":rm" *> identifier)
     <|> Load
-    <$> try (last $ reserved ":load" >> stringLiteral)
+    <$> try (last $ reserved ":load" *> stringLiteral)
 
 exprParser :: Parser Expr
 exprParser =
@@ -86,24 +86,24 @@ singleExprParser = braces seqExprParser <|> try printExprParser <|> exprParser
 ifExprParser :: Parser Expr
 ifExprParser =
   If
-    <$> (reserved "if" >> exprParser)
-    <*> (reserved "then" >> singleExprParser)
-    <*> option (Val Null) (reserved "else" >> singleExprParser)
+    <$> (reserved "if" *> exprParser)
+    <*> (reserved "then" *> singleExprParser)
+    <*> option (Val Null) (reserved "else" *> singleExprParser)
     <?> "if"
 
 whileExprParser :: Parser Expr
 whileExprParser =
   While
-    <$> (reserved "while" >> exprParser)
-    <*> (reserved "do" >> singleExprParser)
+    <$> (reserved "while" *> exprParser)
+    <*> (reserved "do" *> singleExprParser)
     <?> "while"
 
 printExprParser :: Parser Expr
 printExprParser =
-  Print <$> (reserved "print" >> parens (commaSep exprParser)) <?> "print"
+  Print <$> (reserved "print" *> parens (commaSep exprParser)) <?> "print"
 
 readExprParser :: Parser Expr
-readExprParser = reserved "read" >> string "()" >> return Read
+readExprParser = reserved "read" *> string "()" *> return Read
 
 litValParser :: Parser Val
 litValParser = algValParser <|> StrVal <$> many1 anyChar
@@ -120,21 +120,21 @@ algValParser :: Parser Val
 algValParser =
   AlgVal
     <$> (try double <|> fromInteger <$> integer)
-    <|> (reserved "null" >> return Null)
+    <|> (reserved "null" *> return Null)
 
 boolValParser :: Parser Val
 boolValParser =
   BoolVal
-    <$> (   try (reserved "true" >> return True)
-        <|> try (reserved "false" >> return False)
+    <$> (   try (reserved "true" *> return True)
+        <|> try (reserved "false" *> return False)
         )
-    <|> (reserved "null" >> return Null)
+    <|> (reserved "null" *> return Null)
 
 funValParser :: Parser Val
 funValParser =
   FunVal
     <$> parens (commaSep identifier)
-    <*> (reservedOp "=>" >> singleExprParser)
+    <*> (reservedOp "=>" *> singleExprParser)
     <?> "function definition"
 
 listValParser :: Parser Val
@@ -142,13 +142,13 @@ listValParser =
   ListVal
     .   fromList
     <$> (brackets . commaSep) valParser
-    <|> (reserved "null" >> return Null)
+    <|> (reserved "null" *> return Null)
 
 listLitParser :: Parser Expr
 listLitParser =
   ListLiteral
     <$> (brackets . commaSep) exprParser
-    <|> (reserved "null" >> return (Val Null))
+    <|> (reserved "null" *> return (Val Null))
 
 charValParser :: Parser Val
 charValParser = CharVal <$> charLiteral
@@ -184,7 +184,7 @@ assignExprParser =
   Assign
     <$> identifier
     <*> option (Val Null) (parens exprParser)
-    <*> (reservedOp "=" >> exprParser)
+    <*> (reservedOp "=" *> exprParser)
     <?> "assignment"
 
 relExprParser :: Parser Expr
@@ -245,7 +245,7 @@ relTerm = try boolTerm <|> try algTerm <|> try strTerm <|> listTerm
 
 relation :: ParsecT String u Identity (Val -> Val -> Bool)
 relation =
-  (reservedOp ">" >> return (>))
-    <|> (reservedOp "<" >> return (<))
-    <|> (reservedOp "==" >> return (==))
-    <|> (reservedOp "!=" >> return (/=))
+  (reservedOp ">" *> return (>))
+    <|> (reservedOp "<" *> return (<))
+    <|> (reservedOp "==" *> return (==))
+    <|> (reservedOp "!=" *> return (/=))

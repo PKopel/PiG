@@ -17,15 +17,16 @@ import           System.Console.Pretty
 
 run :: RIO App ()
 run = do
-  version  <- view $ to appVersion
-  settings <- view $ to appSettings
-  options  <- view $ to appOptions
+  version    <- view $ to appVersion
+  settings   <- view $ to appSettings
+  options    <- view $ to appOptions
+  startStore <- liftIO $ runInputT settings $ store options
   logInfo
     (  "We're inside the experimental PiG interpreter!\nversion: "
     <> fromString (showVersion version)
     <> "\ntype ':help' for more information "
     )
-  liftIO $ runInputT settings $ store options >>= runLine Green
+  liftIO $ runInputT settings $ runLine Green startStore
  where
   store ops = case optionsLoad ops of
     []   -> return emptyStore
