@@ -51,6 +51,8 @@ See [examples](https://github.com/PKopel/PiG/tree/master/examples) for more info
 * **[Parsec](https://hackage.haskell.org/package/parsec)**
 * **[Haskeline](https://hackage.haskell.org/package/haskeline)**
 * **[pretty-terminal](https://github.com/loganmac/pretty-terminal)**
+* **[hspec](https://hspec.github.io)**
+* **[QuickCheck](https://hackage.haskell.org/package/QuickCheck)**
 
 ### Author
 
