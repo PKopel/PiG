@@ -2,11 +2,16 @@
 
 module Lang.Lexer where
 
-import           Control.Monad.Identity
 import           Import
 import           Text.Parsec
 import           Text.ParserCombinators.Parsec.Expr
+                                                ( Assoc(AssocLeft)
+                                                , Operator(Infix, Prefix)
+                                                )
 import           Text.ParserCombinators.Parsec.Language
+                                                ( GenLanguageDef
+                                                , emptyDef
+                                                )
 import           Text.ParserCombinators.Parsec.Token
                                                 ( GenTokenParser )
 import qualified Text.ParserCombinators.Parsec.Token

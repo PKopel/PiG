@@ -7,13 +7,20 @@ module Run
   )
 where
 
-import           Data.Version
+import           Data.Version                   ( showVersion )
 import           Import
-import           Interp.Directives
-import           Interp.Statements
-import           Lang.Parser
-import           System.Console.Haskeline
-import           System.Console.Pretty
+import           Interp.Directives              ( exec )
+import           Interp.Statements              ( eval )
+import           Lang.Parser                    ( parseProg )
+import           System.Console.Haskeline       ( InputT
+                                                , getInputLine
+                                                , outputStrLn
+                                                , runInputT
+                                                )
+import           System.Console.Pretty          ( Color(Green, Red)
+                                                , Pretty(color, style)
+                                                , Style(Faint)
+                                                )
 
 run :: RIO App ()
 run = do

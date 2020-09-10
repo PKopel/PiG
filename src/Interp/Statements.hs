@@ -4,12 +4,11 @@
 
 module Interp.Statements where
 
-import           Control.Monad
 import qualified Data.Map                      as Map
 import           Data.Sequence                  ( Seq(..) )
 import qualified Data.Sequence                 as Seq
 import           Import
-import           Lang.Parser
+import           Lang.Parser                    ( parseLitVal )
 
 eval :: Expr -> Interp Val
 eval (Val n          ) = return n

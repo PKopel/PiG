@@ -22,13 +22,17 @@ module Utils.Util
   )
 where
 
-import           Control.Monad.State
-import           Data.List
+import           Control.Monad.State            ( StateT(runStateT)
+                                                , get
+                                                , put
+                                                )
 import qualified Data.Map                      as Map
 import           Data.Sequence                  ( Seq(..) )
 import           RIO
-import           System.Console.Haskeline
-import           System.IO
+import           System.Console.Haskeline       ( InputT
+                                                , outputStr
+                                                )
+import           System.IO                      ( getLine )
 import           Utils.Types
 
 getStore :: Interp Store

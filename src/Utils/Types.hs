@@ -6,13 +6,21 @@
 
 module Utils.Types where
 
-import           Control.Monad.State
-import           Data.List
+import           Control.Monad.State            ( MonadState
+                                                , StateT(StateT)
+                                                )
+import           Data.List                      ( intercalate
+                                                , (!!)
+                                                )
 import qualified Data.Sequence                 as Seq
 import           Data.Version                   ( Version )
 import           RIO
-import           RIO.Process
-import           System.Console.Haskeline
+import           RIO.Process                    ( HasProcessContext(..)
+                                                , ProcessContext
+                                                )
+import           System.Console.Haskeline       ( InputT
+                                                , Settings
+                                                )
 
 data Options = Options
   { optionsVerbose :: !Bool,

@@ -5,8 +5,7 @@
 
 module Lang.Parser where
 
-import           Control.Monad
-import           Data.Sequence
+import           Data.Sequence                  ( fromList )
 import           Import                  hiding ( many
                                                 , optional
                                                 , try
@@ -14,8 +13,11 @@ import           Import                  hiding ( many
                                                 )
 import           Lang.Lexer
 import           Text.Parsec
-import           Text.Parsec.String
+import           Text.Parsec.String             ( Parser
+                                                , parseFromFile
+                                                )
 import           Text.ParserCombinators.Parsec.Expr
+                                                ( buildExpressionParser )
 
 parseProg :: String -> Either String Prog
 parseProg p = case parse progParser "PiG" p of

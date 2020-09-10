@@ -5,13 +5,24 @@ module UtilSpec
   )
 where
 
-import           Control.Monad.State
+import           Control.Monad.State            ( StateT(runStateT) )
 import           Import                  hiding ( assert )
-import           System.Console.Haskeline
-import           Test.Hspec
+import           System.Console.Haskeline       ( defaultSettings
+                                                , runInputT
+                                                )
+import           Test.Hspec                     ( Spec
+                                                , describe
+                                                , it
+                                                )
 import           Test.Hspec.Core.QuickCheck     ( modifyMaxSuccess )
-import           Test.QuickCheck
-import           Test.QuickCheck.Monadic
+import           Test.QuickCheck                ( Property
+                                                , Testable(property)
+                                                )
+import           Test.QuickCheck.Monadic        ( PropertyM
+                                                , assert
+                                                , monadicIO
+                                                , run
+                                                )
 import           TypesSpec                      ( )
 
 interpToProp :: Interp a -> (Scope, Store) -> PropertyM IO a

@@ -3,12 +3,16 @@
 
 module Interp.Directives where
 
-import           Data.Map
-import           Import                  hiding ( try )
-import           Interp.Statements
-import           Lang.Parser
-import           System.Console.Haskeline
-import           System.IO.Error
+import           Data.Map                       ( delete
+                                                , empty
+                                                )
+import           Import
+import           Interp.Statements              ( eval )
+import           Lang.Parser                    ( parseFile )
+import           System.Console.Haskeline       ( InputT
+                                                , outputStrLn
+                                                )
+import           System.IO.Error                ( tryIOError )
 
 execProg :: Store -> Prog -> InputT IO Store
 execProg store (Stmt p) = runWithStore (eval p) store
