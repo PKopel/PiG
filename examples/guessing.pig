@@ -7,10 +7,10 @@ guessing = () => {
         x = l + c;
         print("is your number equal ", x, "?");
         ans = read();
-        if ans == "less" do h = x; 
-        if ans == "more" do l = x;
+        if ans == "less" do h = x
+        elif ans == "more" do l = x
+        elif ans == "yes" do print("your number is ", x , "!");
     };
-    if ans == "yes" do print("your number is ", x , "!");
 };
 
 even = (a) => {
