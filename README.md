@@ -22,7 +22,7 @@ In PiG, everything is an expression:
 * assignments: `<name> = <expr>`, where name consists of alphanumeric characters, or `<name>(<number>) = <expr>` to assign value to a specific element of a list. Value of assignment is the value of expression on the right
 * sequence of expressions, separated and optionally ended by `;`. When sequence is enclosed by braces (`{...}`), it is treated as a single expression (sequences can be nested, like `{ <expr1>; { <expr2>; <expr3> }; }`). Value of a sequence is the value of the last expression in it
 * while loop: `while <expr1> do <expr2>`. Both `<expr1>` and `<expr2>` must be a single expressions, but they don't have to be enclosed in braces. `<expr2>` will be executed as long as `<expr1>` is a `true`, non-zero number, non-empty list or a non-empty string. Value of a while expression is a list of values of `<expr2>` (for example `x = 3; while x > 0 do x = x - 1` will result in `[2,1,0]`)
-* if: `if <expr1> then <expr2> else <expr3>` (`else` is optional). Value of "if" is `<expr2>` if `<expr1>` is a `true`, non-zero number, non-empty list or a non-empty string, otherwise `<expr3>` or `null` if no `else` is specified.
+* if: `if <expr1> do <expr2> else <expr3>` (`else` is optional). Value of "if" is `<expr2>` if `<expr1>` is a `true`, non-zero number, non-empty list or a non-empty string, otherwise `<expr3>` or `null` if no `else` is specified.
 * a variable name, as in assignment. If the variable is bound to a list, `<name>(<num1>,...,<numn>)` syntax can be used to get the value at specified index or a list of them.
 * function application, in form `<name>(<arg1>,...,<argn>)`
 * expressions with build-in operators

@@ -8,12 +8,12 @@ length = (a) => {
 };
 
 quick = (a) => {
-    if a then {
+    if a do {
         p = >- a;
         ls = gt = [];
         while a do {
             c = >- a;
-            if c > p then gt = gt <> c else ls = ls <> c;
+            if c > p do gt = gt <> c else ls = ls <> c;
         };
         x = quick(ls) <> p <> quick(gt); 
     } else x = [];
@@ -27,7 +27,7 @@ bubble = (a) => {
         j = 0;
         while j < (n-i-1) do {
             p = a(j);
-            if p > a(j+1) then {
+            if p > a(j+1) do {
                 a(j) = a(j+1);
                 a(j+1) = p;
             };
