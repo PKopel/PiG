@@ -30,13 +30,14 @@ eval (Print (e : es)) = case e of
     other -> printVal other >> eval (Print es)
   Print _ -> eval e >> eval (Print es)
   _       -> eval e >>= printVal >> eval (Print es)
-eval (Seq []      ) = return Null
-eval (Seq [s     ]) = eval s
-eval (Seq (s : ss)) = eval s >> eval (Seq ss)
-eval (If c e1 e2  ) = eval c >>= \case
-  AlgVal  v -> if v /= 0 then eval e1 else eval e2
-  BoolVal v -> if v then eval e1 else eval e2
-  ListVal v -> if not (Seq.null v) then eval e1 else eval e2
+eval (Seq []             ) = return Null
+eval (Seq [s     ]       ) = eval s
+eval (Seq (s : ss)       ) = eval s >> eval (Seq ss)
+eval (If []            e2) = eval e2
+eval (If ((c, e1) : t) e2) = eval c >>= \case
+  AlgVal  v -> if v /= 0 then eval e1 else eval (If t e2)
+  BoolVal v -> if v then eval e1 else eval (If t e2)
+  ListVal v -> if not (Seq.null v) then eval e1 else eval (If t e2)
   _         -> return Null
 eval (While e s   ) = ListVal <$> evalWhile e s Empty
 eval (Assign x i e) = do

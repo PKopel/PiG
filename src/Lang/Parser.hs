@@ -88,10 +88,12 @@ singleExprParser = braces seqExprParser <|> try printExprParser <|> exprParser
 ifExprParser :: Parser Expr
 ifExprParser =
   If
-    <$> (reserved "if" *> exprParser)
-    <*> (reserved "do" *> singleExprParser)
+    <$> ((:) <$> condition "if" <*> many (condition "elif"))
     <*> option (Val Null) (reserved "else" *> singleExprParser)
     <?> "if"
+ where
+  condition r =
+    (,) <$> (reserved r *> exprParser) <*> (reserved "do" *> singleExprParser)
 
 whileExprParser :: Parser Expr
 whileExprParser =
