@@ -47,7 +47,7 @@ endParser =
        <|> skipMany1 (char '}')
        <|> skipMany1 (char ']')
        <|> skipMany1 (char ',')
-       <|> skipMany1 (reserved "then")
+       <|> skipMany1 (reserved "elif")
        <|> skipMany1 (reserved "else")
        <|> skipMany1 (reserved "do")
        <|> eof
@@ -89,7 +89,7 @@ ifExprParser :: Parser Expr
 ifExprParser =
   If
     <$> (reserved "if" *> exprParser)
-    <*> (reserved "then" *> singleExprParser)
+    <*> (reserved "do" *> singleExprParser)
     <*> option (Val Null) (reserved "else" *> singleExprParser)
     <?> "if"
 

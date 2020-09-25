@@ -30,7 +30,7 @@ languageDef = emptyDef { Token.commentStart    = "/*"
 reservedNms :: [String]
 reservedNms =
   [ "if"
-  , "then"
+  , "elif"
   , "else"
   , "while"
   , "do"
