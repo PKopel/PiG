@@ -1,5 +1,12 @@
 # Changelog for PiG
 
+### 0.12.1
+* `print` doesn't add '\n' at the end of line
+* empty line in interpreter doesn't cause error
+
+### 0.12.0
+* interpreter doesn't print nulls
+
 ### 0.11.0
 * `:exit` directive working properly in files
 

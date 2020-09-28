@@ -20,7 +20,8 @@ import           Text.ParserCombinators.Parsec.Expr
                                                 ( buildExpressionParser )
 
 parseProg :: String -> Either String Prog
-parseProg p = case parse progParser "PiG" p of
+parseProg [] = Right . Stmt . Val $ Null
+parseProg p  = case parse progParser "PiG" p of
   Left  err  -> Left $ show err
   Right prog -> Right prog
 

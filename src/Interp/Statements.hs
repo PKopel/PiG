@@ -23,7 +23,7 @@ eval (FunApp n vs   ) = readVar n >>= evalFunApp vs
 eval Read             = readVal >>= return . parseLitVal >>= \case
   Left  msg -> printString msg >> return Null
   Right val -> return val
-eval (Print []      ) = printString "\n" >> return Null
+eval (Print []      ) = return Null
 eval (Print (e : es)) = case e of
   Seq _ -> eval e >>= \case
     Null  -> eval (Print es)
