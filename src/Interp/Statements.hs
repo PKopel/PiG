@@ -27,7 +27,7 @@ eval (Print []      ) = return Null
 eval (Print (e : es)) = case e of
   Seq _ -> eval e >>= \case
     Null  -> eval (Print es)
-    other -> printVal other >> eval (Print es)
+    other -> printVal other >> printString "\n" >> eval (Print es)
   Print _ -> eval e >> eval (Print es)
   _       -> eval e >>= printVal >> eval (Print es)
 eval (Seq []             ) = return Null
