@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 03fcd5c09f7c3cfb7429d1726ca87c7d3276fbeb6dcd4bc264cfb64667471a24
+-- hash: 9fc77184974cdd1eb472a949b17e999869e7bb863d1c13a09b149e2cb4d5068f
 
 name:           PiG
 version:        0.12.1
@@ -53,7 +53,7 @@ library
     , rio >=0.1.12.0
   default-language: Haskell2010
 
-executable PiG
+executable pig
   main-is: Main.hs
   other-modules:
       Paths_PiG
@@ -75,7 +75,7 @@ executable PiG
     , rio >=0.1.12.0
   default-language: Haskell2010
 
-test-suite PiG-test
+test-suite pig-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:

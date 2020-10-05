@@ -44,7 +44,7 @@ library:
   source-dirs: src
 
 executables:
-  PiG:
+  pig:
     main: Main.hs
     source-dirs: app
     dependencies:
@@ -56,7 +56,7 @@ executables:
       - -with-rtsopts=-N
 
 tests:
-  PiG-test:
+  pig-test:
     main: Spec.hs
     source-dirs: test
     dependencies:

@@ -4,9 +4,9 @@ Interpreter for a simple language.
 
 ## Usage  
 
-* Run `stack exec -- PiG` to start interpreter
-* With `stack exec -- PiG -f|--file <file path>` to start interpreter with <file> loaded.
-* With `stack exec -- PiG --help` to see more info.
+* Run `stack exec pig` to start interpreter
+* With `stack exec pig -- -f|--file <file path>` to start interpreter with <file> loaded.
+* With `stack exec pig -- --help` to see more info.
 
 ## Language
 

@@ -19,7 +19,7 @@ instance Arbitrary Expr where
     , ListLiteral <$> arbitrary
     , FunApp <$> arbitrary <*> arbitrary
     , While <$> arbitrary <*> arbitrary
-    , If <$> arbitrary <*> arbitrary <*> arbitrary
+    , If <$> arbitrary <*> arbitrary
     , Seq <$> arbitrary
     , Print <$> arbitrary
     ]
