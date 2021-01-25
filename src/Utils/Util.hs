@@ -36,10 +36,10 @@ import           System.IO                      ( getLine )
 import           Utils.Types
 
 getStore :: Interp Store
-getStore = get >>= return . snd
+getStore = get <&> snd
 
 getScope :: Interp Scope
-getScope = get >>= return . fst
+getScope = get <&> fst
 
 putStore :: Store -> Interp ()
 putStore s' = do
@@ -58,15 +58,12 @@ withStore f = getStore >>= \case
 
 runWithStore :: Interp a -> Store -> InputT IO Store
 runWithStore interp store@(Right _) =
-  (runStateT . runInterp) interp (globalL, store) >>= return . snd . snd
+  (runStateT . runInterp) interp (globalL, store) <&> snd . snd
 runWithStore _ _ = return (Left ())
 
 getElems :: (Foldable t, Container s, Monoid (s a)) => s a -> t Double -> s a
 getElems list = foldl'
-  (\acc v -> case (<|) <$> list !? (round v) <*> pure acc of
-    Nothing   -> acc
-    Just acc' -> acc'
-  )
+  (\acc v -> fromMaybe acc ((<|) <$> list !? round v <*> pure acc))
   mempty
 
 isVar :: Expr -> (Bool, Var)

@@ -151,21 +151,21 @@ instance Ord Expr where
   _        <= _        = False
 
 instance Show Expr where
+  show Read           = "Read"
+  show (Print b     ) = "Print" ++ '(' : intercalate ", " (show <$> b) ++ ")"
   show (Var v       ) = "Var " <> v
   show (Val v       ) = "Val " <> show v
-  show (Assign a b c) = intercalate " " ["Assign", a, show b, show c]
+  show (Assign a b c) = unwords ["Assign", a, show b, show c]
+  show (While a b   ) = unwords ["While", show a, show b]
+  show (Seq v       ) = "Seq " ++ '{' : intercalate "; " (show <$> v) ++ "}"
+  show (Binary _ a b) = unwords ["Binary", show a, show b]
+  show (Unary _ a   ) = "Unary " <> show a
+  show (If a b) =
+    unwords ["If", intercalate " elif " (show <$> a), "else", show b]
   show (ListLiteral v) =
     "ListLiteral" ++ '[' : intercalate ", " (show <$> v) ++ "]"
   show (FunApp a b) =
     "FunApp " <> a ++ '(' : intercalate ", " (show <$> b) ++ ")"
-  show (Print b  ) = "Print" ++ '(' : intercalate ", " (show <$> b) ++ ")"
-  show (While a b) = intercalate " " ["While", show a, show b]
-  show (If a b) =
-    intercalate " " ["If", intercalate " elif " (show <$> a), "else", show b]
-  show (Seq v)        = "Seq " ++ '{' : intercalate "; " (show <$> v) ++ "}"
-  show Read           = "Read"
-  show (Binary _ a b) = intercalate " " ["Binary", show a, show b]
-  show (Unary _ a   ) = "Unary " <> show a
 
 data Val
   = AlgVal Double

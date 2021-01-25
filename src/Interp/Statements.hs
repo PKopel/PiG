@@ -13,14 +13,14 @@ import           Lang.Parser                    ( parseLitVal )
 eval :: Expr -> Interp Val
 eval (Val n          ) = return n
 eval (Var x          ) = readVar x
-eval (Binary op e1 e2) = (appBin op) <$> eval e1 <*> eval e2
-eval (Unary op e     ) = (appUn op) <$> eval e >>= \case
+eval (Binary op e1 e2) = appBin op <$> eval e1 <*> eval e2
+eval (Unary op e     ) = appUn op <$> eval e >>= \case
   ListVal (h :<| t :<| Empty) ->
-    let (iv, x) = isVar e in when iv (writeVar x t >> return ()) >> return h
+    let (iv, x) = isVar e in when iv (void (writeVar x t)) >> return h
   other -> return other
 eval (ListLiteral es) = ListVal . Seq.fromList <$> mapM eval es
 eval (FunApp n vs   ) = readVar n >>= evalFunApp vs
-eval Read             = readVal >>= return . parseLitVal >>= \case
+eval Read             = readVal <&> parseLitVal >>= \case
   Left  msg -> printString msg >> return Null
   Right val -> return val
 eval (Print []      ) = return Null
@@ -53,9 +53,8 @@ evalFunApp :: [Expr] -> Val -> Interp Val
 evalFunApp vs (FunVal as body) = getStore >>= \case
   Right s -> do
     let oldLocals = view (scope localL) s
-    newLocals <-
-      Map.fromList <$> zipWithM (\a v -> eval v >>= return . (,) a) as vs
-    oldScope <- getScope
+    newLocals <- Map.fromList <$> zipWithM (\a v -> eval v <&> (,) a) as vs
+    oldScope  <- getScope
     withStore $ (over . scope) localL (const newLocals) -- introducing local variables
     setScope localL -- from now variables are declared in local scope
     retVal <- eval body

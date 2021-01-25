@@ -1,5 +1,8 @@
 # Changelog for PiG
 
+### 0.12.2
+* small refactorization
+
 ### 0.12.1
 * `print` doesn't add '\n' at the end of line
 * empty line in interpreter doesn't cause error

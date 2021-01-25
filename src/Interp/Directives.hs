@@ -22,7 +22,7 @@ execFile :: FilePath -> Store -> InputT IO Store
 execFile file store = (lift . tryIOError) (parseFile file) >>= \case
   Left  err          -> outputStrLn (show err) >> return store
   Right (Left  err ) -> outputStrLn err >> return store
-  Right (Right prog) -> foldM (\str stmt -> execProg str stmt) store prog
+  Right (Right prog) -> foldM execProg store prog
 
 exec :: Drct -> Interp ()
 exec Exit  = putStore (Left ())

@@ -59,9 +59,9 @@ last b = b <* endParser
 
 drctParser :: Parser Drct
 drctParser =
-  try (last $ reserved ":clear" *> return Clear)
-    <|> try (last $ reserved ":exit" *> return Exit)
-    <|> try (last $ reserved ":help" *> return Help)
+  try (last $ reserved ":clear" $> Clear)
+    <|> try (last $ reserved ":exit" $> Exit)
+    <|> try (last $ reserved ":help" $> Help)
     <|> Rm
     <$> try (last $ reserved ":rm" *> identifier)
     <|> Load
@@ -81,7 +81,7 @@ exprParser =
     <|> try readExprParser
 
 seqExprParser :: Parser Expr
-seqExprParser = Seq <$> (sepEndBy1 singleExprParser (semi <|> many1 endOfLine))
+seqExprParser = Seq <$> sepEndBy1 singleExprParser (semi <|> many1 endOfLine)
 
 singleExprParser :: Parser Expr
 singleExprParser = braces seqExprParser <|> try printExprParser <|> exprParser
@@ -108,7 +108,7 @@ printExprParser =
   Print <$> (reserved "print" *> parens (commaSep exprParser)) <?> "print"
 
 readExprParser :: Parser Expr
-readExprParser = reserved "read" *> string "()" *> return Read
+readExprParser = reserved "read" *> string "()" $> Read
 
 litValParser :: Parser Val
 litValParser = algValParser <|> StrVal <$> many1 anyChar
@@ -125,15 +125,13 @@ algValParser :: Parser Val
 algValParser =
   AlgVal
     <$> (try double <|> fromInteger <$> integer)
-    <|> (reserved "null" *> return Null)
+    <|> (reserved "null" $> Null)
 
 boolValParser :: Parser Val
 boolValParser =
   BoolVal
-    <$> (   try (reserved "true" *> return True)
-        <|> try (reserved "false" *> return False)
-        )
-    <|> (reserved "null" *> return Null)
+    <$> (try (reserved "true" $> True) <|> try (reserved "false" $> False))
+    <|> (reserved "null" $> Null)
 
 funValParser :: Parser Val
 funValParser =
@@ -147,13 +145,13 @@ listValParser =
   ListVal
     .   fromList
     <$> (brackets . commaSep) valParser
-    <|> (reserved "null" *> return Null)
+    <|> (reserved "null" $> Null)
 
 listLitParser :: Parser Expr
 listLitParser =
   ListLiteral
     <$> (brackets . commaSep) exprParser
-    <|> (reserved "null" *> return (Val Null))
+    <|> (reserved "null" $> Val Null)
 
 charValParser :: Parser Val
 charValParser = CharVal <$> charLiteral
@@ -250,7 +248,7 @@ relTerm = try boolTerm <|> try algTerm <|> try strTerm <|> listTerm
 
 relation :: ParsecT String u Identity (Val -> Val -> Bool)
 relation =
-  (reservedOp ">" *> return (>))
-    <|> (reservedOp "<" *> return (<))
-    <|> (reservedOp "==" *> return (==))
-    <|> (reservedOp "!=" *> return (/=))
+  (reservedOp ">" $> (>))
+    <|> (reservedOp "<" $> (<))
+    <|> (reservedOp "==" $> (==))
+    <|> (reservedOp "!=" $> (/=))
