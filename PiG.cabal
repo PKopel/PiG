@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e749a106d3effe72a12b131a371f7c92f27620565209b34cec37410770a778eb
+-- hash: db443e532d2bbb315b81b9ed9fb31220c0f6c282b233d7f49e5e46c0a83dcbf7
 
 name:           PiG
 version:        0.12.2
@@ -31,7 +31,10 @@ library
       Interp.Directives
       Interp.Statements
       Lang.Lexer
+      Lang.Lexer
       Lang.Parser
+      Lang.Parser
+      Lang.Tokens
       Run
       Utils.Types
       Utils.Util
@@ -42,6 +45,7 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints
   build-depends:
       QuickCheck
+    , array
     , base >=4.11 && <10
     , containers
     , haskeline
@@ -63,6 +67,7 @@ executable pig
   build-depends:
       PiG
     , QuickCheck
+    , array
     , base >=4.11 && <10
     , containers
     , haskeline
@@ -88,6 +93,7 @@ test-suite pig-test
   build-depends:
       PiG
     , QuickCheck
+    , array
     , base >=4.11 && <10
     , containers
     , haskeline

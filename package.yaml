@@ -24,6 +24,7 @@ dependencies:
   - rio >= 0.1.12.0
   - containers
   - mtl
+  - array
   - parsec
   - haskeline
   - pretty-terminal
