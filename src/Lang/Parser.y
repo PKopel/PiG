@@ -1,14 +1,15 @@
 {
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Lang.Parser where
 
 import Lang.Tokens
 import qualified Lang.Lexer as L
-import Control.Monad.Error
-import qualified Data.Sequence                 as Seq
+import Control.Monad.Except
+import qualified Data.Sequence as Seq
+import Import               
 }
 
 %name pig
-%lexer{L.lexer}{TEOF}
 %monad { Except String } { (>>=) } { return }
 %tokentype{Token}
 %error{parseError}
@@ -36,7 +37,7 @@ import qualified Data.Sequence                 as Seq
     '<'             { TLt }
     '>'             { TGt }
     '=='            { TEq }
-    '!='            { TNeq }
+    '!='            { TNEq }
     '<>'            { TLtGt }
     '><'            { TGtLt }
     '-<'            { TRFork }
@@ -99,7 +100,7 @@ Expr    : Atom                          { $1 }
         | Expr '>' Expr                 { Binary (>) $1 $3 }
         | '-<' Expr                     { Unary (-<) $2}
         | '>-' Expr                     { Unary (>-) $2}
-        | Expr '<>' Expr                { Binary ((<>) :: Seq Val -> Seq Val -> Seq Val) $1 $3 }
+        | Expr '<>' Expr                { Binary ((<>) :: Seq.Seq Val -> Seq.Seq Val -> Seq.Seq Val) $1 $3 }
         | Expr '><' Expr                { Binary ((<>) :: String -> String -> String) $1 $3 }
 
 If      : if Expr do Expr               { If [($2,$4)] (Val Null) }
@@ -133,6 +134,17 @@ Val     : true              { BoolVal True }
         | Appl '=>' Expr    { FunVal $1 $3 }                  
 
 {
-parseError _ = throwError '!Parse Error'
+parseError :: [Token] -> Except String a
+parseError (l:ls) = throwError (show l)
+parseError [] = throwError "Unexpected end of Input"
+
+parseProg :: String -> Either String Prog
+parseProg input = runExcept $ do
+  tokenStream <- scanTokens input
+  expr tokenStream
+
+parseTokens :: String -> Either String [Token]
+parseTokens = runExcept . scanTokens
+    
 
 }

@@ -2,6 +2,7 @@
 module Lang.Lexer where
 
 import Lang.Tokens
+import Control.Monad.Except
 }
 
 %wrapper "basic"
@@ -49,7 +50,7 @@ tokens :-
     "<"             { const TLt }
     ">"             { const TGt }
     "=="            { const TEq }
-    "!="            { const TNeq }
+    "!="            { const TNEq }
     "<>"            { const TLtGt }
     "><"            { const TGtLt }
     "-<"            { const TRFork }
@@ -74,5 +75,20 @@ tokens :-
     @comment_line.* ;
     @comment_start(.*\n)*@comment_end ;
 
+{
+
+scanTokens :: String -> Except String [Token]
+scanTokens str = go ('\n',[],str) where 
+  go inp@(_,_bs,str) =
+    case alexScan inp 0 of
+     AlexEOF -> return []
+     AlexError _ -> throwError "Invalid lexeme."
+     AlexSkip  inp' len     -> go inp'
+     AlexToken inp' len act -> do
+      res <- go inp'
+      let rest = act (take len str)
+      return (rest : res)
+
+}
 
 
