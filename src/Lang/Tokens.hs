@@ -42,5 +42,7 @@ data Token = TIf
            | TStr String 
            | TChar Char 
            | TSym String 
+           | TComma
+           | TSemi
            | TEOF
            

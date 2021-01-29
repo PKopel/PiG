@@ -62,6 +62,8 @@ tokens :-
     "{"             { const TLBrace }
     "]"             { const TRBracket }
     "["             { const TLBracket }
+    ","             { const TComma }
+    ";"             { const TSemi }
     "true"          { const TTrue }
     "false"         { const TFalse }
     "null"          { const TNull }
