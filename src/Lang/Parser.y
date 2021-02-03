@@ -76,7 +76,7 @@ File    : Prog File     { $1:$2 }
         | eof           { [] }
 
 Prog    : Drct          { Drct $1 }
-        | Expr          { Stmt $1 }
+        | Seq           { Stmt $1 }
 
 Drct    : exit          { Exit }
         | help          { Help }
@@ -87,7 +87,6 @@ Drct    : exit          { Exit }
 Expr    : Atom                          { $1 }
         | ListLit                       { $1 }   
         | If                            { $1 }
---        | Seq                           { $1 }
         | '(' Expr ')'                  { $2 }
         | VAR '(' Expr ')' '=' Expr     { Assign $1 $3 $6 }
         | VAR '=' Expr                  { Assign $1 (Val Null) $3 }
@@ -119,11 +118,13 @@ If      : if Expr do Expr               { If [($2,$4)] (Val Null) }
 IfList  : Expr do Expr elif IfList      { ($1,$3):$5 }
         | Expr do Expr                  { [($1,$3)] }
 
---Seq     : '{' ExprList '}'      { Seq $2 } 
---        | '{' '}'               { Seq [] }
+Seq     : '{' ExprList '}'      { Seq $2 } 
+        | '{' '}'               { Seq [] }
+        | ExprList              { Seq $1 }       
 
---ExprList : Expr ';' ExprList    { $1:$2 }
---         | Expr ';'             { [$1] }
+ExprList : Expr ';' ExprList    { $1:$3 }
+         | Expr ';'             { [$1] }
+         | Expr                 { [$1] }
 
 ListLit : '[' List ']'      { ListLiteral $2 }
         | '[' ']'           { ListLiteral [] }    

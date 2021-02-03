@@ -1,5 +1,8 @@
 # Changelog for PiG
 
+### 0.13.0
+* rewrite parser and lexer with Alex and Happy
+
 ### 0.12.2
 * small refactorization
 

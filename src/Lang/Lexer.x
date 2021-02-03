@@ -31,52 +31,52 @@ $eol        = [\n]
 
 tokens :-
     $white+			;
-    "if"            { lex' TIf }
-    "elif"          { lex' TElIf }
-    "else"          { lex' TElse }
-    "while"         { lex' TWhile }
-    "do"            { lex' TDo }
-    "print"         { lex' TPrint }
-    "read"          { lex' TRead }
-    "exit"|":exit"  { lex' TExit }
-    ":help"         { lex' THelp }
-    ":rm"           { lex' TRM }
-    ":clear"        { lex' TClear }
-    ":load"         { lex' TLoad }
-    "+"             { lex' TPlus }
-    "-"             { lex' TMinus }
-    "*"             { lex' TStar }
-    "/"             { lex' TSlash }
-    "=>"            { lex' TFatArr }
-    "="             { lex' TAssign }
-    "^"             { lex' TDash }
-    "<"             { lex' TLt }
-    ">"             { lex' TGt }
-    "=="            { lex' TEq }
-    "!="            { lex' TNEq }
-    "<>"            { lex' TLtGt }
-    "><"            { lex' TGtLt }
-    "-<"            { lex' TRFork }
-    ">-"            { lex' TLFork }
-    "~"             { lex' TNot }
-    "&&"            { lex' TAnd }
-    "||"            { lex' TOr }
-    ")"             { lex' TRParen }
-    "("             { lex' TLParen }
-    "}"             { lex' TRBrace }
-    "{"             { lex' TLBrace }
-    "]"             { lex' TRBracket }
-    "["             { lex' TLBracket }
-    ","             { lex' TComma }
-    ";"             { lex' TSemi }
-    "true"          { lex' TTrue }
-    "false"         { lex' TFalse }
-    "null"          { lex' TNull }
-    @double         { lex (TNum . read) }
-    @char           { lex (TChar . head . drop 1 . init) }
-    @string         { lex (TStr . drop 1 . init) }
-    @id             { lex TSym}
-    @comment_line.* ;
+    "if"              { lex' TIf }
+    "elif"            { lex' TElIf }
+    "else"            { lex' TElse }
+    "while"           { lex' TWhile }
+    "do"              { lex' TDo }
+    "print"           { lex' TPrint }
+    "read()"          { lex' TRead }
+    "exit()"|":exit"  { lex' TExit }
+    ":help"           { lex' THelp }
+    ":rm"             { lex' TRM }
+    ":clear"          { lex' TClear }
+    ":load"           { lex' TLoad }
+    "+"               { lex' TPlus }
+    "-"               { lex' TMinus }
+    "*"               { lex' TStar }
+    "/"               { lex' TSlash }
+    "=>"              { lex' TFatArr }
+    "="               { lex' TAssign }
+    "^"               { lex' TDash }
+    "<"               { lex' TLt }
+    ">"               { lex' TGt }
+    "=="              { lex' TEq }
+    "!="              { lex' TNEq }
+    "<>"              { lex' TLtGt }
+    "><"              { lex' TGtLt }
+    "-<"              { lex' TRFork }
+    ">-"              { lex' TLFork }
+    "~"               { lex' TNot }
+    "&&"              { lex' TAnd }
+    "||"              { lex' TOr }
+    ")"               { lex' TRParen }
+    "("               { lex' TLParen }
+    "}"               { lex' TRBrace }
+    "{"               { lex' TLBrace }
+    "]"               { lex' TRBracket }
+    "["               { lex' TLBracket }
+    ","               { lex' TComma }
+    ";"               { lex' TSemi }
+    "true"            { lex' TTrue }
+    "false"           { lex' TFalse }
+    "null"            { lex' TNull }
+    @double           { lex (TNum . read) }
+    @char             { lex (TChar . head . drop 1 . init) }
+    @string           { lex (TStr . drop 1 . init) }
+    @id               { lex TSym}
+    @comment_line.*   ;
     @comment_start(.*\n)*@comment_end ;
 
 {
