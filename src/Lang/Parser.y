@@ -43,16 +43,18 @@ import Import
     '><'            { Token _ TGtLt }
     '-<'            { Token _ TRFork }
     '>-'            { Token _ TLFork }
+    '~'             { Token _ TNot }
     '&&'            { Token _ TAnd }
     '||'            { Token _ TOr }
     ')'             { Token _ TRParen }
-    '('             { Token _ TRParen }
+    '('             { Token _ TLParen }
     '}'             { Token _ TRBrace }
     '{'             { Token _ TLBrace }
     ']'             { Token _ TRBracket }
     '['             { Token _ TLBracket }
     ','             { Token _ TComma }
     ';'             { Token _ TSemi }
+    eof             { Token _ TEOF }
     true            { Token _ TTrue }
     false           { Token _ TFalse }
     null            { Token _ TNull }
@@ -69,6 +71,10 @@ import Import
 %left '<>' '><'
 %%
 
+File    : Prog File     { $1:$2 }
+        | Prog          { [$1] }
+        | eof           { [] }
+
 Prog    : Drct          { Drct $1 }
         | Expr          { Stmt $1 }
 
@@ -81,24 +87,27 @@ Drct    : exit          { Exit }
 Expr    : Atom                          { $1 }
         | ListLit                       { $1 }   
         | If                            { $1 }
-        | Seq                           { $1 }
+--        | Seq                           { $1 }
         | '(' Expr ')'                  { $2 }
-        | VAR '(' Atom ')' '=' Expr     { Assign $1 $3 $6 }
+        | VAR '(' Expr ')' '=' Expr     { Assign $1 $3 $6 }
+        | VAR '=' Expr                  { Assign $1 (Val Null) $3 }
         | while Expr do Expr            { While $2 $4 }
         | read                          { Read }
-        | print Appl                    { Print $2 }
+        | print FunAppl                 { Print $2 }
+        | VAR FunAppl                   { FunApp $1 $2}
         | Expr '+' Expr                 { Binary ((+) :: Double -> Double -> Double) $1 $3 }
         | Expr '-' Expr                 { Binary ((-) :: Double -> Double -> Double) $1 $3 }
         | Expr '*' Expr                 { Binary ((*) :: Double -> Double -> Double) $1 $3 }
         | Expr '/' Expr                 { Binary ((/) :: Double -> Double -> Double) $1 $3 }
         | Expr '^' Expr                 { Binary ((**) :: Double -> Double -> Double) $1 $3 }
-        | '-' Expr                      { Unary opposite $2 }
+        | '-' Expr                      { Unary (negate :: Double -> Double) $2 }
+        | '~' Expr                      { Unary not $2 }
         | Expr '&&' Expr                { Binary (&&) $1 $3 }
         | Expr '||' Expr                { Binary (||) $1 $3 }
-        | Expr '==' Expr                { Binary (==) $1 $3 }
-        | Expr '!=' Expr                { Binary (/=) $1 $3 }
-        | Expr '<' Expr                 { Binary (<) $1 $3 }
-        | Expr '>' Expr                 { Binary (>) $1 $3 }
+        | Expr '==' Expr                { Binary ((==) :: Val -> Val -> Bool) $1 $3 }
+        | Expr '!=' Expr                { Binary ((/=) :: Val -> Val -> Bool) $1 $3 }
+        | Expr '<' Expr                 { Binary ((<) :: Val -> Val -> Bool) $1 $3 }
+        | Expr '>' Expr                 { Binary ((>) :: Val -> Val -> Bool) $1 $3 }
         | '-<' Expr                     { Unary (-<) $2}
         | '>-' Expr                     { Unary (>-) $2}
         | Expr '<>' Expr                { Binary ((<>) :: Seq.Seq Val -> Seq.Seq Val -> Seq.Seq Val) $1 $3 }
@@ -110,14 +119,16 @@ If      : if Expr do Expr               { If [($2,$4)] (Val Null) }
 IfList  : Expr do Expr elif IfList      { ($1,$3):$5 }
         | Expr do Expr                  { [($1,$3)] }
 
-Seq     : '{' Seq           { Seq $2 }
-        | Expr ';' Seq      { $1:$3  }    
-        | '}'               { [] }
+--Seq     : '{' ExprList '}'      { Seq $2 } 
+--        | '{' '}'               { Seq [] }
+
+--ExprList : Expr ';' ExprList    { $1:$2 }
+--         | Expr ';'             { [$1] }
 
 ListLit : '[' List ']'      { ListLiteral $2 }
         | '[' ']'           { ListLiteral [] }    
 
-Appl    : '(' List ')'      { $2 }
+FunAppl : '(' List ')'      { $2 }
         | '(' ')'           { [] }
 
 List    : Expr ',' List     { $1:$3 }
@@ -126,13 +137,19 @@ List    : Expr ',' List     { $1:$3 }
 Atom    : VAR               { Var $1 }
         | Val               { Val $1 }
 
+FunVal  : '(' ArgList ')'   { $2 }
+        | '(' ')'           { [] }
+
+ArgList : VAR ',' ArgList   { $1:$3 }
+        | VAR               { [$1] }
+
 Val     : true              { BoolVal True }
         | false             { BoolVal False }
         | null              { Null }
         | NUM               { AlgVal $1 }
         | CHAR              { CharVal $1 }
         | STR               { StrVal $1 }
-        | Appl '=>' Expr    { FunVal $1 $3 }                  
+        | FunVal '=>' Expr  { FunVal $1 $3 }                  
 
 {
 lexwrap :: (Token -> Alex a) -> Alex a
@@ -142,10 +159,10 @@ happyError :: Token -> Alex a
 happyError (Token p t) =
   alexError' p ("parse error at token '" ++ unLex t ++ "'")
 
-parseFile :: FilePath -> String -> Either String Prog
-parseFile = runAlex' parse
+parseFile :: FilePath -> String -> Either String [Prog]
+parseFile = runAlex' pig
 
 parseProg :: String -> Either String Prog
-parseProg s = runAlex s parse
+parseProg s = runAlex s (head <$> pig)
 
 }

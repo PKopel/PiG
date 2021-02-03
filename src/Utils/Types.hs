@@ -42,15 +42,6 @@ instance HasProcessContext App where
   processContextL =
     lens appProcessContext (\x y -> x { appProcessContext = y })
 
-class Opposable c where
-  opposite :: c -> c 
-
-instance Opposable Bool where
-  opposite = not
-
-instance Opposable Double where
-  opposite = negate
-
 class Container c where
   (!?) :: c a -> Int -> Maybe a
   (|>) :: c a -> a -> c a

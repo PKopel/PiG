@@ -27,6 +27,7 @@ data TokenType = TIf
            | TGtLt
            | TRFork
            | TLFork
+           | TNot
            | TAnd
            | TOr
            | TRParen
@@ -74,6 +75,7 @@ instance Show TokenType where
   show TGtLt     = "><"
   show TRFork    = "-<"
   show TLFork    = ">-"
+  show TNot      = "~"
   show TAnd      = "&&"
   show TOr       = "||"
   show TRParen   = ")"

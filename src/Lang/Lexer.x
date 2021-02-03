@@ -58,10 +58,11 @@ tokens :-
     "><"            { lex' TGtLt }
     "-<"            { lex' TRFork }
     ">-"            { lex' TLFork }
+    "~"             { lex' TNot }
     "&&"            { lex' TAnd }
     "||"            { lex' TOr }
     ")"             { lex' TRParen }
-    "("             { lex' TRParen }
+    "("             { lex' TLParen }
     "}"             { lex' TRBrace }
     "{"             { lex' TLBrace }
     "]"             { lex' TRBracket }
@@ -82,7 +83,7 @@ tokens :-
 data AlexUserState = AlexUserState { filePath :: FilePath }
 
 alexInitUserState :: AlexUserState
-alexInitUserState = AlexUserState "<unknown>"
+alexInitUserState = AlexUserState "PiG"
 
 getFilePath :: Alex FilePath
 getFilePath = liftM filePath alexGetUserState
@@ -101,7 +102,7 @@ unLex = show
 alexEOF :: Alex Token
 alexEOF = do
   (p,_,_,_) <- alexGetInput
-  return $ Token p TokenEOF
+  return $ Token p TEOF
 
 -- Unfortunately, we have to extract the matching bit of string
 -- ourselves...

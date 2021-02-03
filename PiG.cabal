@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: db443e532d2bbb315b81b9ed9fb31220c0f6c282b233d7f49e5e46c0a83dcbf7
+-- hash: eb34a9623301296f3a5e6ed3fb2f0e07769a04772cf2ea9f4a663f97eb21ad4c
 
 name:           PiG
-version:        0.12.2
+version:        0.13.0
 description:    Please see the README on Github at <https://github.com/PKopel/PiG#readme>
 homepage:       https://github.com/PKopel/PiG#readme
 bug-reports:    https://github.com/PKopel/PiG/issues
@@ -31,8 +31,6 @@ library
       Interp.Directives
       Interp.Statements
       Lang.Lexer
-      Lang.Lexer
-      Lang.Parser
       Lang.Parser
       Lang.Tokens
       Run
@@ -47,6 +45,7 @@ library
       QuickCheck
     , array
     , base >=4.11 && <10
+    , bytestring
     , containers
     , haskeline
     , hspec
@@ -69,6 +68,7 @@ executable pig
     , QuickCheck
     , array
     , base >=4.11 && <10
+    , bytestring
     , containers
     , haskeline
     , hspec
@@ -95,6 +95,7 @@ test-suite pig-test
     , QuickCheck
     , array
     , base >=4.11 && <10
+    , bytestring
     , containers
     , haskeline
     , hspec

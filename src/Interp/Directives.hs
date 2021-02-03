@@ -19,7 +19,7 @@ execProg store (Stmt p) = runWithStore (eval p) store
 execProg store (Drct p) = runWithStore (exec p) store
 
 execFile :: FilePath -> Store -> InputT IO Store
-execFile file store = (lift . tryIOError) (parseFile file) >>= \case
+execFile file store = (lift . tryIOError) (parseFile file . show <$> readFileUtf8 file) >>= \case
   Left  err          -> outputStrLn (show err) >> return store
   Right (Left  err ) -> outputStrLn err >> return store
   Right (Right prog) -> foldM execProg store prog
