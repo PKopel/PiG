@@ -150,7 +150,7 @@ Val     : true              { BoolVal True }
         | NUM               { AlgVal $1 }
         | CHAR              { CharVal $1 }
         | STR               { StrVal $1 }
-        | FunVal '=>' Expr  { FunVal $1 $3 }                  
+        | FunVal '=>' Seq   { FunVal $1 $3 }                  
 
 {
 lexwrap :: (Token -> Alex a) -> Alex a
