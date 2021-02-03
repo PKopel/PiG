@@ -8,7 +8,6 @@ import qualified Data.Map                      as Map
 import           Data.Sequence                  ( Seq(..) )
 import qualified Data.Sequence                 as Seq
 import           Import
-import           Lang.Parser                    ( parseLitVal )
 
 eval :: Expr -> Interp Val
 eval (Val n          ) = return n
@@ -20,9 +19,7 @@ eval (Unary op e     ) = appUn op <$> eval e >>= \case
   other -> return other
 eval (ListLiteral es) = ListVal . Seq.fromList <$> mapM eval es
 eval (FunApp n vs   ) = readVar n >>= evalFunApp vs
-eval Read             = readVal <&> parseLitVal >>= \case
-  Left  msg -> printString msg >> return Null
-  Right val -> return val
+eval Read             = StrVal <$> readVal 
 eval (Print []      ) = return Null
 eval (Print (e : es)) = case e of
   Seq _ -> eval e >>= \case

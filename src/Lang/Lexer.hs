@@ -2,8 +2,12 @@
 {-# LANGUAGE CPP #-}
 {-# LINE 1 "Lexer.x" #-}
 
+{-# OPTIONS -w  #-}
 module Lang.Lexer where
 
+
+import Prelude hiding (lex)
+import Control.Monad ( liftM )
 import Lang.Tokens
 
 #if __GLASGOW_HASKELL__ >= 603
@@ -24,7 +28,7 @@ import Array
 -- it for any purpose whatsoever.
 
 
-
+import Control.Applicative as App (Applicative (..))
 
 
 import Data.Word (Word8)
@@ -82,23 +86,23 @@ type Byte = Word8
 -- The input type
 
 
+type AlexInput = (AlexPosn,     -- current position,
+                  Char,         -- previous char
+                  [Byte],       -- pending bytes on current char
+                  String)       -- current input string
 
+ignorePendingBytes :: AlexInput -> AlexInput
+ignorePendingBytes (p,c,_ps,s) = (p,c,[],s)
 
+alexInputPrevChar :: AlexInput -> Char
+alexInputPrevChar (_p,c,_bs,_s) = c
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+alexGetByte :: AlexInput -> Maybe (Byte,AlexInput)
+alexGetByte (p,c,(b:bs),s) = Just (b,(p,c,bs,s))
+alexGetByte (_,_,[],[]) = Nothing
+alexGetByte (p,_,[],(c:s))  = let p' = alexMove p c
+                              in case utf8Encode' c of
+                                   (b, bs) -> p' `seq`  Just (b, (p', c, bs, s))
 
 
 
@@ -171,52 +175,94 @@ type Byte = Word8
 -- assuming the usual eight character tab stops.
 
 
+data AlexPosn = AlexPn !Int !Int !Int
+        deriving (Eq,Show)
 
+alexStartPos :: AlexPosn
+alexStartPos = AlexPn 0 1 1
 
-
-
-
-
-
-
-
-
+alexMove :: AlexPosn -> Char -> AlexPosn
+alexMove (AlexPn a l c) '\t' = AlexPn (a+1)  l     (c+alex_tab_size-((c-1) `mod` alex_tab_size))
+alexMove (AlexPn a l _) '\n' = AlexPn (a+1) (l+1)   1
+alexMove (AlexPn a l c) _    = AlexPn (a+1)  l     (c+1)
 
 
 -- -----------------------------------------------------------------------------
 -- Monad (default and with ByteString input)
 
 
+data AlexState = AlexState {
+        alex_pos :: !AlexPosn,  -- position at current input location
 
+        alex_inp :: String,     -- the current input
+        alex_chr :: !Char,      -- the character before the input
+        alex_bytes :: [Byte],
 
 
 
 
 
+        alex_scd :: !Int        -- the current startcode
 
+      , alex_ust :: AlexUserState -- AlexUserState will be defined in the user program
 
+    }
 
+-- Compile with -funbox-strict-fields for best results!
 
 
+runAlex :: String -> Alex a -> Either String a
+runAlex input__ (Alex f)
+   = case f (AlexState {alex_bytes = [],
 
 
 
 
 
+                        alex_pos = alexStartPos,
+                        alex_inp = input__,
+                        alex_chr = '\n',
 
+                        alex_ust = alexInitUserState,
 
+                        alex_scd = 0}) of Left msg -> Left msg
+                                          Right ( _, a ) -> Right a
 
+newtype Alex a = Alex { unAlex :: AlexState -> Either String (AlexState, a) }
 
+instance Functor Alex where
+  fmap f a = Alex $ \s -> case unAlex a s of
+                            Left msg -> Left msg
+                            Right (s', a') -> Right (s', f a')
 
+instance Applicative Alex where
+  pure a   = Alex $ \s -> Right (s, a)
+  fa <*> a = Alex $ \s -> case unAlex fa s of
+                            Left msg -> Left msg
+                            Right (s', f) -> case unAlex a s' of
+                                               Left msg -> Left msg
+                                               Right (s'', b) -> Right (s'', f b)
 
+instance Monad Alex where
+  m >>= k  = Alex $ \s -> case unAlex m s of
+                                Left msg -> Left msg
+                                Right (s',a) -> unAlex (k a) s'
+  return = App.pure
 
+alexGetInput :: Alex AlexInput
+alexGetInput
 
+ = Alex $ \s@AlexState{alex_pos=pos,alex_chr=c,alex_bytes=bs,alex_inp=inp__} ->
+        Right (s, (pos,c,bs,inp__))
 
 
 
 
 
+alexSetInput :: AlexInput -> Alex ()
 
+alexSetInput (pos,c,bs,inp__)
+ = Alex $ \s -> case s{alex_pos=pos,alex_chr=c,alex_bytes=bs,alex_inp=inp__} of
 
 
 
@@ -224,117 +270,75 @@ type Byte = Word8
 
 
 
+                  state__@(AlexState{}) -> Right (state__, ())
 
+alexError :: String -> Alex a
+alexError message = Alex $ const $ Left message
 
+alexGetStartCode :: Alex Int
+alexGetStartCode = Alex $ \s@AlexState{alex_scd=sc} -> Right (s, sc)
 
+alexSetStartCode :: Int -> Alex ()
+alexSetStartCode sc = Alex $ \s -> Right (s{alex_scd=sc}, ())
 
 
+alexGetUserState :: Alex AlexUserState
+alexGetUserState = Alex $ \s@AlexState{alex_ust=ust} -> Right (s,ust)
 
+alexSetUserState :: AlexUserState -> Alex ()
+alexSetUserState ss = Alex $ \s -> Right (s{alex_ust=ss}, ())
 
 
+alexMonadScan = do
 
+  inp__ <- alexGetInput
 
 
 
+  sc <- alexGetStartCode
+  case alexScan inp__ sc of
+    AlexEOF -> alexEOF
+    AlexError ((AlexPn _ line column),_,_,_) -> alexError $ "lexical error at line " ++ (show line) ++ ", column " ++ (show column)
+    AlexSkip  inp__' _len -> do
+        alexSetInput inp__'
+        alexMonadScan
 
+    AlexToken inp__' len action -> do
 
 
 
+        alexSetInput inp__'
+        action (ignorePendingBytes inp__) len
 
+-- -----------------------------------------------------------------------------
+-- Useful token actions
 
 
+type AlexAction result = AlexInput -> Int -> Alex result
 
 
 
 
+-- just ignore this token and scan another one
+-- skip :: AlexAction result
+skip _input _len = alexMonadScan
 
+-- ignore this token, but set the start code to a new value
+-- begin :: Int -> AlexAction result
+begin code _input _len = do alexSetStartCode code; alexMonadScan
 
+-- perform an action for this token, and set the start code to a new value
+andBegin :: AlexAction result -> Int -> AlexAction result
+(action `andBegin` code) input__ len = do
+  alexSetStartCode code
+  action input__ len
 
 
+token :: (AlexInput -> Int -> token) -> AlexAction token
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+token t input__ len = return (t input__ len)
 
 
 
@@ -342,25 +346,25 @@ type Byte = Word8
 -- Basic wrapper
 
 
-type AlexInput = (Char,[Byte],String)
 
-alexInputPrevChar :: AlexInput -> Char
-alexInputPrevChar (c,_,_) = c
 
--- alexScanTokens :: String -> [token]
-alexScanTokens str = go ('\n',[],str)
-  where go inp__@(_,_bs,s) =
-          case alexScan inp__ 0 of
-                AlexEOF -> []
-                AlexError _ -> error "lexical error"
-                AlexSkip  inp__' _ln     -> go inp__'
-                AlexToken inp__' len act -> act (take len s) : go inp__'
 
-alexGetByte :: AlexInput -> Maybe (Byte,AlexInput)
-alexGetByte (c,(b:bs),s) = Just (b,(c,bs,s))
-alexGetByte (_,[],[])    = Nothing
-alexGetByte (_,[],(c:s)) = case utf8Encode' c of
-                             (b, bs) -> Just (b, (c, bs, s))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -17302,50 +17306,114 @@ alex_actions = array (0 :: Int, 76)
   , (0,alex_action_44)
   ]
 
-alex_action_1 =  const TIf 
-alex_action_2 =  const TElIf 
-alex_action_3 =  const TElse 
-alex_action_4 =  const TWhile 
-alex_action_5 =  const TDo 
-alex_action_6 =  const TPrint 
-alex_action_7 =  const TRead 
-alex_action_8 =  const TExit 
-alex_action_9 =  const THelp 
-alex_action_10 =  const TRM 
-alex_action_11 =  const TClear 
-alex_action_12 =  const TLoad 
-alex_action_13 =  const TPlus 
-alex_action_14 =  const TMinus 
-alex_action_15 =  const TStar 
-alex_action_16 =  const TSlash 
-alex_action_17 =  const TFatArr 
-alex_action_18 =  const TAssign 
-alex_action_19 =  const TDash 
-alex_action_20 =  const TLt 
-alex_action_21 =  const TGt 
-alex_action_22 =  const TEq 
-alex_action_23 =  const TNEq 
-alex_action_24 =  const TLtGt 
-alex_action_25 =  const TGtLt 
-alex_action_26 =  const TRFork 
-alex_action_27 =  const TLFork 
-alex_action_28 =  const TAnd 
-alex_action_29 =  const TOr 
-alex_action_30 =  const TRParen 
-alex_action_31 =  const TRParen 
-alex_action_32 =  const TRBrace 
-alex_action_33 =  const TLBrace 
-alex_action_34 =  const TRBracket 
-alex_action_35 =  const TLBracket 
-alex_action_36 =  const TComma 
-alex_action_37 =  const TSemi 
-alex_action_38 =  const TTrue 
-alex_action_39 =  const TFalse 
-alex_action_40 =  const TNull 
-alex_action_41 =  TNum . read 
-alex_action_42 =  TChar . head . drop 1 . init 
-alex_action_43 =  TStr . drop 1 . init 
-alex_action_44 =  TSym
+{-# LINE 81 "Lexer.x" #-}
+
+data AlexUserState = AlexUserState { filePath :: FilePath }
+
+alexInitUserState :: AlexUserState
+alexInitUserState = AlexUserState "<unknown>"
+
+getFilePath :: Alex FilePath
+getFilePath = liftM filePath alexGetUserState
+
+setFilePath :: FilePath -> Alex ()
+setFilePath = alexSetUserState . AlexUserState
+
+data Token = Token AlexPosn TokenType
+  deriving ( Show )
+
+
+-- For nice parser error messages.
+unLex :: TokenType -> String
+unLex = show
+
+alexEOF :: Alex Token
+alexEOF = do
+  (p,_,_,_) <- alexGetInput
+  return $ Token p TokenEOF
+
+-- Unfortunately, we have to extract the matching bit of string
+-- ourselves...
+lex :: (String -> TokenType) -> AlexAction Token
+lex f = \(p,_,_,s) i -> return $ Token p (f (take i s))
+
+-- For constructing tokens that do not depend on
+-- the input
+lex' :: TokenType -> AlexAction Token
+lex' = lex . const
+
+-- We rewrite alexMonadScan' to delegate to alexError' when lexing fails
+-- (the default implementation just returns an error message).
+alexMonadScan' :: Alex Token
+alexMonadScan' = do
+  inp <- alexGetInput
+  sc <- alexGetStartCode
+  case alexScan inp sc of
+    AlexEOF -> alexEOF
+    AlexError (p, _, _, s) ->
+        alexError' p ("lexical error at character '" ++ take 1 s ++ "'")
+    AlexSkip  inp' len -> do
+        alexSetInput inp'
+        alexMonadScan'
+    AlexToken inp' len action -> do
+        alexSetInput inp'
+        action (ignorePendingBytes inp) len
+
+-- Signal an error, including a commonly accepted source code position.
+alexError' :: AlexPosn -> String -> Alex a
+alexError' (AlexPn _ l c) msg = do
+  fp <- getFilePath
+  alexError (fp ++ ":" ++ show l ++ ":" ++ show c ++ ": " ++ msg)
+
+-- A variant of runAlex, keeping track of the path of the file we are lexing.
+runAlex' :: Alex a -> FilePath -> String -> Either String a
+runAlex' a fp input = runAlex input (setFilePath fp >> a)
+
+
+alex_action_1 =  lex' TIf 
+alex_action_2 =  lex' TElIf 
+alex_action_3 =  lex' TElse 
+alex_action_4 =  lex' TWhile 
+alex_action_5 =  lex' TDo 
+alex_action_6 =  lex' TPrint 
+alex_action_7 =  lex' TRead 
+alex_action_8 =  lex' TExit 
+alex_action_9 =  lex' THelp 
+alex_action_10 =  lex' TRM 
+alex_action_11 =  lex' TClear 
+alex_action_12 =  lex' TLoad 
+alex_action_13 =  lex' TPlus 
+alex_action_14 =  lex' TMinus 
+alex_action_15 =  lex' TStar 
+alex_action_16 =  lex' TSlash 
+alex_action_17 =  lex' TFatArr 
+alex_action_18 =  lex' TAssign 
+alex_action_19 =  lex' TDash 
+alex_action_20 =  lex' TLt 
+alex_action_21 =  lex' TGt 
+alex_action_22 =  lex' TEq 
+alex_action_23 =  lex' TNEq 
+alex_action_24 =  lex' TLtGt 
+alex_action_25 =  lex' TGtLt 
+alex_action_26 =  lex' TRFork 
+alex_action_27 =  lex' TLFork 
+alex_action_28 =  lex' TAnd 
+alex_action_29 =  lex' TOr 
+alex_action_30 =  lex' TRParen 
+alex_action_31 =  lex' TRParen 
+alex_action_32 =  lex' TRBrace 
+alex_action_33 =  lex' TLBrace 
+alex_action_34 =  lex' TRBracket 
+alex_action_35 =  lex' TLBracket 
+alex_action_36 =  lex' TComma 
+alex_action_37 =  lex' TSemi 
+alex_action_38 =  lex' TTrue 
+alex_action_39 =  lex' TFalse 
+alex_action_40 =  lex' TNull 
+alex_action_41 =  lex (TNum . read) 
+alex_action_42 =  lex (TChar . head . drop 1 . init) 
+alex_action_43 =  lex (TStr . drop 1 . init) 
+alex_action_44 =  lex TSym
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
 -- -----------------------------------------------------------------------------
 -- ALEX TEMPLATE

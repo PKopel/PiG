@@ -7,7 +7,7 @@
 module Lang.Parser where
 
 import Lang.Tokens
-import qualified Lang.Lexer as L
+import Lang.Lexer
 import Control.Monad.Except
 import qualified Data.Sequence as Seq
 import Import
@@ -1538,7 +1538,7 @@ happyReduction_5 _
 #if __GLASGOW_HASKELL__ >= 710
 #endif
 happyReduce_6 = happySpecReduce_2  5# happyReduction_6
-happyReduction_6 (HappyTerminal (TStr happy_var_2))
+happyReduction_6 (HappyTerminal (Token _ (TStr happy_var_2)))
 	_
 	 =  HappyAbsSyn5
 		 (Load happy_var_2
@@ -1548,7 +1548,7 @@ happyReduction_6 _ _  = notHappyAtAll
 #if __GLASGOW_HASKELL__ >= 710
 #endif
 happyReduce_7 = happySpecReduce_2  5# happyReduction_7
-happyReduction_7 (HappyTerminal (TSym happy_var_2))
+happyReduction_7 (HappyTerminal (Token _ (TSym happy_var_2)))
 	_
 	 =  HappyAbsSyn5
 		 (Rm happy_var_2
@@ -1610,7 +1610,7 @@ happyReduction_13 ((HappyAbsSyn6  happy_var_6) `HappyStk`
 	_ `HappyStk`
 	(HappyAbsSyn13  happy_var_3) `HappyStk`
 	_ `HappyStk`
-	(HappyTerminal (TSym happy_var_1)) `HappyStk`
+	(HappyTerminal (Token _ (TSym happy_var_1))) `HappyStk`
 	happyRest)
 	 = HappyAbsSyn6
 		 (Assign happy_var_1 happy_var_3 happy_var_6
@@ -1959,7 +1959,7 @@ happyReduction_45 _  = notHappyAtAll
 #if __GLASGOW_HASKELL__ >= 710
 #endif
 happyReduce_46 = happySpecReduce_1  13# happyReduction_46
-happyReduction_46 (HappyTerminal (TSym happy_var_1))
+happyReduction_46 (HappyTerminal (Token _ (TSym happy_var_1)))
 	 =  HappyAbsSyn13
 		 (Var happy_var_1
 	)
@@ -2001,7 +2001,7 @@ happyReduction_50 _
 #if __GLASGOW_HASKELL__ >= 710
 #endif
 happyReduce_51 = happySpecReduce_1  14# happyReduction_51
-happyReduction_51 (HappyTerminal (TNum happy_var_1))
+happyReduction_51 (HappyTerminal (Token _ (TNum happy_var_1)))
 	 =  HappyAbsSyn14
 		 (AlgVal happy_var_1
 	)
@@ -2010,7 +2010,7 @@ happyReduction_51 _  = notHappyAtAll
 #if __GLASGOW_HASKELL__ >= 710
 #endif
 happyReduce_52 = happySpecReduce_1  14# happyReduction_52
-happyReduction_52 (HappyTerminal (TChar happy_var_1))
+happyReduction_52 (HappyTerminal (Token _ (TChar happy_var_1)))
 	 =  HappyAbsSyn14
 		 (CharVal happy_var_1
 	)
@@ -2019,7 +2019,7 @@ happyReduction_52 _  = notHappyAtAll
 #if __GLASGOW_HASKELL__ >= 710
 #endif
 happyReduce_53 = happySpecReduce_1  14# happyReduction_53
-happyReduction_53 (HappyTerminal (TStr happy_var_1))
+happyReduction_53 (HappyTerminal (Token _ (TStr happy_var_1)))
 	 =  HappyAbsSyn14
 		 (StrVal happy_var_1
 	)
@@ -2036,88 +2036,101 @@ happyReduction_54 (HappyAbsSyn6  happy_var_3)
 	)
 happyReduction_54 _ _ _  = notHappyAtAll 
 
-happyNewToken action sts stk [] =
-	action 59# 59# notHappyAtAll (HappyState action) sts stk []
-
-happyNewToken action sts stk (tk:tks) =
-	let cont i = action i i tk (HappyState action) sts stk tks in
+happyNewToken :: () => (Happy_GHC_Exts.Int#
+                   -> Happy_GHC_Exts.Int#
+                   -> (Token)
+                   -> HappyState (Token) (t -> Alex a)
+                   -> [HappyState (Token) (t -> Alex a)]
+                   -> t
+                   -> Alex a)
+                 -> [HappyState (Token) (t -> Alex a)]
+                 -> t
+                 -> Alex a
+happyNewToken action sts stk
+	= lexwrap(\tk -> 
+	let cont i = action i i tk (HappyState action) sts stk in
 	case tk of {
-	TIf -> cont 15#;
-	TElIf -> cont 16#;
-	TElse -> cont 17#;
-	TWhile -> cont 18#;
-	TDo -> cont 19#;
-	TPrint -> cont 20#;
-	TRead -> cont 21#;
-	TExit -> cont 22#;
-	THelp -> cont 23#;
-	TRM -> cont 24#;
-	TClear -> cont 25#;
-	TLoad -> cont 26#;
-	TPlus -> cont 27#;
-	TMinus -> cont 28#;
-	TStar -> cont 29#;
-	TSlash -> cont 30#;
-	TFatArr -> cont 31#;
-	TAssign -> cont 32#;
-	TDash -> cont 33#;
-	TLt -> cont 34#;
-	TGt -> cont 35#;
-	TEq -> cont 36#;
-	TNEq -> cont 37#;
-	TLtGt -> cont 38#;
-	TGtLt -> cont 39#;
-	TRFork -> cont 40#;
-	TLFork -> cont 41#;
-	TAnd -> cont 42#;
-	TOr -> cont 43#;
-	TRParen -> cont 44#;
-	TRParen -> cont 45#;
-	TRBrace -> cont 46#;
-	TLBrace -> cont 47#;
-	TRBracket -> cont 48#;
-	TLBracket -> cont 49#;
-	TComma -> cont 50#;
-	TSemi -> cont 51#;
-	TTrue -> cont 52#;
-	TFalse -> cont 53#;
-	TNull -> cont 54#;
-	TNum happy_dollar_dollar -> cont 55#;
-	TChar happy_dollar_dollar -> cont 56#;
-	TStr happy_dollar_dollar -> cont 57#;
-	TSym happy_dollar_dollar -> cont 58#;
-	_ -> happyError' ((tk:tks), [])
-	}
+	Token _ TEOF -> action 59# 59# tk (HappyState action) sts stk;
+	Token _ TIf -> cont 15#;
+	Token _ TElIf -> cont 16#;
+	Token _ TElse -> cont 17#;
+	Token _ TWhile -> cont 18#;
+	Token _ TDo -> cont 19#;
+	Token _ TPrint -> cont 20#;
+	Token _ TRead -> cont 21#;
+	Token _ TExit -> cont 22#;
+	Token _ THelp -> cont 23#;
+	Token _ TRM -> cont 24#;
+	Token _ TClear -> cont 25#;
+	Token _ TLoad -> cont 26#;
+	Token _ TPlus -> cont 27#;
+	Token _ TMinus -> cont 28#;
+	Token _ TStar -> cont 29#;
+	Token _ TSlash -> cont 30#;
+	Token _ TFatArr -> cont 31#;
+	Token _ TAssign -> cont 32#;
+	Token _ TDash -> cont 33#;
+	Token _ TLt -> cont 34#;
+	Token _ TGt -> cont 35#;
+	Token _ TEq -> cont 36#;
+	Token _ TNEq -> cont 37#;
+	Token _ TLtGt -> cont 38#;
+	Token _ TGtLt -> cont 39#;
+	Token _ TRFork -> cont 40#;
+	Token _ TLFork -> cont 41#;
+	Token _ TAnd -> cont 42#;
+	Token _ TOr -> cont 43#;
+	Token _ TRParen -> cont 44#;
+	Token _ TRParen -> cont 45#;
+	Token _ TRBrace -> cont 46#;
+	Token _ TLBrace -> cont 47#;
+	Token _ TRBracket -> cont 48#;
+	Token _ TLBracket -> cont 49#;
+	Token _ TComma -> cont 50#;
+	Token _ TSemi -> cont 51#;
+	Token _ TTrue -> cont 52#;
+	Token _ TFalse -> cont 53#;
+	Token _ TNull -> cont 54#;
+	Token _ (TNum happy_dollar_dollar) -> cont 55#;
+	Token _ (TChar happy_dollar_dollar) -> cont 56#;
+	Token _ (TStr happy_dollar_dollar) -> cont 57#;
+	Token _ (TSym happy_dollar_dollar) -> cont 58#;
+	_ -> happyError' (tk, [])
+	})
 
-happyError_ explist 59# tk tks = happyError' (tks, explist)
-happyError_ explist _ tk tks = happyError' ((tk:tks), explist)
+happyError_ explist 59# tk = happyError' (tk, explist)
+happyError_ explist _ tk = happyError' (tk, explist)
 
-happyThen :: () => Except String a -> (a -> Except String b) -> Except String b
-happyThen = ((>>=))
-happyReturn :: () => a -> Except String a
+happyThen :: () => Alex a -> (a -> Alex b) -> Alex b
+happyThen = (>>=)
+happyReturn :: () => a -> Alex a
 happyReturn = (return)
-happyThen1 m k tks = ((>>=)) m (\a -> k a tks)
-happyReturn1 :: () => a -> b -> Except String a
-happyReturn1 = \a tks -> (return) a
-happyError' :: () => ([(Token)], [String]) -> Except String a
-happyError' = (\(tokens, _) -> parseError tokens)
-pig tks = happySomeParser where
- happySomeParser = happyThen (happyParse action_0 tks) (\x -> case x of {HappyAbsSyn4 z -> happyReturn z; _other -> notHappyAtAll })
+#if __GLASGOW_HASKELL__ >= 710
+#endif
+happyThen1 :: () => Alex a -> (a -> Alex b) -> Alex b
+happyThen1 = happyThen
+happyReturn1 :: () => a -> Alex a
+happyReturn1 = happyReturn
+happyError' :: () => ((Token), [String]) -> Alex a
+happyError' tk = (\(tokens, _) -> happyError tokens) tk
+pig = happySomeParser where
+ happySomeParser = happyThen (happyParse action_0) (\x -> case x of {HappyAbsSyn4 z -> happyReturn z; _other -> notHappyAtAll })
 
 happySeq = happyDontSeq
 
 
-parseError :: [Token] -> Except String a
-parseError (l:ls) = throwError (show l)
-parseError [] = throwError "Unexpected end of Input"
+lexwrap :: (Token -> Alex a) -> Alex a
+lexwrap = (alexMonadScan' >>=)
+
+happyError :: Token -> Alex a
+happyError (Token p t) =
+  alexError' p ("parse error at token '" ++ unLex t ++ "'")
+
+parseFile :: FilePath -> String -> Either String Prog
+parseFile = runAlex' parse
 
 parseProg :: String -> Either String Prog
-parseProg input = runExcept $ do
-  tokenStream <- scanTokens input
-  expr tokenStream
-
-parseTokens :: String -> Either String [Token]
-parseTokens = runExcept . scanTokens
+parseProg s = runAlex s parse
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
 -- $Id: GenericTemplate.hs,v 1.26 2005/01/14 14:47:22 simonmar Exp $
 

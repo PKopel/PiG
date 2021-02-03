@@ -3,62 +3,63 @@
 module Lang.Parser where
 
 import Lang.Tokens
-import qualified Lang.Lexer as L
+import Lang.Lexer
 import Control.Monad.Except
 import qualified Data.Sequence as Seq
 import Import               
 }
-
 %name pig
-%monad { Except String } { (>>=) } { return }
-%tokentype{Token}
-%error{parseError}
+%tokentype { Token }
+%monad { Alex }
+%lexer { lexwrap } { Token _ TEOF }
+-- Without this we get a type error
+%error { happyError }
 
 %token
-    if              { TIf }
-    elif            { TElIf }
-    else            { TElse }
-    while           { TWhile }
-    do              { TDo }
-    print           { TPrint }
-    read            { TRead }
-    exit            { TExit }
-    help            { THelp }
-    rm              { TRM }
-    clear           { TClear }
-    load            { TLoad }
-    '+'             { TPlus }
-    '-'             { TMinus }
-    '*'             { TStar }
-    '/'             { TSlash }
-    '=>'            { TFatArr }
-    '='             { TAssign }
-    '^'             { TDash }
-    '<'             { TLt }
-    '>'             { TGt }
-    '=='            { TEq }
-    '!='            { TNEq }
-    '<>'            { TLtGt }
-    '><'            { TGtLt }
-    '-<'            { TRFork }
-    '>-'            { TLFork }
-    '&&'            { TAnd }
-    '||'            { TOr }
-    ')'             { TRParen }
-    '('             { TRParen }
-    '}'             { TRBrace }
-    '{'             { TLBrace }
-    ']'             { TRBracket }
-    '['             { TLBracket }
-    ','             { TComma }
-    ';'             { TSemi }
-    true            { TTrue }
-    false           { TFalse }
-    null            { TNull }
-    NUM             { TNum $$ }
-    CHAR            { TChar $$ }
-    STR             { TStr $$ }
-    VAR             { TSym $$}
+    if              { Token _ TIf }
+    elif            { Token _ TElIf }
+    else            { Token _ TElse }
+    while           { Token _ TWhile }
+    do              { Token _ TDo }
+    print           { Token _ TPrint }
+    read            { Token _ TRead }
+    exit            { Token _ TExit }
+    help            { Token _ THelp }
+    rm              { Token _ TRM }
+    clear           { Token _ TClear }
+    load            { Token _ TLoad }
+    '+'             { Token _ TPlus }
+    '-'             { Token _ TMinus }
+    '*'             { Token _ TStar }
+    '/'             { Token _ TSlash }
+    '=>'            { Token _ TFatArr }
+    '='             { Token _ TAssign }
+    '^'             { Token _ TDash }
+    '<'             { Token _ TLt }
+    '>'             { Token _ TGt }
+    '=='            { Token _ TEq }
+    '!='            { Token _ TNEq }
+    '<>'            { Token _ TLtGt }
+    '><'            { Token _ TGtLt }
+    '-<'            { Token _ TRFork }
+    '>-'            { Token _ TLFork }
+    '&&'            { Token _ TAnd }
+    '||'            { Token _ TOr }
+    ')'             { Token _ TRParen }
+    '('             { Token _ TRParen }
+    '}'             { Token _ TRBrace }
+    '{'             { Token _ TLBrace }
+    ']'             { Token _ TRBracket }
+    '['             { Token _ TLBracket }
+    ','             { Token _ TComma }
+    ';'             { Token _ TSemi }
+    true            { Token _ TTrue }
+    false           { Token _ TFalse }
+    null            { Token _ TNull }
+    NUM             { Token _ (TNum $$) }
+    CHAR            { Token _ (TChar $$) }
+    STR             { Token _ (TStr $$) }
+    VAR             { Token _ (TSym $$) }
 
 
 %left '&&' '||'
@@ -134,17 +135,17 @@ Val     : true              { BoolVal True }
         | Appl '=>' Expr    { FunVal $1 $3 }                  
 
 {
-parseError :: [Token] -> Except String a
-parseError (l:ls) = throwError (show l)
-parseError [] = throwError "Unexpected end of Input"
+lexwrap :: (Token -> Alex a) -> Alex a
+lexwrap = (alexMonadScan' >>=)
+
+happyError :: Token -> Alex a
+happyError (Token p t) =
+  alexError' p ("parse error at token '" ++ unLex t ++ "'")
+
+parseFile :: FilePath -> String -> Either String Prog
+parseFile = runAlex' parse
 
 parseProg :: String -> Either String Prog
-parseProg input = runExcept $ do
-  tokenStream <- scanTokens input
-  expr tokenStream
-
-parseTokens :: String -> Either String [Token]
-parseTokens = runExcept . scanTokens
-    
+parseProg s = runAlex s parse
 
 }
