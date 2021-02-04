@@ -1,6 +1,6 @@
 # PiG
 
-Interpreter for a simple language.
+Interpreter for a simple language, build with [Alex](https://www.haskell.org/alex/) and [Happy](https://www.haskell.org/happy/).
 
 ## Usage  
 
@@ -53,6 +53,7 @@ See [examples](https://github.com/PKopel/PiG/tree/master/examples) for more info
 * **[pretty-terminal](https://github.com/loganmac/pretty-terminal)**
 * **[hspec](https://hspec.github.io)**
 * **[QuickCheck](https://hackage.haskell.org/package/QuickCheck)**
+* **[array](https://gitlab.haskell.org/ghc/packages/array)**
 
 ### Author
 

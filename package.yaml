@@ -24,7 +24,7 @@ dependencies:
   - rio >= 0.1.12.0
   - containers
   - mtl
-  - bytestring
+  - text
   - array
   - parsec
   - haskeline

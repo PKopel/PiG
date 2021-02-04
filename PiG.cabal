@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: eb34a9623301296f3a5e6ed3fb2f0e07769a04772cf2ea9f4a663f97eb21ad4c
+-- hash: fa5783a8c9a092040a3d15968eb259b6a56922a5f1d490c55b65b5fea64d0c84
 
 name:           PiG
 version:        0.13.0
@@ -45,7 +45,6 @@ library
       QuickCheck
     , array
     , base >=4.11 && <10
-    , bytestring
     , containers
     , haskeline
     , hspec
@@ -54,6 +53,7 @@ library
     , parsec
     , pretty-terminal
     , rio >=0.1.12.0
+    , text
   default-language: Haskell2010
 
 executable pig
@@ -68,7 +68,6 @@ executable pig
     , QuickCheck
     , array
     , base >=4.11 && <10
-    , bytestring
     , containers
     , haskeline
     , hspec
@@ -78,6 +77,7 @@ executable pig
     , parsec
     , pretty-terminal
     , rio >=0.1.12.0
+    , text
   default-language: Haskell2010
 
 test-suite pig-test
@@ -95,7 +95,6 @@ test-suite pig-test
     , QuickCheck
     , array
     , base >=4.11 && <10
-    , bytestring
     , containers
     , haskeline
     , hspec
@@ -104,4 +103,5 @@ test-suite pig-test
     , parsec
     , pretty-terminal
     , rio >=0.1.12.0
+    , text
   default-language: Haskell2010

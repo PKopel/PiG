@@ -83,6 +83,7 @@ Drct    : exit          { Exit }
         | clear         { Clear }
         | load STR      { Load $2 }
         | rm VAR        { Rm $2 }
+        | Drct ';'      { $1 } 
 
 Expr    : Atom                          { $1 }
         | ListLit                       { $1 }   
@@ -158,7 +159,7 @@ lexwrap = (alexMonadScan' >>=)
 
 happyError :: Token -> Alex a
 happyError (Token p t) =
-  alexError' p ("parse error at token '" ++ unLex t ++ "'")
+  alexError' p ("parse error at token '" ++ show t ++ "'")
 
 parseFile :: FilePath -> String -> Either String [Prog]
 parseFile = runAlex' pig
