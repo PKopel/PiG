@@ -11,23 +11,17 @@ import Lang.Tokens
 %wrapper "monadUserState"
 
 $digit      = [0-9]
-$octdig     = [0-7]
-$hexdig     = [0-9A-Fa-f]
-$alpha      = [a-zA-Z]
-$special    = [\.\;\,\$\|\*\+\?\#\~\-\{\}\(\)\[\]\^\/]
-$eol        = [\n]
 
 @comment_line      = "//" ( [^\n\/]* [^\n]* )?
 @comment_start     = "/*"
 @comment_end       = "*/"
 
-@escape            = '\\' ($printable | 'x' $hexdig+ | 'o' $octdig+ | $digit+)
+@escape            = \\ [nrt\\'"0] 
 @decimal_suffix    = \. [0-9][0-9_]*
 @double            = [0-9][0-9_]* @decimal_suffix?
-@string            = \" ($printable # \" | @escape)* \"
+@string            = \" ( @escape | $printable # \")* \"
 @id                = [A-Za-z][A-Za-z0-9'_]*
-@char              = \'($printable # $special) | @escape\'
-
+@char              = \' ( @escape | [^\\'\n\t\r] ) \'
 tokens :-
     $white+			;
     "if"              { lex' TIf }
@@ -72,8 +66,8 @@ tokens :-
     "false"           { lex' TFalse }
     "null"            { lex' TNull }
     @double           { lex (TNum . read) }
-    @char             { lex (TChar . head . drop 1 . init) }
-    @string           { lex (TStr . drop 1 . init) }
+    @char             { lex lexChar }
+    @string           { lex (lexString []) }
     @id               { lex TSym}
     @comment_line.*   ;
     @comment_start(.*\n)*@comment_end ;
@@ -103,6 +97,25 @@ lex f = \(p,_,_,s) i -> return $ Token p (f (take i s))
 
 lex' :: TokenType -> AlexAction Token
 lex' = lex . const
+
+escape :: Char -> Char
+escape c = case c of 
+              'n' -> '\n'
+              't' -> '\t'
+              'r' -> '\r'
+              '0' -> '\0'
+              o -> o
+
+lexString :: String -> String -> TokenType
+lexString acc [] = TStr (reverse acc)
+lexString acc ('"':s) = lexString acc s
+lexString acc ('\\':c:s) = lexString (ec:acc) s
+  where ec = escape c
+lexString acc (c:s) = lexString (c:acc) s
+
+lexChar :: String -> TokenType
+lexChar ('\'':c:'\'':_) = TChar c
+lexChar ('\'':'\\':c:'\'':_) = TChar (escape c)
 
 alexMonadScan' :: Alex Token
 alexMonadScan' = do

@@ -6,4 +6,4 @@ hello = () =>{
 
 hello();
 
-:exit
+exit();
