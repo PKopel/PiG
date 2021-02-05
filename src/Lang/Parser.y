@@ -76,7 +76,7 @@ File    : Prog File     { $1:$2 }
         | eof           { [] }
 
 Prog    : Drct          { Drct $1 }
-        | Seq           { Stmt $1 }
+        | OutSeq           { Stmt $1 }
 
 Drct    : exit          { Exit }
         | help          { Help }
@@ -91,6 +91,7 @@ Expr    : Atom                          { $1 }
         | '(' Expr ')'                  { $2 }
         | VAR '(' Expr ')' '=' Expr     { Assign $1 $3 $6 }
         | VAR '=' Expr                  { Assign $1 (Val Null) $3 }
+        | while Expr do InSeq           { While $2 $4 }
         | while Expr do Expr            { While $2 $4 }
         | read                          { Read }
         | print FunAppl                 { Print $2 }
@@ -113,15 +114,22 @@ Expr    : Atom                          { $1 }
         | Expr '<>' Expr                { Binary ((<>) :: Seq.Seq Val -> Seq.Seq Val -> Seq.Seq Val) $1 $3 }
         | Expr '><' Expr                { Binary ((<>) :: String -> String -> String) $1 $3 }
 
-If      : if Expr do Expr               { If [($2,$4)] (Val Null) }
+If      : if Expr do InSeq              { If [($2,$4)] (Val Null) }
+        | if Expr do Expr               { If [($2,$4)] (Val Null) }
+        | if IfList                     { If $2 (Val Null) }
+        | if IfList else InSeq          { If $2 $4 }
         | if IfList else Expr           { If $2 $4 }
 
-IfList  : Expr do Expr elif IfList      { ($1,$3):$5 }
+IfList  : Expr do InSeq elif IfList     { ($1,$3):$5 }
+        | Expr do Expr elif IfList      { ($1,$3):$5 }
+        | Expr do InSeq                 { [($1,$3)] }
         | Expr do Expr                  { [($1,$3)] }
 
-Seq     : '{' ExprList '}'      { Seq $2 } 
-        | '{' '}'               { Seq [] }
-        | ExprList              { Seq $1 }       
+OutSeq  : InSeq                 { $1 }
+        | ExprList              { Seq $1 } 
+
+InSeq   : '{' ExprList '}'      { Seq $2 } 
+        | '{' '}'               { Seq [] }      
 
 ExprList : Expr ';' ExprList    { $1:$3 }
          | Expr ';'             { [$1] }
@@ -131,6 +139,7 @@ ListLit : '[' List ']'      { ListLiteral $2 }
         | '[' ']'           { ListLiteral [] }    
 
 FunAppl : '(' List ')'      { $2 }
+        | '(' Expr ')'      { [$2] }
         | '(' ')'           { [] }
 
 List    : Expr ',' List     { $1:$3 }
@@ -151,7 +160,7 @@ Val     : true              { BoolVal True }
         | NUM               { AlgVal $1 }
         | CHAR              { CharVal $1 }
         | STR               { StrVal $1 }
-        | FunVal '=>' Seq   { FunVal $1 $3 }                  
+        | FunVal '=>' InSeq { FunVal $1 $3 }                  
 
 {
 lexwrap :: (Token -> Alex a) -> Alex a

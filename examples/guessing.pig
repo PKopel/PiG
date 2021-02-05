@@ -17,7 +17,7 @@ even = (a) => {
     x = 0;
     if a > 0 
         do while x < a do x = x + 2 
-        else while x > a do x = x - 2;
+    else while x > a do x = x - 2;
     if x > a do x - 2 else x;
 };
 

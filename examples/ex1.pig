@@ -1,6 +1,6 @@
 :load "ex2.pig";
 
-fun = (a) => a + 1;
+fun = (a) => {a + 1};
 
 main = () => {
     x = 1;
