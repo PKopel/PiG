@@ -33,7 +33,7 @@ run = do
       logInfo
         (  "We're inside the experimental PiG interpreter!\nversion: "
         <> fromString (showVersion version)
-        <> "\ntype ':help' for more information "
+        <> "\ntype ':help' or ':h' for more information "
         )
       liftIO $ runInputT settings $ runLine Green store
  where

@@ -25,8 +25,6 @@ import Import
     else            { Token _ TElse }
     while           { Token _ TWhile }
     do              { Token _ TDo }
-    print           { Token _ TPrint }
-    read            { Token _ TRead }
     exit            { Token _ TExit }
     help            { Token _ THelp }
     rm              { Token _ TRM }
@@ -97,8 +95,6 @@ Expr    : Atom                          { $1 }
         | VAR '=' Expr                  { Assign $1 (Val Null) $3 }
         | while Expr do InSeq           { While $2 $4 }
         | while Expr do Expr            { While $2 $4 }
-        | read                          { FunApp "read" [] }
-        | print FunAppl                 { FunApp "print" $2 }
         | VAR FunAppl                   { FunApp $1 $2}
         | Expr '+' Expr                 { Binary ((+) :: Double -> Double -> Double) $1 $3 }
         | Expr '-' Expr                 { Binary ((-) :: Double -> Double -> Double) $1 $3 }
@@ -118,9 +114,7 @@ Expr    : Atom                          { $1 }
         | Expr '<>' Expr                { Binary ((<>) :: Seq.Seq Val -> Seq.Seq Val -> Seq.Seq Val) $1 $3 }
         | Expr '><' Expr                { Binary ((<>) :: String -> String -> String) $1 $3 }
 
-If      : if Expr do InSeq              { If [($2,$4)] (Val Null) }
-        | if Expr do Expr               { If [($2,$4)] (Val Null) }
-        | if IfList                     { If $2 (Val Null) }
+If      : if IfList                     { If $2 (Val Null) }
         | if IfList else InSeq          { If $2 $4 }
         | if IfList else Expr           { If $2 $4 }
 

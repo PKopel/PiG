@@ -26,7 +26,6 @@ dependencies:
   - mtl
   - text
   - array
-  - parsec
   - haskeline
   - pretty-terminal
   - hspec

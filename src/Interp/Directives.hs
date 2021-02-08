@@ -33,10 +33,10 @@ exec Clear = withStore $ (over . scope) globalL (const empty)
 exec Help =
   printString
     "PiG interpreter directives: \n\
-    \':help' - display this message\n\
-    \':exit' or Ctrl+d - leave the interpreter\n\
-    \':clear' - remove all variables\n\
-    \':rm <name>' - remove variable <name>\n\
-    \':load \"<file path>\"' - execute program from <file path>\n"
+    \:help | :h - display this message\n\
+    \:exit | :e or Ctrl+d - leave the interpreter\n\
+    \:clear | :c - remove all variables\n\
+    \:rm <name> - remove variable <name>\n\
+    \:load | :l \"<file path>\"' - execute program from <file path>\n"
 exec (Rm   var ) = withStore $ (over . scope) globalL (delete var)
 exec (Load file) = getStore >>= Interp . lift . execFile file >>= putStore

@@ -36,11 +36,11 @@ Build-in operators are:
 * `><` for strings (attaches second argument at the end of the firs one, works with any type but results always in a string)
 
 Interpreter also provides five directives:
-* `:load "<file path>"` to load file
-* `:exit` (or Ctrl+d) to leave the interpreter
+* `:load | :l "<file path>"` to load file
+* `:exit | :e` (or Ctrl+d) to leave the interpreter
 * `:rm <variable name>` to remove binding of a variable
-* `:clear` to remove all bindings
-* `:help` to display information about directives
+* `:clear | :c` to remove all bindings
+* `:help | :h` to display information about directives
 
 Directives can also be used in files.
 
@@ -48,7 +48,6 @@ See [examples](https://github.com/PKopel/PiG/tree/master/examples) for more info
 
 ### Dependencies
 * **[RIO](https://hackage.haskell.org/package/rio)**
-* **[Parsec](https://hackage.haskell.org/package/parsec)**
 * **[Haskeline](https://hackage.haskell.org/package/haskeline)**
 * **[pretty-terminal](https://github.com/loganmac/pretty-terminal)**
 * **[hspec](https://hspec.github.io)**

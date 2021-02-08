@@ -2,6 +2,7 @@
 
 ### 0.13.1
 * remove Print & Read constructors, use FunApp "print" and FunApp "read" instead
+* add one letter shortcuts for directives
 
 ### 0.13.0
 * rewrite parser and lexer with Alex and Happy

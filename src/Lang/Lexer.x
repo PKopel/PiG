@@ -28,52 +28,50 @@ import Lang.Tokens
 @char              = \' ( @escape | [^\\'\n\t\r] ) \'
 tokens :-
     $white+			;
-    "if"              { tok' TIf }
-    "elif"            { tok' TElIf }
-    "else"            { tok' TElse }
-    "while"           { tok' TWhile }
-    "do"              { tok' TDo }
-    "print"           { tok' TPrint }
-    "read()"          { tok' TRead }
-    "exit()"|":exit"  { tok' TExit }
-    ":help"           { tok' THelp }
-    ":rm"             { tok' TRM }
-    ":clear"          { tok' TClear }
-    ":load"           { tok' TLoad }
-    "+"               { tok' TPlus }
-    "-"               { tok' TMinus }
-    "*"               { tok' TStar }
-    "/"               { tok' TSlash }
-    "=>"              { tok' TFatArr }
-    "="               { tok' TAssign }
-    "^"               { tok' TDash }
-    "<"               { tok' TLt }
-    ">"               { tok' TGt }
-    "=="              { tok' TEq }
-    "!="              { tok' TNEq }
-    "<>"              { tok' TLtGt }
-    "><"              { tok' TGtLt }
-    "-<"              { tok' TRFork }
-    ">-"              { tok' TLFork }
-    "~"               { tok' TNot }
-    "&&"              { tok' TAnd }
-    "||"              { tok' TOr }
-    ")"               { tok' TRParen }
-    "("               { tok' TLParen }
-    "}"               { tok' TRBrace }
-    "{"               { tok' TLBrace }
-    "]"               { tok' TRBracket }
-    "["               { tok' TLBracket }
-    ","               { tok' TComma }
-    ";"               { tok' TSemi }
-    "true"            { tok' TTrue }
-    "false"           { tok' TFalse }
-    "null"            { tok' TNull }
-    @double           { tok (TNum . read) }
-    @char             { tok lexChar }
-    @string           { tok (lexString []) }
-    @id               { tok TSym}
-    @comment_line.*   ;
+    "if"                   { tok' TIf }
+    "elif"                 { tok' TElIf }
+    "else"                 { tok' TElse }
+    "while"                { tok' TWhile }
+    "do"                   { tok' TDo }
+    "exit()"|":exit"|":e"  { tok' TExit }
+    ":help"|":h"           { tok' THelp }
+    ":rm"                  { tok' TRM }
+    ":clear"|":c"          { tok' TClear }
+    ":load"|":l"           { tok' TLoad }
+    "+"                    { tok' TPlus }
+    "-"                    { tok' TMinus }
+    "*"                    { tok' TStar }
+    "/"                    { tok' TSlash }
+    "=>"                   { tok' TFatArr }
+    "="                    { tok' TAssign }
+    "^"                    { tok' TDash }
+    "<"                    { tok' TLt }
+    ">"                    { tok' TGt }
+    "=="                   { tok' TEq }
+    "!="                   { tok' TNEq }
+    "<>"                   { tok' TLtGt }
+    "><"                   { tok' TGtLt }
+    "-<"                   { tok' TRFork }
+    ">-"                   { tok' TLFork }
+    "~"                    { tok' TNot }
+    "&&"                   { tok' TAnd }
+    "||"                   { tok' TOr }
+    ")"                    { tok' TRParen }
+    "("                    { tok' TLParen }
+    "}"                    { tok' TRBrace }
+    "{"                    { tok' TLBrace }
+    "]"                    { tok' TRBracket }
+    "["                    { tok' TLBracket }
+    ","                    { tok' TComma }
+    ";"                    { tok' TSemi }
+    "true"                 { tok' TTrue }
+    "false"                { tok' TFalse }
+    "null"                 { tok' TNull }
+    @double                { tok (TNum . read) }
+    @char                  { tok lexChar }
+    @string                { tok (lexString []) }
+    @id                    { tok TSym}
+    @comment_line.*                   ;
     @comment_start(.*\n)*@comment_end ;
 
 {
