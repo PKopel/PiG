@@ -1,8 +1,10 @@
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module Interp.Statements where
+module Interp.Statements
+  ( eval
+  )
+where
 
 import qualified Data.Map                      as Map
 import           Data.Sequence                  ( Seq(..) )
@@ -13,20 +15,20 @@ eval :: Expr -> Interp Val
 eval (Val n          ) = return n
 eval (Var x          ) = readVar x
 eval (Binary op e1 e2) = appBin op <$> eval e1 <*> eval e2
-eval (Unary op e     ) = appUn op <$> eval e >>= \case
+eval (Unary op e     ) = eval e <&> appUn op >>= \case
   ListVal (h :<| t :<| Empty) ->
     let (iv, x) = isVar e in when iv (void (writeVar x t)) >> return h
   other -> return other
-eval (ListLiteral es) = ListVal . Seq.fromList <$> mapM eval es
-eval (FunApp n vs   ) = readVar n >>= evalFunApp vs
-eval Read             = StrVal <$> readVal 
-eval (Print []      ) = return Null
-eval (Print (e : es)) = case e of
+eval (ListLiteral es         ) = ListVal . Seq.fromList <$> mapM eval es
+eval (FunApp "read"  _       ) = StrVal <$> readVal
+eval (FunApp "print" []      ) = return Null
+eval (FunApp "print" (e : es)) = case e of
   Seq _ -> eval e >>= \case
-    Null  -> eval (Print es)
-    other -> printVal other >> printString "\n" >> eval (Print es)
-  Print _ -> eval e >> eval (Print es)
-  _       -> eval e >>= printVal >> eval (Print es)
+    Null  -> eval (FunApp "print" es)
+    other -> printVal other >> printString "\n" >> eval (FunApp "print" es)
+  FunApp "print" _ -> eval e >> eval (FunApp "print" es)
+  _                -> eval e >>= printVal >> eval (FunApp "print" es)
+eval (FunApp n vs        ) = readVar n >>= evalFunApp vs
 eval (Seq []             ) = return Null
 eval (Seq [s     ]       ) = eval s
 eval (Seq (s : ss)       ) = eval s >> eval (Seq ss)
@@ -45,12 +47,22 @@ eval (Assign x i e) = do
       _          -> writeVar x v
     _ -> writeVar x v
 
+evalWhile :: Expr -> Expr -> Seq Val -> Interp (Seq Val)
+evalWhile e s acc = eval e >>= \case
+  AlgVal  v -> while $ v /= 0
+  BoolVal v -> while v
+  ListVal v -> while $ not (Seq.null v)
+  _         -> return acc
+ where
+  while cond =
+    if cond then eval s >>= evalWhile e s . (acc Seq.|>) else return acc
+
 evalFunApp :: [Expr] -> Val -> Interp Val
--- execute function with arguments from vs
-evalFunApp vs (FunVal as body) = getStore >>= \case
+-- execute function with arguments from args
+evalFunApp args (FunVal as body) = getStore >>= \case
   Right s -> do
     let oldLocals = view (scope localL) s
-    newLocals <- Map.fromList <$> zipWithM (\a v -> eval v <&> (,) a) as vs
+    newLocals <- Map.fromList <$> zipWithM (\a v -> eval v <&> (,) a) as args
     oldScope  <- getScope
     withStore $ (over . scope) localL (const newLocals) -- introducing local variables
     setScope localL -- from now variables are declared in local scope
@@ -60,15 +72,15 @@ evalFunApp vs (FunVal as body) = getStore >>= \case
     return retVal
   _ -> return Null
 -- get elements from list
-evalFunApp vs (ListVal l) = do
-  evs <- evalDoubleList vs
+evalFunApp args (ListVal l) = do
+  evs <- evalDoubleList args
   case getElems l evs of
     v  :<|    Empty -> return v -- one argument in vs, result is a single value
     v@(_ :<| _)     -> return $ ListVal v -- more than one argument in vs, result is a list
     _               -> return Null
 -- get chars from string
-evalFunApp vs (StrVal l) = do
-  evs <- evalDoubleList vs
+evalFunApp args (StrVal l) = do
+  evs <- evalDoubleList args
   case getElems l evs of
     [  v    ] -> return $ CharVal v -- one argument in vs, result is a single char
     v@(_ : _) -> return $ StrVal v -- more than one argument in vs, result is a string
@@ -83,12 +95,3 @@ evalDoubleList = foldM
   )
   []
 
-evalWhile :: Expr -> Expr -> Seq Val -> Interp (Seq Val)
-evalWhile e s acc = eval e >>= \case
-  AlgVal  v -> while $ v /= 0
-  BoolVal v -> while v
-  ListVal v -> while $ not (Seq.null v)
-  _         -> return acc
- where
-  while cond =
-    if cond then eval s >>= evalWhile e s . (acc Seq.|>) else return acc

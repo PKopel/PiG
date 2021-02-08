@@ -125,8 +125,6 @@ data Expr
   | While Expr Expr
   | If [(Expr, Expr)] Expr
   | Seq [Expr]
-  | Print [Expr]
-  | Read
   | forall op. (BinAppToVal op) => Binary op Expr Expr
   | forall op. (UnAppToVal op) => Unary op Expr
 
@@ -140,9 +138,7 @@ instance Eq Expr where
   (Var         a) == (Var         d) = a == d
   (Val         a) == (Val         d) = a == d
   (Seq         a) == (Seq         d) = a == d
-  (Print       a) == (Print       d) = a == d
   (ListLiteral a) == (ListLiteral d) = a == d
-  Read            == Read            = True
   _               == _               = False
 
 instance Ord Expr where
@@ -151,21 +147,17 @@ instance Ord Expr where
   _        <= _        = False
 
 instance Show Expr where
-  show Read           = "Read"
-  show (Print b     ) = "Print" ++ '(' : intercalate ", " (show <$> b) ++ ")"
   show (Var v       ) = "Var " <> v
   show (Val v       ) = "Val " <> show v
-  show (Assign a b c) = unwords ["Assign", a, show b, show c]
+  show (Assign a b c) = unwords [a, show b, " = ", show c]
   show (While a b   ) = unwords ["While", show a, show b]
-  show (Seq v       ) = "Seq " ++ '{' : intercalate "; " (show <$> v) ++ "}"
+  show (Seq v       ) = '{' : intercalate "; " (show <$> v) ++ "}"
   show (Binary _ a b) = unwords ["Binary", show a, show b]
   show (Unary _ a   ) = "Unary " <> show a
   show (If a b) =
-    unwords ["If", intercalate " elif " (show <$> a), "else", show b]
-  show (ListLiteral v) =
-    "ListLiteral" ++ '[' : intercalate ", " (show <$> v) ++ "]"
-  show (FunApp a b) =
-    "FunApp " <> a ++ '(' : intercalate ", " (show <$> b) ++ ")"
+    unwords ["if", intercalate " elif " (show <$> a), "else", show b]
+  show (ListLiteral v) = '[' : intercalate ", " (show <$> v) ++ "]"
+  show (FunApp a b   ) = a ++ '(' : intercalate ", " (show <$> b) ++ ")"
 
 data Val
   = AlgVal Double

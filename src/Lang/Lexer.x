@@ -1,6 +1,14 @@
 {
 {-# OPTIONS -w  #-}
-module Lang.Lexer where
+module Lang.Lexer
+  ( alexMonadScan'
+  , alexError'
+  , runAlex
+  , runAlex'
+  , Alex(..)
+  , Token(..)
+  )
+where
 
 import Control.Monad ( liftM )
 import Lang.Tokens

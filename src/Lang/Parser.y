@@ -1,6 +1,10 @@
 {
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-module Lang.Parser where
+module Lang.Parser 
+        ( parseFile
+        , parseProg
+        ) 
+where
 
 import Lang.Tokens
 import Lang.Lexer
@@ -93,8 +97,8 @@ Expr    : Atom                          { $1 }
         | VAR '=' Expr                  { Assign $1 (Val Null) $3 }
         | while Expr do InSeq           { While $2 $4 }
         | while Expr do Expr            { While $2 $4 }
-        | read                          { Read }
-        | print FunAppl                 { Print $2 }
+        | read                          { FunApp "read" [] }
+        | print FunAppl                 { FunApp "print" $2 }
         | VAR FunAppl                   { FunApp $1 $2}
         | Expr '+' Expr                 { Binary ((+) :: Double -> Double -> Double) $1 $3 }
         | Expr '-' Expr                 { Binary ((-) :: Double -> Double -> Double) $1 $3 }

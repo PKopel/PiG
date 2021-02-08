@@ -52,7 +52,7 @@ runLine colour store = do
 runProg :: Store -> Prog -> InputT IO ()
 runProg store (Stmt p) =
   let p' = case p of
-        e@(Seq _) -> Print [e]
+        e@(Seq _) -> FunApp "print" [e]
         other     -> other
   in  runWithStore (eval p') store >>= runLine Green
 runProg _     (Drct Exit) = return ()
