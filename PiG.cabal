@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e749a106d3effe72a12b131a371f7c92f27620565209b34cec37410770a778eb
+-- hash: f4e717b68a681b3611e955555e0bbcf6cfeaf2d1a461ece1e2522bdc31da39d5
 
 name:           PiG
-version:        0.12.2
+version:        0.13.1
 description:    Please see the README on Github at <https://github.com/PKopel/PiG#readme>
 homepage:       https://github.com/PKopel/PiG#readme
 bug-reports:    https://github.com/PKopel/PiG/issues
@@ -32,6 +32,7 @@ library
       Interp.Statements
       Lang.Lexer
       Lang.Parser
+      Lang.Tokens
       Run
       Utils.Types
       Utils.Util
@@ -42,15 +43,16 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints
   build-depends:
       QuickCheck
+    , array
     , base >=4.11 && <10
     , containers
     , haskeline
     , hspec
     , hspec-core
     , mtl
-    , parsec
     , pretty-terminal
     , rio >=0.1.12.0
+    , text
   default-language: Haskell2010
 
 executable pig
@@ -63,6 +65,7 @@ executable pig
   build-depends:
       PiG
     , QuickCheck
+    , array
     , base >=4.11 && <10
     , containers
     , haskeline
@@ -70,9 +73,9 @@ executable pig
     , hspec-core
     , mtl
     , optparse-simple
-    , parsec
     , pretty-terminal
     , rio >=0.1.12.0
+    , text
   default-language: Haskell2010
 
 test-suite pig-test
@@ -88,13 +91,14 @@ test-suite pig-test
   build-depends:
       PiG
     , QuickCheck
+    , array
     , base >=4.11 && <10
     , containers
     , haskeline
     , hspec
     , hspec-core
     , mtl
-    , parsec
     , pretty-terminal
     , rio >=0.1.12.0
+    , text
   default-language: Haskell2010

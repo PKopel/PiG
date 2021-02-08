@@ -1,6 +1,6 @@
 # PiG
 
-Interpreter for a simple language.
+Interpreter for a simple language, build with [Alex](https://www.haskell.org/alex/) and [Happy](https://www.haskell.org/happy/).
 
 ## Usage  
 
@@ -17,7 +17,7 @@ In PiG, everything is an expression:
     * `true`/`false`
     * numbers (integral and real)
     * characters like `'a'` and strings like `"abcd"`
-    * functions (lambdas) in form `(<arg1>,...,<argn>) => <expr>`
+    * functions (lambdas) in form `(<arg1>,...,<argn>) => <sequence>`
     * lists in form `[<expr1>,...,<exprn>]`
 * assignments: `<name> = <expr>`, where name consists of alphanumeric characters, or `<name>(<number>) = <expr>` to assign value to a specific element of a list. Value of assignment is the value of expression on the right
 * sequence of expressions, separated and optionally ended by `;`. When sequence is enclosed by braces (`{...}`), it is treated as a single expression (sequences can be nested, like `{ <expr1>; { <expr2>; <expr3> }; }`). Value of a sequence is the value of the last expression in it
@@ -27,7 +27,7 @@ In PiG, everything is an expression:
 * function application, in form `<name>(<arg1>,...,<argn>)`
 * expressions with build-in operators
 
-There are two build-in functions provided: `print(arg1,...,argn)` which prints all its arguments to stdout, and `read()`, which reads one literal value (number or string) from stdin.
+There are two build-in functions provided: `print(arg1,...,argn)` which prints all its arguments to stdout, and `read()`, which reads string from stdin.
 
 Build-in operators are:
 * `+`, `-`, `*`, `/` and `^` for numbers
@@ -36,11 +36,11 @@ Build-in operators are:
 * `><` for strings (attaches second argument at the end of the firs one, works with any type but results always in a string)
 
 Interpreter also provides five directives:
-* `:load "<file path>"` to load file
-* `:exit` (or Ctrl+d) to leave the interpreter
+* `:load | :l "<file path>"` to load file
+* `:exit | :e` (or Ctrl+d) to leave the interpreter
 * `:rm <variable name>` to remove binding of a variable
-* `:clear` to remove all bindings
-* `:help` to display information about directives
+* `:clear | :c` to remove all bindings
+* `:help | :h` to display information about directives
 
 Directives can also be used in files.
 
@@ -48,11 +48,11 @@ See [examples](https://github.com/PKopel/PiG/tree/master/examples) for more info
 
 ### Dependencies
 * **[RIO](https://hackage.haskell.org/package/rio)**
-* **[Parsec](https://hackage.haskell.org/package/parsec)**
 * **[Haskeline](https://hackage.haskell.org/package/haskeline)**
 * **[pretty-terminal](https://github.com/loganmac/pretty-terminal)**
 * **[hspec](https://hspec.github.io)**
 * **[QuickCheck](https://hackage.haskell.org/package/QuickCheck)**
+* **[array](https://gitlab.haskell.org/ghc/packages/array)**
 
 ### Author
 
