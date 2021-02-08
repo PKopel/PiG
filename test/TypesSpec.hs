@@ -12,8 +12,7 @@ import           Test.QuickCheck
 
 instance Arbitrary Expr where
   arbitrary = oneof
-    [ return Read
-    , Var <$> arbitrary
+    [ Var <$> arbitrary
     , Val <$> arbitrary
     , Assign <$> arbitrary <*> arbitrary <*> arbitrary
     , ListLiteral <$> arbitrary
@@ -21,7 +20,6 @@ instance Arbitrary Expr where
     , While <$> arbitrary <*> arbitrary
     , If <$> arbitrary <*> arbitrary
     , Seq <$> arbitrary
-    , Print <$> arbitrary
     ]
 
 instance Arbitrary Val where

@@ -27,7 +27,7 @@ import           TypesSpec                      ( )
 
 interpToProp :: Interp a -> (Scope, Store) -> PropertyM IO a
 interpToProp i s =
-  run . runInputT defaultSettings $ (runStateT . runInterp) i s >>= return . fst
+  run . runInputT defaultSettings $ (runStateT . runInterp) i s <&> fst
 
 prop_getStore :: (Scope, Store) -> Property
 prop_getStore ss@(_, st) = monadicIO $ do
@@ -68,16 +68,16 @@ prop_getElems ids seqv =
     == getElems seqv ids'''
  where
   ids'   = fromInteger <$> ids
-  ids''  = ((+ 0.49) . fromInteger) <$> ids
-  ids''' = ((subtract 0.49) . fromInteger) <$> ids
+  ids''  = (+ 0.49) . fromInteger <$> ids
+  ids''' = subtract 0.49 . fromInteger <$> ids
 
 spec :: Spec
-spec = do
+spec =
   describe "Utils.Util" $ do
-    modifyMaxSuccess (const 1) $ do
-      it "Utils.Util.getStore" $ property prop_getStore
-      it "Utils.Util.getScope" $ property prop_getScope
-      it "Utils.Util.putStore" $ property prop_putStore
-      it "Utils.Util.setScope" $ property prop_setScope
-      it "Utils.Util.withStore" $ property prop_withStore
-      it "Utils.Util.getElems" $ property prop_getElems
+  modifyMaxSuccess (const 1) $ do
+    it "Utils.Util.getStore" $ property prop_getStore
+    it "Utils.Util.getScope" $ property prop_getScope
+    it "Utils.Util.putStore" $ property prop_putStore
+    it "Utils.Util.setScope" $ property prop_setScope
+    it "Utils.Util.withStore" $ property prop_withStore
+    it "Utils.Util.getElems" $ property prop_getElems
