@@ -1,5 +1,8 @@
 # Changelog for PiG
 
+### 0.13.1
+* remove Print & Read constructors, use FunApp "print" and FunApp "read" instead
+
 ### 0.13.0
 * rewrite parser and lexer with Alex and Happy
 
