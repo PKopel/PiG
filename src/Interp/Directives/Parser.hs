@@ -11,7 +11,7 @@ import           Text.Parsec
 import           Text.Parsec.String             ( Parser )
 
 parseDrct :: String -> Either String Drct
-parseDrct s = case parse drctParser "REPL directives" s of
+parseDrct s = case parse drctParser "PIG REPL" s of
   Left  err  -> Left $ show err
   Right drct -> Right drct
 
@@ -21,8 +21,5 @@ drctParser =
     *>  try (string ":e" $> Exit)
     <|> try (string ":h" $> Help)
     <|> try (string ":c" $> Clear)
-    <|> try (string ":rm " *> (Rm <$> anyStr))
-    <|> ((try (string ":l ") <|> string ":load ") *> (Load <$> quotes anyStr))
- where
-  quotes = between (char '"') (char '"')
-  anyStr = many anyToken
+    <|> try (string ":rm " *> (Rm <$> many anyToken))
+    <|> ((try (string ":l \"") <|> string ":load \"") *> (Load <$> manyTill anyChar (char '"')))

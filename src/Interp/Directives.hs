@@ -15,7 +15,7 @@ isDirective s = ':' `elem` s
 
 execute :: String -> Interp ()
 execute str = case parseDrct str of
-  Left  err  -> printString err
+  Left  err  -> printString (err ++ "\n")
   Right drct -> exec drct
 
 exec :: Drct -> Interp ()
