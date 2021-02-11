@@ -23,4 +23,4 @@ even = (a) => {
 
 guessing();
 
-:exit
+exit();

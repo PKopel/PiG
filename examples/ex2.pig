@@ -1,3 +1,3 @@
-fun2 = (a,b) => {a * b}
+fun2 = (a,b) => {a * b};
 
-fun3 = (a,b,c) => {(a+b)*c}
+fun3 = (a,b,c) => {(a+b)*c};
