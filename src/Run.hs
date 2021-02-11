@@ -8,18 +8,9 @@ where
 
 import           Data.Version                   ( showVersion )
 import           Import
+import           Interp.Console                 ( startREPL )
 import           Interp.Directives              ( exec )
-import           Interp.Statements              ( eval )
-import           Lang.Parser                    ( parseProg )
-import           System.Console.Haskeline       ( InputT
-                                                , getInputLine
-                                                , outputStrLn
-                                                , runInputT
-                                                )
-import           System.Console.Pretty          ( Color(Green, Red)
-                                                , Pretty(color, style)
-                                                , Style(Faint)
-                                                )
+import           System.Console.Haskeline       ( runInputT )
 
 run :: RIO App ()
 run = do
@@ -35,25 +26,8 @@ run = do
         <> fromString (showVersion version)
         <> "\ntype ':help' or ':h' for more information "
         )
-      liftIO $ runInputT settings $ runLine Green store
+      liftIO $ startREPL settings store
  where
   startStore ops = case optionsLoad ops of
     []   -> return $ Right emptyStore
     file -> runWithStore (exec (Load file)) $ Right emptyStore
-
-runLine :: Color -> Store -> InputT IO ()
-runLine colour store = do
-  line <- getInputLine $ (style Faint . color colour) "PiG" <> "> "
-  case parseProg <$> line of
-    Nothing           -> return ()
-    Just (Left  err ) -> outputStrLn err >> runLine Red store
-    Just (Right prog) -> runProg store prog
-
-runProg :: Store -> Prog -> InputT IO ()
-runProg store (Stmt p) =
-  let p' = case p of
-        e@(Seq _) -> FunApp "print" [e]
-        other     -> other
-  in  runWithStore (eval p') store >>= runLine Green
-runProg _     (Drct Exit) = return ()
-runProg store (Drct p   ) = runWithStore (exec p) store >>= runLine Green

@@ -3,6 +3,7 @@
 
 module Interp.Statements
   ( eval
+  , evalFile
   )
 where
 
@@ -10,6 +11,12 @@ import qualified Data.Map                      as Map
 import           Data.Sequence                  ( Seq(..) )
 import qualified Data.Sequence                 as Seq
 import           Import
+import           Lang.Parser                    ( parseFile )
+import           System.Console.Haskeline       ( InputT
+                                                , outputStrLn
+                                                )
+import           System.IO.Error                ( tryIOError )
+import qualified Data.Text                     as T
 
 eval :: Expr -> Interp Val
 eval (Val n          ) = return n
@@ -19,16 +26,9 @@ eval (Unary op e     ) = eval e <&> appUn op >>= \case
   ListVal (h :<| t :<| Empty) ->
     let (iv, x) = isVar e in when iv (void (writeVar x t)) >> return h
   other -> return other
-eval (ListLiteral es         ) = ListVal . Seq.fromList <$> mapM eval es
-eval (FunApp "read"  _       ) = StrVal <$> readVal
-eval (FunApp "print" []      ) = return Null
-eval (FunApp "print" (e : es)) = case e of
-  Seq _ -> eval e >>= \case
-    Null  -> eval (FunApp "print" es)
-    other -> printVal other >> printString "\n" >> eval (FunApp "print" es)
-  FunApp "print" _ -> eval e >> eval (FunApp "print" es)
-  _                -> eval e >>= printVal >> eval (FunApp "print" es)
-eval (FunApp n vs        ) = readVar n >>= evalFunApp vs
+eval (ListLiteral es) = ListVal . Seq.fromList <$> mapM eval es
+eval (FunApp n vs) | n `elem` bifs = mapM eval vs >>= evalBIF n
+                   | otherwise     = readVar n >>= evalFunApp vs
 eval (Seq []             ) = return Null
 eval (Seq [s     ]       ) = eval s
 eval (Seq (s : ss)       ) = eval s >> eval (Seq ss)
@@ -62,7 +62,7 @@ evalFunApp :: [Expr] -> Val -> Interp Val
 evalFunApp args (FunVal as body) = getStore >>= \case
   Right s -> do
     let oldLocals = view (scope localL) s
-    newLocals <- Map.fromList <$> zipWithM (\a v -> eval v <&> (,) a) as args
+    newLocals <- Map.fromList <$> zipWithM (\v a -> eval v <&> (,) a) args as
     oldScope  <- getScope
     withStore $ (over . scope) localL (const newLocals) -- introducing local variables
     setScope localL -- from now variables are declared in local scope
@@ -95,3 +95,25 @@ evalDoubleList = foldM
   )
   []
 
+bifs :: [String]
+bifs = ["read", "print", "load", "exit"]
+
+evalBIF :: String -> [Val] -> Interp Val
+evalBIF "read"  _        = StrVal <$> readVal
+evalBIF "print" []       = return Null
+evalBIF "print" (e : es) = printVal e >> evalBIF "print" es
+evalBIF "exit"  _        = putStore (Left ()) >> return Null
+evalBIF "load"  []       = return Null
+evalBIF "load" ((StrVal file) : t) =
+  getStore >>= Interp . lift . evalFile file >>= putStore >> evalBIF "load" t
+evalBIF _ _ = return Null
+
+
+evalFile :: FilePath -> Store -> InputT IO Store
+evalFile file store = do
+  contents <- (lift . tryIOError)
+    (parseFile file . T.unpack <$> readFileUtf8 file)
+  case contents of
+    Left  err          -> outputStrLn (show err) >> return store
+    Right (Left  err ) -> outputStrLn err >> return store
+    Right (Right expr) -> runWithStore (eval expr) store

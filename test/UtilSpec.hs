@@ -72,8 +72,7 @@ prop_getElems ids seqv =
   ids''' = subtract 0.49 . fromInteger <$> ids
 
 spec :: Spec
-spec =
-  describe "Utils.Util" $ do
+spec = describe "Utils.Util" $ do
   modifyMaxSuccess (const 1) $ do
     it "Utils.Util.getStore" $ property prop_getStore
     it "Utils.Util.getScope" $ property prop_getScope

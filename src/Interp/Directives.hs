@@ -1,31 +1,22 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Interp.Directives where
 
-import qualified Data.Text                     as T
+import           Import
+import           Interp.Statements              ( evalFile )
+import           Interp.Directives.Parser       ( parseDrct )
 import           Data.Map                       ( delete
                                                 , empty
                                                 )
-import           Import
-import           Interp.Statements              ( eval )
-import           Lang.Parser                    ( parseFile )
-import           System.Console.Haskeline       ( InputT
-                                                , outputStrLn
-                                                )
-import           System.IO.Error                ( tryIOError )
 
-execProg :: Store -> Prog -> InputT IO Store
-execProg store (Stmt p) = runWithStore (eval p) store
-execProg store (Drct p) = runWithStore (exec p) store
+isDirective :: String -> Bool
+isDirective s = ':' `elem` s
 
-execFile :: FilePath -> Store -> InputT IO Store
-execFile file store =
-  (lift . tryIOError) (parseFile file . T.unpack <$> readFileUtf8 file)
-    >>= \case
-          Left  err          -> outputStrLn (show err) >> return store
-          Right (Left  err ) -> outputStrLn err >> return store
-          Right (Right prog) -> foldM execProg store prog
+
+execute :: String -> Interp ()
+execute str = case parseDrct str of
+  Left  err  -> printString err
+  Right drct -> exec drct
 
 exec :: Drct -> Interp ()
 exec Exit  = putStore (Left ())
@@ -39,4 +30,4 @@ exec Help =
     \:rm <name> - remove variable <name>\n\
     \:load | :l \"<file path>\"' - execute program from <file path>\n"
 exec (Rm   var ) = withStore $ (over . scope) globalL (delete var)
-exec (Load file) = getStore >>= Interp . lift . execFile file >>= putStore
+exec (Load file) = getStore >>= Interp . lift . evalFile file >>= putStore
