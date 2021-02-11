@@ -8,8 +8,8 @@ where
 
 import           Data.Version                   ( showVersion )
 import           Import
-import           REPL.Console                   ( startREPL )
-import           REPL.Directives                ( exec )
+import           Interp.Console                 ( startREPL )
+import           Interp.Directives              ( exec )
 import           System.Console.Haskeline       ( runInputT )
 
 run :: RIO App ()

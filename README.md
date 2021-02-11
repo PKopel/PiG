@@ -27,7 +27,7 @@ In PiG, everything is an expression:
 * function application, in form `<name>(<arg1>,...,<argn>)`
 * expressions with build-in operators
 
-There are two build-in functions provided: `print(arg1,...,argn)` which prints all its arguments to stdout, and `read()`, which reads string from stdin.
+There are four build-in functions provided: `print(arg1,...,argn)` which prints all its arguments to stdout, `read()`, which reads string from stdin, `load(<file name 1>, ... , <file name n>)` which loads other files and `exit()` which closes interpreter.
 
 Build-in operators are:
 * `+`, `-`, `*`, `/` and `^` for numbers
@@ -41,8 +41,6 @@ Interpreter also provides five directives:
 * `:rm <variable name>` to remove binding of a variable
 * `:clear | :c` to remove all bindings
 * `:help | :h` to display information about directives
-
-Directives can also be used in files.
 
 See [examples](https://github.com/PKopel/PiG/tree/master/examples) for more info.
 

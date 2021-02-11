@@ -182,7 +182,10 @@ type Bindings = Map Var Val
 
 newtype Scope = Scope {scope :: Lens' Scopes Bindings}
 
-data Scopes = Scopes {globalS :: Bindings, localS :: Bindings}
+instance Show Scope where
+  show _ = "scope"
+
+data Scopes = Scopes {globalS :: Bindings, localS :: Bindings} deriving (Show)
 
 instance Eq Scopes where
   s1 == s2 = (globalS s1 == globalS s2) && (localS s1 == localS s2)

@@ -1,5 +1,12 @@
 # Changelog for PiG
 
+### 0.14.1
+* change implementation of read, print, load and exit
+
+### 0.14.0
+* change implementation of directives
+* split interpretation of directives and programs
+
 ### 0.13.1
 * remove Print & Read constructors, use FunApp "print" and FunApp "read" instead
 * add one letter shortcuts for directives

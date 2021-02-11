@@ -1,5 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module REPL.Directives.Parser where
+module Interp.Directives.Parser where
 
 import           Import                  hiding ( many
                                                 , optional

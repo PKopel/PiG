@@ -1,9 +1,9 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module REPL.Console where
+module Interp.Console ( startREPL ) where
 
 import           Import
 import           Interp.Statements              ( eval )
-import           REPL.Directives                ( isDirective
+import           Interp.Directives              ( isDirective
                                                 , execute
                                                 )
 import           Lang.Parser                    ( parseProg )
@@ -37,6 +37,6 @@ runLine colour store    = do
 runProg :: Store -> Expr -> InputT IO ()
 runProg store expr =
   let expr' = case expr of
-        e@(Seq _) -> FunApp "print" [e]
+        e@(Seq _) -> FunApp "print" [e, Val (StrVal "\n")]
         other     -> other
   in  runWithStore (eval expr') store >>= runLine Green

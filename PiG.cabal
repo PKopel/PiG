@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 39bdc898882c20aa1864baed87d9897cb094253324d59874a15cee20e9eead2d
+-- hash: e490a1eb919330ed49553fbcd5bab88cdae6862ee5b8a613e4fbedc323cdbeb0
 
 name:           PiG
-version:        0.14.0
+version:        0.14.1
 description:    Please see the README on Github at <https://github.com/PKopel/PiG#readme>
 homepage:       https://github.com/PKopel/PiG#readme
 bug-reports:    https://github.com/PKopel/PiG/issues
@@ -28,17 +28,15 @@ source-repository head
 library
   exposed-modules:
       Import
+      Interp.Console
+      Interp.Directives
+      Interp.Directives.Parser
       Interp.Statements
       Lang.Lexer
       Lang.Parser
       Lang.Tokens
-      REPL.Console
-      REPL.Directives
-      REPL.Directives.Parser
       Run
       Utils.Types
-      Utils.Types.Classes
-      Utils.Types.Expr
       Utils.Util
   other-modules:
       Paths_PiG
