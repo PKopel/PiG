@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f4e717b68a681b3611e955555e0bbcf6cfeaf2d1a461ece1e2522bdc31da39d5
+-- hash: 39bdc898882c20aa1864baed87d9897cb094253324d59874a15cee20e9eead2d
 
 name:           PiG
-version:        0.13.1
+version:        0.14.0
 description:    Please see the README on Github at <https://github.com/PKopel/PiG#readme>
 homepage:       https://github.com/PKopel/PiG#readme
 bug-reports:    https://github.com/PKopel/PiG/issues
@@ -28,13 +28,17 @@ source-repository head
 library
   exposed-modules:
       Import
-      Interp.Directives
       Interp.Statements
       Lang.Lexer
       Lang.Parser
       Lang.Tokens
+      REPL.Console
+      REPL.Directives
+      REPL.Directives.Parser
       Run
       Utils.Types
+      Utils.Types.Classes
+      Utils.Types.Expr
       Utils.Util
   other-modules:
       Paths_PiG
@@ -50,6 +54,7 @@ library
     , hspec
     , hspec-core
     , mtl
+    , parsec
     , pretty-terminal
     , rio >=0.1.12.0
     , text
@@ -73,6 +78,7 @@ executable pig
     , hspec-core
     , mtl
     , optparse-simple
+    , parsec
     , pretty-terminal
     , rio >=0.1.12.0
     , text
@@ -98,6 +104,7 @@ test-suite pig-test
     , hspec
     , hspec-core
     , mtl
+    , parsec
     , pretty-terminal
     , rio >=0.1.12.0
     , text

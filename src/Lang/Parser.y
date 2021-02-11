@@ -25,11 +25,6 @@ import Import
     else            { Token _ TElse }
     while           { Token _ TWhile }
     do              { Token _ TDo }
-    exit            { Token _ TExit }
-    help            { Token _ THelp }
-    rm              { Token _ TRM }
-    clear           { Token _ TClear }
-    load            { Token _ TLoad }
     '+'             { Token _ TPlus }
     '-'             { Token _ TMinus }
     '*'             { Token _ TStar }
@@ -73,19 +68,8 @@ import Import
 %left '<>' '><'
 %%
 
-File    : Prog File     { $1:$2 }
-        | Prog          { [$1] }
-        | eof           { [] }
-
-Prog    : Drct          { Drct $1 }
-        | OutSeq           { Stmt $1 }
-
-Drct    : exit          { Exit }
-        | help          { Help }
-        | clear         { Clear }
-        | load STR      { Load $2 }
-        | rm VAR        { Rm $2 }
-        | Drct ';'      { $1 } 
+File    : InSeq                 { $1 }
+        | ExprList              { Seq $1 } 
 
 Expr    : Atom                          { $1 }
         | ListLit                       { $1 }   
@@ -122,9 +106,6 @@ IfList  : Expr do InSeq elif IfList     { ($1,$3):$5 }
         | Expr do Expr elif IfList      { ($1,$3):$5 }
         | Expr do InSeq                 { [($1,$3)] }
         | Expr do Expr                  { [($1,$3)] }
-
-OutSeq  : InSeq                 { $1 }
-        | ExprList              { Seq $1 } 
 
 InSeq   : '{' ExprList '}'      { Seq $2 } 
         | '{' '}'               { Seq [] }      
@@ -168,10 +149,10 @@ happyError :: Token -> Alex a
 happyError (Token p t) =
   alexError' p ("parse error at token '" ++ show t ++ "'")
 
-parseFile :: FilePath -> String -> Either String [Prog]
+parseFile :: FilePath -> String -> Either String Expr
 parseFile = runAlex' pig
 
-parseProg :: String -> Either String Prog
-parseProg s = runAlex s (head <$> pig)
+parseProg :: String -> Either String Expr
+parseProg s = runAlex s pig
 
 }

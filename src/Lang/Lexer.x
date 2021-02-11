@@ -33,11 +33,6 @@ tokens :-
     "else"                 { tok' TElse }
     "while"                { tok' TWhile }
     "do"                   { tok' TDo }
-    "exit()"|":exit"|":e"  { tok' TExit }
-    ":help"|":h"           { tok' THelp }
-    ":rm"                  { tok' TRM }
-    ":clear"|":c"          { tok' TClear }
-    ":load"|":l"           { tok' TLoad }
     "+"                    { tok' TPlus }
     "-"                    { tok' TMinus }
     "*"                    { tok' TStar }

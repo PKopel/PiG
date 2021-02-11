@@ -58,29 +58,29 @@ instance Container [] where
   (<|) = (:)
   l |> a = l ++ [a]
 
-class UnAppToVal op where
+class UnaryOp op where
   appUn :: op -> Val -> Val
 
-instance UnAppToVal (Double -> Double) where
+instance UnaryOp (Double -> Double) where
   appUn op (AlgVal a) = AlgVal $ op a
   appUn _  _          = Null
 
-instance UnAppToVal (Bool -> Bool) where
+instance UnaryOp (Bool -> Bool) where
   appUn op (BoolVal a) = BoolVal $ op a
   appUn _  _           = Null
 
-instance UnAppToVal (Seq Val -> (Val, Seq Val)) where
+instance UnaryOp (Seq Val -> (Val, Seq Val)) where
   appUn op (ListVal a) =
     let (v, l) = op a in ListVal $ Seq.fromList [v, ListVal l]
   appUn _ _ = Null
 
-class BinAppToVal op where
+class BinaryOp op where
   appBin :: op -> Val -> Val -> Val
 
-instance BinAppToVal (Val -> Val -> Bool) where
+instance BinaryOp (Val -> Val -> Bool) where
   appBin op a b = BoolVal $ op a b
 
-instance BinAppToVal (Bool -> Bool -> Bool) where
+instance BinaryOp (Bool -> Bool -> Bool) where
   appBin op a b = BoolVal $ op (toBool a) (toBool b)
    where
     toBool (BoolVal v) = v
@@ -90,23 +90,21 @@ instance BinAppToVal (Bool -> Bool -> Bool) where
     toBool Null        = False
     toBool _           = True
 
-instance BinAppToVal (Double -> Double -> Double) where
+instance BinaryOp (Double -> Double -> Double) where
   appBin op (AlgVal a) (AlgVal b) = AlgVal $ op a b
   appBin _  _          _          = Null
 
-instance BinAppToVal (String -> String -> String) where
+instance BinaryOp (String -> String -> String) where
   appBin op a b = StrVal $ op (toStr a) (toStr b)
    where
     toStr (FunVal _ _) = ""
     toStr v            = show v
 
-instance BinAppToVal (Seq.Seq Val -> Seq.Seq Val -> Seq.Seq Val) where
+instance BinaryOp (Seq.Seq Val -> Seq.Seq Val -> Seq.Seq Val) where
   appBin op a b = ListVal $ op (toSeq a) (toSeq b)
    where
     toSeq (ListVal v) = v
     toSeq v           = Seq.singleton v
-
-data Prog = Stmt Expr | Drct Drct deriving (Show)
 
 data Drct
   = Exit
@@ -114,7 +112,6 @@ data Drct
   | Help
   | Rm Var
   | Load FilePath
-  deriving (Show)
 
 data Expr
   = Var Var
@@ -125,8 +122,8 @@ data Expr
   | While Expr Expr
   | If [(Expr, Expr)] Expr
   | Seq [Expr]
-  | forall op. (BinAppToVal op) => Binary op Expr Expr
-  | forall op. (UnAppToVal op) => Unary op Expr
+  | forall op. (BinaryOp op) => Binary op Expr Expr
+  | forall op. (UnaryOp op) => Unary op Expr
 
 instance Eq Expr where
   (Assign a b c ) == (Assign d e f ) = a == d && b == e && c == f
@@ -185,10 +182,7 @@ type Bindings = Map Var Val
 
 newtype Scope = Scope {scope :: Lens' Scopes Bindings}
 
-instance Show Scope where
-  show _ = "scope"
-
-data Scopes = Scopes {globalS :: Bindings, localS :: Bindings} deriving (Show)
+data Scopes = Scopes {globalS :: Bindings, localS :: Bindings}
 
 instance Eq Scopes where
   s1 == s2 = (globalS s1 == globalS s2) && (localS s1 == localS s2)

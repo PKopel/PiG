@@ -1,31 +1,36 @@
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module Interp.Directives where
+module REPL.Directives where
 
-import qualified Data.Text                     as T
-import           Data.Map                       ( delete
-                                                , empty
-                                                )
 import           Import
 import           Interp.Statements              ( eval )
 import           Lang.Parser                    ( parseFile )
+import           REPL.Directives.Parser         ( parseDrct )
 import           System.Console.Haskeline       ( InputT
                                                 , outputStrLn
                                                 )
 import           System.IO.Error                ( tryIOError )
+import qualified Data.Text                     as T
+import           Data.Map                       ( delete
+                                                , empty
+                                                )
 
-execProg :: Store -> Prog -> InputT IO Store
-execProg store (Stmt p) = runWithStore (eval p) store
-execProg store (Drct p) = runWithStore (exec p) store
+isDirective :: String -> Bool
+isDirective s = ':' `elem` s
 
 execFile :: FilePath -> Store -> InputT IO Store
-execFile file store =
-  (lift . tryIOError) (parseFile file . T.unpack <$> readFileUtf8 file)
-    >>= \case
-          Left  err          -> outputStrLn (show err) >> return store
-          Right (Left  err ) -> outputStrLn err >> return store
-          Right (Right prog) -> foldM execProg store prog
+execFile file store = do
+  contents <- (lift . tryIOError)
+    (parseFile file . T.unpack <$> readFileUtf8 file)
+  case contents of
+    Left  err          -> outputStrLn (show err) >> return store
+    Right (Left  err ) -> outputStrLn err >> return store
+    Right (Right expr) -> runWithStore (eval expr) store
+
+execute :: String -> Interp ()
+execute str = case parseDrct str of
+  Left  err  -> printString err
+  Right drct -> exec drct
 
 exec :: Drct -> Interp ()
 exec Exit  = putStore (Left ())
