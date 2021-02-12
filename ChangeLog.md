@@ -1,5 +1,8 @@
 # Changelog for PiG
 
+### 0.14.2
+* change `--file` to `--load` to make it more consistent with language
+
 ### 0.14.1
 * change implementation of read, print, load and exit
 

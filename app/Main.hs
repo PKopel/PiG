@@ -39,7 +39,7 @@ pigOptions = simpleOptions
   (   Options
   <$> switch (long "verbose" <> short 'v' <> help "verbose output")
   <*> strOption
-        (long "file" <> short 'f' 
+        (long "load" <> short 'l' 
         <> metavar "FILE" <> value "" 
         <> help "start interpreter with FILE loaded"
         )
