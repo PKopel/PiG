@@ -11,7 +11,7 @@ import           Text.Parsec
 import           Text.Parsec.String             ( Parser )
 
 parseDrct :: String -> Either String Drct
-parseDrct s = case parse drctParser "PIG REPL" s of
+parseDrct s = case parse drctParser "PiG REPL" s of
   Left  err  -> Left $ show err
   Right drct -> Right drct
 
