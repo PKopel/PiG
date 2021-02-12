@@ -1,5 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
-module Interp.Console ( startREPL ) where
+module Interp.Console
+  ( startREPL
+  )
+where
 
 import           Import
 import           Interp.Statements              ( eval )

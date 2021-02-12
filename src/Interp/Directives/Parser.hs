@@ -22,4 +22,6 @@ drctParser =
     <|> try (string ":h" $> Help)
     <|> try (string ":c" $> Clear)
     <|> try (string ":rm " *> (Rm <$> many anyToken))
-    <|> ((try (string ":l \"") <|> string ":load \"") *> (Load <$> manyTill anyChar (char '"')))
+    <|> (  (try (string ":l \"") <|> string ":load \"")
+        *> (Load <$> manyTill anyChar (char '"'))
+        )
