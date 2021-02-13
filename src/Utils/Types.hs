@@ -6,6 +6,9 @@
 
 module Utils.Types where
 
+import           Control.Monad.Catch            ( MonadMask
+                                                , MonadCatch
+                                                )
 import           Control.Monad.State            ( MonadState
                                                 , StateT(StateT)
                                                 )
@@ -13,34 +16,7 @@ import           Data.List                      ( intercalate
                                                 , (!!)
                                                 )
 import qualified Data.Sequence                 as Seq
-import           Data.Version                   ( Version )
 import           RIO
-import           RIO.Process                    ( HasProcessContext(..)
-                                                , ProcessContext
-                                                )
-import           System.Console.Haskeline       ( InputT
-                                                , Settings
-                                                )
-
-data Options = Options
-  { optionsVerbose :: !Bool,
-    optionsLoad :: !String
-  }
-
-data App = App
-  { appLogFunc :: !LogFunc,
-    appProcessContext :: !ProcessContext,
-    appOptions :: !Options,
-    appSettings :: !(Settings IO),
-    appVersion :: !Version
-  }
-
-instance HasLogFunc App where
-  logFuncL = lens appLogFunc (\x y -> x { appLogFunc = y })
-
-instance HasProcessContext App where
-  processContextL =
-    lens appProcessContext (\x y -> x { appProcessContext = y })
 
 class Container c where
   (!?) :: c a -> Int -> Maybe a
@@ -201,11 +177,14 @@ globalL = Scope $ lens globalS (\x y -> x { globalS = y })
 localL :: Scope
 localL = Scope $ lens localS (\x y -> x { localS = y })
 
-newtype Interp a = Interp {runInterp :: StateT (Scope, Store) (InputT IO) a}
+newtype Interp a = Interp {runInterp :: StateT (Scope, Store) IO a}
   deriving
     ( Functor,
       Applicative,
       Monad,
       MonadIO,
+      MonadThrow,
+      MonadCatch,
+      MonadMask,
       MonadState (Scope, Store)
     )

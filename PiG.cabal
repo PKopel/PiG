@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3315d4016f8efbbc04147bb52c495d61e05d959245ceeaff19b5e4848e79e9bf
+-- hash: af65f299d570b5b1b514498d1283094b7acba7e2143c9292ae9ca4c9b09ace72
 
 name:           PiG
-version:        0.14.2
+version:        0.15.1
 description:    Please see the README on Github at <https://github.com/PKopel/PiG#readme>
 homepage:       https://github.com/PKopel/PiG#readme
 bug-reports:    https://github.com/PKopel/PiG/issues
@@ -36,7 +36,10 @@ library
       Lang.Parser
       Lang.Tokens
       Run
+      Utils.Completion
+      Utils.Interp
       Utils.Types
+      Utils.Types.App
       Utils.Util
   other-modules:
       Paths_PiG
@@ -48,7 +51,8 @@ library
     , array
     , base >=4.11 && <10
     , containers
-    , haskeline
+    , exceptions
+    , haskeline >=0.8
     , hspec
     , hspec-core
     , mtl
@@ -71,7 +75,8 @@ executable pig
     , array
     , base >=4.11 && <10
     , containers
-    , haskeline
+    , exceptions
+    , haskeline >=0.8
     , hspec
     , hspec-core
     , mtl
@@ -98,7 +103,8 @@ test-suite pig-test
     , array
     , base >=4.11 && <10
     , containers
-    , haskeline
+    , exceptions
+    , haskeline >=0.8
     , hspec
     , hspec-core
     , mtl

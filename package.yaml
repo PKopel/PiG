@@ -1,5 +1,5 @@
 name: PiG
-version: 0.14.2
+version: 0.15.1
 github: PKopel/PiG
 license: BSD3
 author: Paweł Kopel
@@ -27,7 +27,8 @@ dependencies:
   - text
   - array
   - parsec
-  - haskeline
+  - exceptions
+  - haskeline >= 0.8
   - pretty-terminal
   - hspec
   - hspec-core

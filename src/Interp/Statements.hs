@@ -12,11 +12,11 @@ import           Data.Sequence                  ( Seq(..) )
 import qualified Data.Sequence                 as Seq
 import           Import
 import           Lang.Parser                    ( parseFile )
-import           System.Console.Haskeline       ( InputT
-                                                , outputStrLn
-                                                )
 import           System.IO.Error                ( tryIOError )
 import qualified Data.Text                     as T
+import           System.IO                      ( print
+                                                , putStrLn
+                                                )
 
 eval :: Expr -> Interp Val
 eval (Val n          ) = return n
@@ -95,25 +95,24 @@ evalDoubleList = foldM
   )
   []
 
-bifs :: [String]
-bifs = ["read", "print", "load", "exit"]
-
 evalBIF :: String -> [Val] -> Interp Val
-evalBIF "read"  _        = StrVal <$> readVal
-evalBIF "print" []       = return Null
-evalBIF "print" (e : es) = printVal e >> evalBIF "print" es
-evalBIF "exit"  _        = putStore (Left ()) >> return Null
-evalBIF "load"  []       = return Null
+evalBIF "read"   _           = StrVal <$> readVal
+evalBIF "print"  []          = return Null
+evalBIF "print"  (e : es)    = printVal e >> evalBIF "print" es
+evalBIF ":print" []          = return Null
+evalBIF ":print" (Null : _ ) = return Null
+evalBIF ":print" (e    : es) = printVal e >> evalBIF ":print" es
+evalBIF "exit"   _           = putStore (Left ()) >> return Null
+evalBIF "load"   []          = return Null
 evalBIF "load" ((StrVal file) : t) =
   getStore >>= Interp . lift . evalFile file >>= putStore >> evalBIF "load" t
 evalBIF _ _ = return Null
 
 
-evalFile :: FilePath -> Store -> InputT IO Store
+evalFile :: FilePath -> Store -> IO Store
 evalFile file store = do
-  contents <- (lift . tryIOError)
-    (parseFile file . T.unpack <$> readFileUtf8 file)
+  contents <- tryIOError (parseFile file . T.unpack <$> readFileUtf8 file)
   case contents of
-    Left  err          -> outputStrLn (show err) >> return store
-    Right (Left  err ) -> outputStrLn err >> return store
-    Right (Right expr) -> runWithStore (eval expr) store
+    Left  err          -> print err >> return store
+    Right (Left  err ) -> putStrLn err >> return store
+    Right (Right expr) -> runWithStoreIO (eval expr) store
