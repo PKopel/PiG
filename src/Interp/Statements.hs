@@ -95,9 +95,6 @@ evalDoubleList = foldM
   )
   []
 
-bifs :: [String]
-bifs = ["read", "print", "load", "exit", ":print"]
-
 evalBIF :: String -> [Val] -> Interp Val
 evalBIF "read"   _           = StrVal <$> readVal
 evalBIF "print"  []          = return Null

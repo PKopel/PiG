@@ -18,7 +18,7 @@ main = do
   options <- fst <$> pigOptions
   lo      <- logOptionsHandle stderr (optionsVerbose options)
   pc      <- mkDefaultProcessContext
-  let settings = Settings { complete       = noCompletion
+  let settings = Settings { complete       = completion
                           , historyFile    = Nothing
                           , autoAddHistory = True
                           }
