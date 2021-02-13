@@ -6,6 +6,7 @@
 
 module Utils.Types where
 
+import           Control.Monad.Catch
 import           Control.Monad.State            ( MonadState
                                                 , StateT(StateT)
                                                 )
@@ -18,9 +19,7 @@ import           RIO
 import           RIO.Process                    ( HasProcessContext(..)
                                                 , ProcessContext
                                                 )
-import           System.Console.Haskeline       ( InputT
-                                                , Settings
-                                                )
+import           System.Console.Haskeline       ( Settings )
 
 data Options = Options
   { optionsVerbose :: !Bool,
@@ -31,7 +30,7 @@ data App = App
   { appLogFunc :: !LogFunc,
     appProcessContext :: !ProcessContext,
     appOptions :: !Options,
-    appSettings :: !(Settings IO),
+    appSettings :: !(Settings Interp),
     appVersion :: !Version
   }
 
@@ -201,11 +200,14 @@ globalL = Scope $ lens globalS (\x y -> x { globalS = y })
 localL :: Scope
 localL = Scope $ lens localS (\x y -> x { localS = y })
 
-newtype Interp a = Interp {runInterp :: StateT (Scope, Store) (InputT IO) a}
+newtype Interp a = Interp {runInterp :: StateT (Scope, Store) IO a}
   deriving
     ( Functor,
       Applicative,
       Monad,
       MonadIO,
+      MonadThrow,
+      MonadCatch,
+      MonadMask,
       MonadState (Scope, Store)
     )

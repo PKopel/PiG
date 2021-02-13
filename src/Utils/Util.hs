@@ -10,6 +10,7 @@ module Utils.Util
   , readVar
   , writeVar
   , runWithStore
+  , runWithStoreIO
   , getElems
   , getStore
   , getScope
@@ -29,10 +30,9 @@ import           Control.Monad.State            ( StateT(runStateT)
 import qualified Data.Map                      as Map
 import           Data.Sequence                  ( Seq(..) )
 import           RIO
-import           System.Console.Haskeline       ( InputT
-                                                , outputStr
+import           System.IO                      ( getLine
+                                                , putStr
                                                 )
-import           System.IO                      ( getLine )
 import           Utils.Types
 
 getStore :: Interp Store
@@ -56,10 +56,14 @@ withStore f = getStore >>= \case
   Right store -> putStore . Right . f $ store
   _           -> return ()
 
-runWithStore :: Interp a -> Store -> InputT IO Store
-runWithStore interp store@(Right _) =
+runWithStore :: Interp a -> Interp ()
+runWithStore interp =
+  getStore >>= Interp . lift . runWithStoreIO interp >>= putStore
+
+runWithStoreIO :: Interp a -> Store -> IO Store
+runWithStoreIO interp store@(Right _) =
   (runStateT . runInterp) interp (globalL, store) <&> snd . snd
-runWithStore _ _ = return (Left ())
+runWithStoreIO _ _ = return (Left ())
 
 getElems :: (Foldable t, Container s, Monoid (s a)) => s a -> t Double -> s a
 getElems list = foldl'
@@ -86,13 +90,13 @@ writeVar x v = do
   return v
 
 readVal :: Interp String
-readVal = Interp . lift . lift $ getLine
+readVal = Interp . lift $ getLine
 
 printVal :: Show a => a -> Interp ()
-printVal = Interp . lift . outputStr . show
+printVal = Interp . lift . putStr . show
 
 printString :: String -> Interp ()
-printString = Interp . lift . outputStr
+printString = Interp . lift . putStr
 
 (>-) :: Seq Val -> (Val, Seq Val)
 (>-) (h :<| t) = (h, t)

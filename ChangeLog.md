@@ -1,5 +1,8 @@
 # Changelog for PiG
 
+### 0.15.0
+* change order of monads in Interp to allow for auto completion
+
 ### 0.14.2
 * change `--file` to `--load` to make it more consistent with language
 

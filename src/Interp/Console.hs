@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 module Interp.Console
   ( startREPL
@@ -21,25 +22,28 @@ import           System.Console.Haskeline       ( InputT
                                                 , runInputT
                                                 )
 
-startREPL :: Settings IO -> Either () Scopes -> IO ()
-startREPL settings store = runInputT settings $ runLine Green store
+startREPL :: Settings Interp -> Interp ()
+startREPL settings = runInputT settings $ runLine Green
 
-runLine :: Color -> Store -> InputT IO ()
-runLine _      (Left _) = return ()
-runLine colour store    = do
-  line <- getInputLine $ (style Faint . color colour) "PiG" <> "> "
-  checkLine line
- where
-  checkLine Nothing     = return ()
-  checkLine (Just line) = if isDirective line
-    then runWithStore (execute line) store >>= runLine Green
-    else case parseProg line of
-      Left  err  -> outputStrLn err >> runLine Red store
-      Right prog -> runProg store prog
+runLine :: Color -> InputT Interp ()
+runLine colour = lift getStore >>= \case
+  Left _ -> return ()
+  _      -> do
+    line <- getInputLine $ (style Faint . color colour) "PiG" <> "> "
+    checkLine line
 
-runProg :: Store -> Expr -> InputT IO ()
-runProg store expr =
+checkLine :: Maybe String -> InputT Interp ()
+checkLine (Just line) = if isDirective line
+  then lift (runWithStore (execute line)) >> runLine Green
+  else case parseProg line of
+    Left  err  -> outputStrLn err >> runLine Red
+    Right prog -> runProg prog
+checkLine _ = return ()
+
+runProg :: Expr -> InputT Interp ()
+runProg expr =
   let expr' = case expr of
-        e@(Seq _) -> FunApp "print" [e, Val (StrVal "\n")]
+    -- kind of a hack, but works
+        e@(Seq _) -> FunApp ":print" [e, Val (StrVal "\n")]
         other     -> other
-  in  runWithStore (eval expr') store >>= runLine Green
+  in  lift (runWithStore (eval expr')) >> runLine Green
