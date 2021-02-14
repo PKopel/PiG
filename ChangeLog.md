@@ -1,5 +1,9 @@
 # Changelog for PiG
 
+### 0.15.2
+* add modulo operator (`%`)
+* add `strToNum` 
+
 ### 0.15.1
 * implement code completion
 

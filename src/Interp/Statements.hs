@@ -97,15 +97,14 @@ evalDoubleList = foldM
 
 evalBIF :: String -> [Val] -> Interp Val
 evalBIF "read"   _           = StrVal <$> readVal
-evalBIF "print"  []          = return Null
-evalBIF "print"  (e : es)    = printVal e >> evalBIF "print" es
-evalBIF ":print" []          = return Null
+evalBIF "print"  (e    : es) = printVal e >> evalBIF "print" es
 evalBIF ":print" (Null : _ ) = return Null
 evalBIF ":print" (e    : es) = printVal e >> evalBIF ":print" es
 evalBIF "exit"   _           = putStore (Left ()) >> return Null
-evalBIF "load"   []          = return Null
 evalBIF "load" ((StrVal file) : t) =
   getStore >>= Interp . lift . evalFile file >>= putStore >> evalBIF "load" t
+evalBIF "strToNum" ((StrVal str) : _) =
+  return $ maybe Null AlgVal (readMaybe str)
 evalBIF _ _ = return Null
 
 

@@ -9,6 +9,7 @@ data TokenType = TIf
            | TMinus
            | TStar
            | TSlash
+           | TMod
            | TFatArr
            | TAssign
            | TDash
@@ -50,6 +51,7 @@ instance Show TokenType where
   show TMinus    = "-"
   show TStar     = "*"
   show TSlash    = "/"
+  show TMod      = "%"
   show TFatArr   = "=>"
   show TAssign   = "="
   show TDash     = "^"

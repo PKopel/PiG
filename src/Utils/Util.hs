@@ -17,7 +17,7 @@ import           Utils.Types
 
 
 bifs :: [String]
-bifs = ["read", "print", "load", "exit", ":print"]
+bifs = ["read", "print", "load", "exit", "strToNum", ":print"]
 
 getElems :: (Foldable t, Container s, Monoid (s a)) => s a -> t Double -> s a
 getElems list = foldl'

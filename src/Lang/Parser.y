@@ -29,6 +29,7 @@ import Import
     '-'             { Token _ TMinus }
     '*'             { Token _ TStar }
     '/'             { Token _ TSlash }
+    '%'             { Token _ TMod }
     '=>'            { Token _ TFatArr }
     '='             { Token _ TAssign }
     '^'             { Token _ TDash }
@@ -61,10 +62,12 @@ import Import
     VAR             { Token _ (TSym $$) }
 
 
+%left '==' '!='
 %left '&&' '||'
+%left '<' '>' '%'
 %left '+' '-'
 %left '*' '/'
-%left '^'
+%left '^' 
 %left '<>' '><'
 %%
 
@@ -85,6 +88,7 @@ Expr    : Atom                          { $1 }
         | Expr '*' Expr                 { Binary ((*) :: Double -> Double -> Double) $1 $3 }
         | Expr '/' Expr                 { Binary ((/) :: Double -> Double -> Double) $1 $3 }
         | Expr '^' Expr                 { Binary ((**) :: Double -> Double -> Double) $1 $3 }
+        | Expr '%' Expr                 { Binary (mod :: Integer -> Integer -> Integer) $1 $3}
         | '-' Expr                      { Unary (negate :: Double -> Double) $2 }
         | '~' Expr                      { Unary not $2 }
         | Expr '&&' Expr                { Binary (&&) $1 $3 }

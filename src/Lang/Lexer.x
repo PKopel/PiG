@@ -37,6 +37,7 @@ tokens :-
     "-"                    { tok' TMinus }
     "*"                    { tok' TStar }
     "/"                    { tok' TSlash }
+    "%"                    { tok' TMod }
     "=>"                   { tok' TFatArr }
     "="                    { tok' TAssign }
     "^"                    { tok' TDash }

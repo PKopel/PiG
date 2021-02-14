@@ -70,6 +70,12 @@ instance BinaryOp (Double -> Double -> Double) where
   appBin op (AlgVal a) (AlgVal b) = AlgVal $ op a b
   appBin _  _          _          = Null
 
+instance BinaryOp (Integer -> Integer -> Integer) where
+  appBin op (AlgVal a) (AlgVal b) | isInt a && isInt b =
+    AlgVal $ fromIntegral $ op (round a) (round b)
+    where isInt x = (100000 * (x - fromInteger (round x))) == 0.0
+  appBin _ _ _ = Null
+
 instance BinaryOp (String -> String -> String) where
   appBin op a b = StrVal $ op (toStr a) (toStr b)
    where

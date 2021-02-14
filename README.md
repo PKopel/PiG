@@ -27,10 +27,10 @@ In PiG, everything is an expression:
 * function application, in form `<name>(<arg1>,...,<argn>)`
 * expressions with build-in operators
 
-There are four build-in functions provided: `print(arg1,...,argn)` which prints all its arguments to stdout, `read()`, which reads string from stdin, `load(<file name 1>, ... , <file name n>)` which loads other files and `exit()` which closes interpreter.
+There are four build-in functions provided: `print(arg1,...,argn)` which prints all its arguments to stdout, `read()`, which reads string from stdin, `strToNum(arg)` which parses number from string, `load(<file name 1>, ... , <file name n>)` which loads other files and `exit()` which closes interpreter.
 
 Build-in operators are:
-* `+`, `-`, `*`, `/` and `^` for numbers
+* `+`, `-`, `*`, `/`, `^` and `%` (modulo) for numbers
 * `-`, `||`, `&&` for booleans
 * `<>`, `-<`, `>-` for lists (`>-` removes and returns first element, `-<` the last one, `<>` concatenates second argument to the end of the first one, works with any type but results always in a list)
 * `><` for strings (attaches second argument at the end of the firs one, works with any type but results always in a string)
