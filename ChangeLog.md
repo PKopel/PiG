@@ -2,6 +2,8 @@
 
 ### 0.16.0
 * change `load` from function to keyword, remove `:load` directive
+* move bifs to module Interp.BIF
+* remove modulw Import
 
 ### 0.15.2
 * add modulo operator (`%`)
