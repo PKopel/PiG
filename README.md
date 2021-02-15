@@ -37,7 +37,7 @@ Build-in operators are:
 * `<>`, `-<`, `>-` for lists (`>-` removes and returns first element, `-<` the last one, `<>` concatenates second argument to the end of the first one, works with any type but results always in a list)
 * `><` for strings (attaches second argument at the end of the firs one, works with any type but results always in a string)
 
-Interpreter also provides five directives:
+Interpreter also provides four directives:
 * `:exit | :e` (or Ctrl+d) to leave the interpreter
 * `:rm <variable name>` to remove binding of a variable
 * `:clear | :c` to remove all bindings
