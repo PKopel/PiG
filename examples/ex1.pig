@@ -1,4 +1,4 @@
-load("ex2.pig");
+load "ex2.pig";
 
 fun = (a) => {a + 1};
 

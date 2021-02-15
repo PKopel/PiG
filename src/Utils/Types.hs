@@ -88,19 +88,13 @@ instance BinaryOp (Seq.Seq Val -> Seq.Seq Val -> Seq.Seq Val) where
     toSeq (ListVal v) = v
     toSeq v           = Seq.singleton v
 
-data Drct
-  = Exit
-  | Clear
-  | Help
-  | Rm Var
-  | Load FilePath
-
 data Expr
   = Var Var
   | Val Val
   | Assign Var Expr Expr
   | ListLiteral [Expr]
   | FunApp Var [Expr]
+  | Load Expr
   | While Expr Expr
   | If [(Expr, Expr)] Expr
   | Seq [Expr]
@@ -129,6 +123,7 @@ instance Show Expr where
   show (Var v       ) = "Var " <> v
   show (Val v       ) = "Val " <> show v
   show (Assign a b c) = unwords [a, show b, " = ", show c]
+  show (Load e      ) = "Load " ++ show e
   show (While a b   ) = unwords ["While", show a, show b]
   show (Seq v       ) = '{' : intercalate "; " (show <$> v) ++ "}"
   show (Binary _ a b) = unwords ["Binary", show a, show b]

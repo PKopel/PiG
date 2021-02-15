@@ -5,11 +5,20 @@ module UtilSpec
   )
 where
 
-import           Control.Monad.State            ( StateT(runStateT) )
-import           Import                  hiding ( assert )
-import           System.Console.Haskeline       ( defaultSettings
-                                                , runInputT
+import           Utils.Types                    ( Scope(scope)
+                                                , Store
+                                                , Val
+                                                , Interp(runInterp)
                                                 )
+import           Utils.Interp                   ( getScope
+                                                , getStore
+                                                , putStore
+                                                , setScope
+                                                , withScopes
+                                                )
+import           Utils.Util                     ( getElems )
+import           Control.Monad.State            ( StateT(runStateT) )
+import           RIO                     hiding ( assert )
 import           Test.Hspec                     ( Spec
                                                 , describe
                                                 , it
@@ -26,8 +35,7 @@ import           Test.QuickCheck.Monadic        ( PropertyM
 import           TypesSpec                      ( )
 
 interpToProp :: Interp a -> (Scope, Store) -> PropertyM IO a
-interpToProp i s =
-  run . runInputT defaultSettings $ (runStateT . runInterp) i s <&> fst
+interpToProp i s = run $ (runStateT . runInterp) i s <&> fst
 
 prop_getStore :: (Scope, Store) -> Property
 prop_getStore ss@(_, st) = monadicIO $ do
@@ -57,7 +65,7 @@ prop_setScope _ _ = property True
 
 prop_withStore :: (Scope, Store) -> Property
 prop_withStore ss@(_, st) = monadicIO $ do
-  st' <- interpToProp (withStore id >> getStore) ss
+  st' <- interpToProp (withScopes id >> getStore) ss
   assert (st == st')
 
 prop_getElems :: [Integer] -> Seq Val -> Bool

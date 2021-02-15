@@ -6,7 +6,8 @@ module TypesSpec
   )
 where
 
-import           Import
+import           Utils.Types
+import           RIO
 import           Test.Hspec
 import           Test.QuickCheck
 

@@ -33,6 +33,7 @@ tokens :-
     "else"                 { tok' TElse }
     "while"                { tok' TWhile }
     "do"                   { tok' TDo }
+    "load"                 { tok' TLoad }
     "+"                    { tok' TPlus }
     "-"                    { tok' TMinus }
     "*"                    { tok' TStar }

@@ -10,10 +10,17 @@ where
 import           RIO
 import qualified Data.Map                      as M
 import           Data.List                      ( isPrefixOf )
-import           System.Console.Haskeline
-import           Utils.Types
-import           Utils.Interp
-import           Utils.Util
+import           System.Console.Haskeline       ( completeWord
+                                                , simpleCompletion
+                                                , Completion
+                                                , CompletionFunc
+                                                )
+import           Utils.Types                    ( Interp
+                                                , Store
+                                                , Scopes(globalS, localS)
+                                                )
+import           Utils.Interp                   ( getStore )
+import           Interp.BIF
 
 
 searchFunc :: Store -> String -> [Completion]

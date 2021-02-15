@@ -6,9 +6,11 @@ module Main
   )
 where
 
-import           Import
+import           Utils.Completion
+import           Utils.Types.App
 import           Options.Applicative.Simple
 import qualified Paths_PiG
+import           RIO
 import           RIO.Process                    ( mkDefaultProcessContext )
 import           Run                            ( run )
 import           System.Console.Haskeline
@@ -39,9 +41,8 @@ pigOptions = simpleOptions
   (   Options
   <$> switch (long "verbose" <> short 'v' <> help "verbose output")
   <*> strOption
-        (long "load" <> short 'l' 
-        <> metavar "FILE" <> value "" 
-        <> help "start interpreter with FILE loaded"
+        (long "load" <> short 'l' <> metavar "FILE" <> value "" <> help
+          "start interpreter with FILE loaded"
         )
   )
   empty

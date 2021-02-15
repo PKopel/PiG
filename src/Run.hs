@@ -7,9 +7,21 @@ module Run
 where
 
 import           Data.Version                   ( showVersion )
-import           Import
+import           RIO
+import           Utils.Types.App                ( App
+                                                  ( appVersion
+                                                  , appSettings
+                                                  , appOptions
+                                                  )
+                                                , Options(optionsLoad)
+                                                )
+import           Utils.Interp                   ( runWithStoreIO )
+import           Utils.Types                    ( Val(StrVal)
+                                                , Expr(Val, Load)
+                                                , emptyStore
+                                                )
 import           Interp.Console                 ( startREPL )
-import           Interp.Directives              ( exec )
+import           Interp.Statements              ( eval )
 
 run :: RIO App ()
 run = do
@@ -28,5 +40,6 @@ run = do
       liftIO . void $ runWithStoreIO (startREPL settings) store
  where
   startStore ops = case optionsLoad ops of
-    []   -> return $ Right emptyStore
-    file -> runWithStoreIO (exec (Load file)) $ Right emptyStore
+    [] -> return $ Right emptyStore
+    file ->
+      runWithStoreIO (eval . Load . Val . StrVal $ file) $ Right emptyStore
