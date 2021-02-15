@@ -5,13 +5,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Utils.Types where
-
-import           Control.Monad.Catch            ( MonadMask
-                                                , MonadCatch
-                                                )
-import           Control.Monad.State            ( MonadState
-                                                , StateT(StateT)
-                                                )
 import           Data.List                      ( intercalate
                                                 , (!!)
                                                 )
@@ -177,15 +170,3 @@ globalL = Scope $ lens globalS (\x y -> x { globalS = y })
 
 localL :: Scope
 localL = Scope $ lens localS (\x y -> x { localS = y })
-
-newtype Interp a = Interp {runInterp :: StateT (Scope, Store) IO a}
-  deriving
-    ( Functor,
-      Applicative,
-      Monad,
-      MonadIO,
-      MonadThrow,
-      MonadCatch,
-      MonadMask,
-      MonadState (Scope, Store)
-    )

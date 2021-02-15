@@ -27,8 +27,7 @@ run :: RIO App ()
 run = do
   version  <- view $ to appVersion
   settings <- view $ to appSettings
-  options  <- view $ to appOptions
-  store    <- liftIO $ startStore options
+  store    <- view (to appOptions) >>= startStore
   case store of
     Left  _ -> return ()
     Right _ -> do
@@ -37,7 +36,7 @@ run = do
         <> fromString (showVersion version)
         <> "\ntype ':help' or ':h' for more information "
         )
-      liftIO . void $ runWithStoreIO (startREPL settings) store
+      void $ runWithStoreIO (startREPL settings) store
  where
   startStore ops = case optionsLoad ops of
     [] -> return $ Right emptyStore
