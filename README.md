@@ -4,9 +4,10 @@ Interpreter for a simple language, build with [Alex](https://www.haskell.org/ale
 
 ## Usage  
 
-* Run `stack exec pig` to start interpreter
-* With `stack exec pig -- -l|--load <file>` to start interpreter with `<file>` loaded.
-* With `stack exec pig -- --help` to see more info.
+Use
+* `stack exec pig` to start interpreter
+* `stack exec pig -- -l|--load <file>` to start interpreter with `<file>` loaded.
+* `stack exec pig -- --help` to see more info.
 
 ## Language
 
