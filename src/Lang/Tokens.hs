@@ -5,6 +5,7 @@ data TokenType = TIf
            | TElse
            | TWhile
            | TDo
+           | TLoad
            | TPlus
            | TMinus
            | TStar
@@ -47,6 +48,7 @@ instance Show TokenType where
   show TElse     = "else"
   show TWhile    = "while"
   show TDo       = "do"
+  show TLoad     = "load"
   show TPlus     = "+"
   show TMinus    = "-"
   show TStar     = "*"

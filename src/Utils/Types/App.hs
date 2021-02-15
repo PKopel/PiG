@@ -3,12 +3,17 @@
 module Utils.Types.App where
 
 import           Data.Version                   ( Version )
-import           RIO
+import           RIO                            ( Bool
+                                                , String
+                                                , lens
+                                                , HasLogFunc(..)
+                                                , LogFunc
+                                                )
 import           RIO.Process                    ( HasProcessContext(..)
                                                 , ProcessContext
                                                 )
 import           System.Console.Haskeline       ( Settings )
-import           Utils.Types
+import           Utils.Types                    ( Interp )
 
 data Options = Options
   { optionsVerbose :: !Bool,

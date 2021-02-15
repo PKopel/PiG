@@ -1,5 +1,8 @@
 # Changelog for PiG
 
+### 0.16.0
+* change `load` from function to keyword, remove `:load` directive
+
 ### 0.15.2
 * add modulo operator (`%`)
 * add `strToNum` 

@@ -1,14 +1,20 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 module Interp.Directives.Parser where
 
-import           Import                  hiding ( many
+import           RIO                     hiding ( many
                                                 , optional
                                                 , try
                                                 , (<|>)
                                                 )
-
+import           Utils.Types                    ( Var )
 import           Text.Parsec
 import           Text.Parsec.String             ( Parser )
+
+data Drct
+  = Exit
+  | Clear
+  | Help
+  | Rm Var
 
 parseDrct :: String -> Either String Drct
 parseDrct s = case parse drctParser "PiG REPL" s of
@@ -22,6 +28,4 @@ drctParser =
     <|> try (string ":h" $> Help)
     <|> try (string ":c" $> Clear)
     <|> try (string ":rm " *> (Rm <$> many anyToken))
-    <|> (  (try (string ":l \"") <|> string ":load \"")
-        *> (Load <$> manyTill anyChar (char '"'))
-        )
+    <?> "PiG directives"

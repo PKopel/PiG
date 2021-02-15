@@ -10,7 +10,15 @@ where
 import qualified Data.Map                      as Map
 import           Data.Sequence                  ( Seq(..) )
 import qualified Data.Sequence                 as Seq
-import           Import
+import           RIO
+import           Utils.Types
+import           Utils.Interp
+import           Utils.Util                     ( getElems
+                                                , isVar
+                                                )
+import           Interp.BIF                     ( evalBIF
+                                                , bifs
+                                                )
 import           Lang.Parser                    ( parseFile )
 import           System.IO.Error                ( tryIOError )
 import qualified Data.Text                     as T
@@ -19,8 +27,11 @@ import           System.IO                      ( print
                                                 )
 
 eval :: Expr -> Interp Val
-eval (Val n          ) = return n
-eval (Var x          ) = readVar x
+eval (Val  n) = return n
+eval (Var  x) = readVar x
+eval (Load e) = eval e >>= \case
+  StrVal file -> withStore (Interp . lift . evalFile file) >> return Null
+  _           -> return Null
 eval (Binary op e1 e2) = appBin op <$> eval e1 <*> eval e2
 eval (Unary op e     ) = eval e <&> appUn op >>= \case
   ListVal (h :<| t :<| Empty) ->
@@ -64,11 +75,11 @@ evalFunApp args (FunVal as body) = getStore >>= \case
     let oldLocals = view (scope localL) s
     newLocals <- Map.fromList <$> zipWithM (\v a -> eval v <&> (,) a) args as
     oldScope  <- getScope
-    withStore $ (over . scope) localL (const newLocals) -- introducing local variables
+    withScopes $ (over . scope) localL (const newLocals) -- introducing local variables
     setScope localL -- from now variables are declared in local scope
     retVal <- eval body
     setScope oldScope -- end of local scope
-    withStore $ (over . scope) localL (const oldLocals) -- removing local variables
+    withScopes $ (over . scope) localL (const oldLocals) -- removing local variables
     return retVal
   _ -> return Null
 -- get elements from list
@@ -94,18 +105,6 @@ evalDoubleList = foldM
     _         -> return acc
   )
   []
-
-evalBIF :: String -> [Val] -> Interp Val
-evalBIF "read"   _           = StrVal <$> readVal
-evalBIF "print"  (e    : es) = printVal e >> evalBIF "print" es
-evalBIF ":print" (Null : _ ) = return Null
-evalBIF ":print" (e    : es) = printVal e >> evalBIF ":print" es
-evalBIF "exit"   _           = putStore (Left ()) >> return Null
-evalBIF "load" ((StrVal file) : t) =
-  getStore >>= Interp . lift . evalFile file >>= putStore >> evalBIF "load" t
-evalBIF "strToNum" ((StrVal str) : _) =
-  return $ maybe Null AlgVal (readMaybe str)
-evalBIF _ _ = return Null
 
 
 evalFile :: FilePath -> Store -> IO Store

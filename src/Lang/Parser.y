@@ -10,7 +10,8 @@ import Lang.Tokens
 import Lang.Lexer
 import Control.Monad.Except
 import qualified Data.Sequence as Seq
-import Import               
+import Utils.Types   
+import Utils.Util           
 }
 %name pig
 %tokentype { Token }
@@ -25,6 +26,7 @@ import Import
     else            { Token _ TElse }
     while           { Token _ TWhile }
     do              { Token _ TDo }
+    load            { Token _ TLoad }
     '+'             { Token _ TPlus }
     '-'             { Token _ TMinus }
     '*'             { Token _ TStar }
@@ -78,6 +80,7 @@ Expr    : Atom                          { $1 }
         | ListLit                       { $1 }   
         | If                            { $1 }
         | '(' Expr ')'                  { $2 }
+        | load Expr                     { Load $2 }
         | VAR '(' Expr ')' '=' Expr     { Assign $1 $3 $6 }
         | VAR '=' Expr                  { Assign $1 (Val Null) $3 }
         | while Expr do InSeq           { While $2 $4 }

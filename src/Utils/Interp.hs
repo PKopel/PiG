@@ -10,6 +10,7 @@ module Utils.Interp
   , getScope
   , putStore
   , setScope
+  , withScopes
   , withStore
   , readVar
   , writeVar
@@ -45,14 +46,16 @@ setScope w' = do
   (_, s) <- get
   put (w', s)
 
-withStore :: (Scopes -> Scopes) -> Interp ()
-withStore f = getStore >>= \case
+withScopes :: (Scopes -> Scopes) -> Interp ()
+withScopes f = getStore >>= \case
   Right store -> putStore . Right . f $ store
   _           -> return ()
 
+withStore :: (Store -> Interp Store) -> Interp ()
+withStore fun = getStore >>= fun >>= putStore
+
 runWithStore :: Interp a -> Interp ()
-runWithStore interp =
-  getStore >>= Interp . lift . runWithStoreIO interp >>= putStore
+runWithStore interp = withStore $ Interp . lift . runWithStoreIO interp
 
 runWithStoreIO :: Interp a -> Store -> IO Store
 runWithStoreIO interp store@(Right _) =
@@ -71,7 +74,7 @@ readVar x = getStore >>= \case
 writeVar :: Var -> Val -> Interp Val
 writeVar x v = do
   s <- getScope
-  withStore $ (over $ scope s) (Map.insert x v)
+  withScopes $ (over $ scope s) (Map.insert x v)
   return v
 
 readVal :: Interp String

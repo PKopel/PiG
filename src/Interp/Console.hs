@@ -5,7 +5,14 @@ module Interp.Console
   )
 where
 
-import           Import
+import           RIO
+import           Utils.Types                    ( Interp
+                                                , Val(StrVal)
+                                                , Expr(Val, Seq, FunApp)
+                                                )
+import           Utils.Interp                   ( getStore
+                                                , runWithStore
+                                                )
 import           Interp.Statements              ( eval )
 import           Interp.Directives              ( isDirective
                                                 , execute
