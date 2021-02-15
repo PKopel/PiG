@@ -12,6 +12,7 @@ import           Data.Sequence                  ( Seq(..) )
 import qualified Data.Sequence                 as Seq
 import           RIO
 import           Utils.Types
+import           Utils.Types.App                ( Interp(..) )
 import           Utils.Interp
 import           Utils.Util                     ( getElems
                                                 , isVar
@@ -20,13 +21,10 @@ import           Interp.BIF                     ( evalBIF
                                                 , bifs
                                                 )
 import           Lang.Parser                    ( parseFile )
-import           System.IO.Error                ( tryIOError )
 import qualified Data.Text                     as T
-import           System.IO                      ( print
-                                                , putStrLn
-                                                )
+import           System.IO                      ( putStr )
 
-eval :: Expr -> Interp Val
+eval :: Expr -> Interp a Val
 eval (Val  n) = return n
 eval (Var  x) = readVar x
 eval (Load e) = eval e >>= \case
@@ -58,7 +56,7 @@ eval (Assign x i e) = do
       _          -> writeVar x v
     _ -> writeVar x v
 
-evalWhile :: Expr -> Expr -> Seq Val -> Interp (Seq Val)
+evalWhile :: Expr -> Expr -> Seq Val -> Interp a (Seq Val)
 evalWhile e s acc = eval e >>= \case
   AlgVal  v -> while $ v /= 0
   BoolVal v -> while v
@@ -68,7 +66,7 @@ evalWhile e s acc = eval e >>= \case
   while cond =
     if cond then eval s >>= evalWhile e s . (acc Seq.|>) else return acc
 
-evalFunApp :: [Expr] -> Val -> Interp Val
+evalFunApp :: [Expr] -> Val -> Interp a Val
 -- execute function with arguments from args
 evalFunApp args (FunVal as body) = getStore >>= \case
   Right s -> do
@@ -98,7 +96,7 @@ evalFunApp args (StrVal l) = do
     _         -> return Null
 evalFunApp _ _ = return Null
 
-evalDoubleList :: [Expr] -> Interp [Double]
+evalDoubleList :: [Expr] -> Interp a [Double]
 evalDoubleList = foldM
   (\acc v -> eval v >>= \case
     AlgVal av -> return (av : acc)
@@ -107,10 +105,9 @@ evalDoubleList = foldM
   []
 
 
-evalFile :: FilePath -> Store -> IO Store
+evalFile :: FilePath -> Store -> RIO a Store
 evalFile file store = do
-  contents <- tryIOError (parseFile file . T.unpack <$> readFileUtf8 file)
+  contents <- parseFile file . T.unpack <$> readFileUtf8 file
   case contents of
-    Left  err          -> print err >> return store
-    Right (Left  err ) -> putStrLn err >> return store
-    Right (Right expr) -> runWithStoreIO (eval expr) store
+    Left  err  -> liftIO (putStr err) >> return store
+    Right expr -> runWithStoreIO (eval expr) store

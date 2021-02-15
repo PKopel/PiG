@@ -5,10 +5,10 @@ module UtilSpec
   )
 where
 
+import           Utils.Types.App                ( Interp(runInterp) )
 import           Utils.Types                    ( Scope(scope)
                                                 , Store
                                                 , Val
-                                                , Interp(runInterp)
                                                 )
 import           Utils.Interp                   ( getScope
                                                 , getStore
@@ -34,8 +34,8 @@ import           Test.QuickCheck.Monadic        ( PropertyM
                                                 )
 import           TypesSpec                      ( )
 
-interpToProp :: Interp a -> (Scope, Store) -> PropertyM IO a
-interpToProp i s = run $ (runStateT . runInterp) i s <&> fst
+interpToProp :: Interp () v -> (Scope, Store) -> PropertyM IO v
+interpToProp i s = run . runRIO () $ (runStateT . runInterp) i s <&> fst
 
 prop_getStore :: (Scope, Store) -> Property
 prop_getStore ss@(_, st) = monadicIO $ do

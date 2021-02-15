@@ -15,8 +15,8 @@ import           System.Console.Haskeline       ( completeWord
                                                 , Completion
                                                 , CompletionFunc
                                                 )
-import           Utils.Types                    ( Interp
-                                                , Store
+import           Utils.Types.App                ( Interp )
+import           Utils.Types                    ( Store
                                                 , Scopes(globalS, localS)
                                                 )
 import           Utils.Interp                   ( getStore )
@@ -29,7 +29,7 @@ searchFunc (Right scopes) str = map simpleCompletion $ filter
   (M.keys (globalS scopes) ++ M.keys (localS scopes) ++ bifs)
 searchFunc _ _ = []
 
-completion :: CompletionFunc Interp
+completion :: CompletionFunc (Interp a)
 completion = completeWord Nothing " \t" $ \str -> do
   store <- getStore
   return $ searchFunc store str

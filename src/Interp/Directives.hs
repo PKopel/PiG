@@ -3,8 +3,8 @@
 module Interp.Directives where
 
 import           RIO
-import           Utils.Types                    ( Interp
-                                                , Scope(scope)
+import           Utils.Types.App                ( Interp )
+import           Utils.Types                    ( Scope(scope)
                                                 , globalL
                                                 )
 import           Utils.Interp                   ( printString
@@ -21,12 +21,12 @@ import           Data.Map                       ( delete
 isDirective :: String -> Bool
 isDirective s = ':' `elem` s
 
-execute :: String -> Interp ()
+execute :: String -> Interp a ()
 execute str = case parseDrct str of
   Left  err  -> printString (err ++ "\n")
   Right drct -> exec drct
 
-exec :: Drct -> Interp ()
+exec :: Drct -> Interp a ()
 exec Exit  = putStore (Left ())
 exec Clear = withScopes $ (over . scope) globalL (const empty)
 exec Help =

@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e23e4b3d2d6374a7f3c2367895ec0c3aa00acf570dee59339a69b476ad08343c
+-- hash: 36ac0d04caf269787fbda36c88c5bfbb513b4f8dabe96ec49a63d1b916d9b3fc
 
 name:           PiG
-version:        0.16.0
+version:        0.16.1
 description:    Please see the README on Github at <https://github.com/PKopel/PiG#readme>
 homepage:       https://github.com/PKopel/PiG#readme
 bug-reports:    https://github.com/PKopel/PiG/issues
@@ -59,6 +59,7 @@ library
     , parsec
     , pretty-terminal
     , rio >=0.1.12.0
+    , rio-orphans
     , text
   default-language: Haskell2010
 
@@ -84,6 +85,7 @@ executable pig
     , parsec
     , pretty-terminal
     , rio >=0.1.12.0
+    , rio-orphans
     , text
   default-language: Haskell2010
 
@@ -111,5 +113,6 @@ test-suite pig-test
     , parsec
     , pretty-terminal
     , rio >=0.1.12.0
+    , rio-orphans
     , text
   default-language: Haskell2010

@@ -1,5 +1,8 @@
 # Changelog for PiG
 
+### 0.16.1
+* replace bare IO with RIO App
+
 ### 0.16.0
 * change `load` from function to keyword, remove `:load` directive
 * move bifs to module Interp.BIF

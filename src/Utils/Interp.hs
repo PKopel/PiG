@@ -29,40 +29,41 @@ import           System.IO                      ( getLine
                                                 )
 import           RIO
 import           Utils.Types
+import           Utils.Types.App                ( Interp(..) )
 
-getStore :: Interp Store
+getStore :: Interp a Store
 getStore = get <&> snd
 
-getScope :: Interp Scope
+getScope :: Interp a Scope
 getScope = get <&> fst
 
-putStore :: Store -> Interp ()
+putStore :: Store -> Interp a ()
 putStore s' = do
   (w, _) <- get
   put (w, s')
 
-setScope :: Scope -> Interp ()
+setScope :: Scope -> Interp a ()
 setScope w' = do
   (_, s) <- get
   put (w', s)
 
-withScopes :: (Scopes -> Scopes) -> Interp ()
+withScopes :: (Scopes -> Scopes) -> Interp a ()
 withScopes f = getStore >>= \case
   Right store -> putStore . Right . f $ store
   _           -> return ()
 
-withStore :: (Store -> Interp Store) -> Interp ()
+withStore :: (Store -> Interp a Store) -> Interp a ()
 withStore fun = getStore >>= fun >>= putStore
 
-runWithStore :: Interp a -> Interp ()
+runWithStore :: Interp a v -> Interp a ()
 runWithStore interp = withStore $ Interp . lift . runWithStoreIO interp
 
-runWithStoreIO :: Interp a -> Store -> IO Store
+runWithStoreIO :: Interp a v -> Store -> RIO a Store
 runWithStoreIO interp store@(Right _) =
   (runStateT . runInterp) interp (globalL, store) <&> snd . snd
 runWithStoreIO _ _ = return (Left ())
 
-readVar :: Var -> Interp Val
+readVar :: Var -> Interp a Val
 readVar x = getStore >>= \case
   Right store -> case Map.lookup x (view (scope localL) store) of
     Just v  -> return v
@@ -71,17 +72,17 @@ readVar x = getStore >>= \case
       Nothing -> return Null
   _ -> return Null
 
-writeVar :: Var -> Val -> Interp Val
+writeVar :: Var -> Val -> Interp a Val
 writeVar x v = do
   s <- getScope
   withScopes $ (over $ scope s) (Map.insert x v)
   return v
 
-readVal :: Interp String
-readVal = Interp . lift $ getLine
+readVal :: Interp a String
+readVal = Interp . lift . liftIO $ getLine
 
-printVal :: Show a => a -> Interp ()
-printVal = Interp . lift . putStr . show
+printVal :: Show v => v -> Interp a ()
+printVal = Interp . lift . liftIO . putStr . show
 
-printString :: String -> Interp ()
-printString = Interp . lift . putStr
+printString :: String -> Interp a ()
+printString = Interp . lift . liftIO . putStr

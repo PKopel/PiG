@@ -1,19 +1,29 @@
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module Utils.Types.App where
+module Utils.Types.App
+  ( Options(..)
+  , App(..)
+  , Interp(..)
+  , TestInterp
+  )
+where
 
+import           Utils.Types
 import           Data.Version                   ( Version )
-import           RIO                            ( Bool
-                                                , String
-                                                , lens
-                                                , HasLogFunc(..)
-                                                , LogFunc
-                                                )
+import           RIO
+import           RIO.Orphans                    ( )
 import           RIO.Process                    ( HasProcessContext(..)
                                                 , ProcessContext
                                                 )
 import           System.Console.Haskeline       ( Settings )
-import           Utils.Types                    ( Interp )
+
+import           Control.Monad.Catch            ( MonadMask
+                                                , MonadCatch
+                                                )
+import           Control.Monad.State            ( MonadState
+                                                , StateT(StateT)
+                                                )
 
 data Options = Options
   { optionsVerbose :: !Bool,
@@ -24,7 +34,7 @@ data App = App
   { appLogFunc :: !LogFunc,
     appProcessContext :: !ProcessContext,
     appOptions :: !Options,
-    appSettings :: !(Settings Interp),
+    appSettings :: !(Settings (Interp App)),
     appVersion :: !Version
   }
 
@@ -34,3 +44,17 @@ instance HasLogFunc App where
 instance HasProcessContext App where
   processContextL =
     lens appProcessContext (\x y -> x { appProcessContext = y })
+
+newtype Interp app v = Interp {runInterp :: StateT (Scope, Store) (RIO app) v}
+  deriving
+    ( Functor,
+      Applicative,
+      Monad,
+      MonadIO,
+      MonadThrow,
+      MonadCatch,
+      MonadMask,
+      MonadState (Scope, Store)
+    )
+
+type TestInterp = Interp ()
