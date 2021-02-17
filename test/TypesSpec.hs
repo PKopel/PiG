@@ -8,6 +8,7 @@ where
 
 import           Utils.Types
 import           RIO
+import Data.Text.Lazy
 import           Test.Hspec
 import           Test.QuickCheck
 
@@ -43,6 +44,9 @@ instance Arbitrary Scopes where
 instance Arbitrary Scope where
   arbitrary = elements [globalL, localL]
 
+instance Arbitrary Data.Text.Lazy.Text where
+  arbitrary = pack <$> arbitrary
+
 spec :: Spec
 spec = do
   describe "Utils.Types" $ do
@@ -54,8 +58,8 @@ prop_emptyStore :: SpecWith ()
 prop_emptyStore = describe "Utils.Types.emptyStore" $ do
   it "returns empty store" $ do
     let store = emptyStore
-    null (globalS store) `shouldBe` True
-    null (localS store) `shouldBe` True
+    RIO.null (globalS store) `shouldBe` True
+    RIO.null (localS store) `shouldBe` True
 
 prop_appUn :: SpecWith ()
 prop_appUn = describe "Utils.Types.UnAppToVal" $ do
