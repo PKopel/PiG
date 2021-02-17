@@ -1,5 +1,11 @@
 # Changelog for PiG
 
+### 0.17.0
+* change lexer and parser to use Text.Lazy
+* add Utils.IO to simplify IO
+* remove redundant functions from Utils.Interp
+* change directives parser to use Attoparsec
+
 ### 0.16.1
 * replace bare IO with RIO App
 

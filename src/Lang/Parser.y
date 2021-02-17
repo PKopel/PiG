@@ -1,5 +1,6 @@
 {
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Lang.Parser 
         ( parseFile
         , parseProg
@@ -10,6 +11,7 @@ import Lang.Tokens
 import Lang.Lexer
 import Control.Monad.Except
 import qualified Data.Sequence as Seq
+import qualified Data.Text.Lazy as TL
 import Utils.Types   
 import Utils.Util           
 }
@@ -145,7 +147,7 @@ Val     : true              { BoolVal True }
         | null              { Null }
         | NUM               { AlgVal $1 }
         | CHAR              { CharVal $1 }
-        | STR               { StrVal $1 }
+        | STR               { StrVal $ TL.unpack $1 }
         | FunVal '=>' InSeq { FunVal $1 $3 }                  
 
 {
@@ -154,12 +156,12 @@ lexwrap = (alexMonadScan >>=)
 
 happyError :: Token -> Alex a
 happyError (Token p t) =
-  alexError p ("parse error at token '" ++ show t ++ "'")
+  alexError p ("parse error at token '" <> TL.pack (show t) <> "'")
 
-parseFile :: FilePath -> String -> Either String Expr
+parseFile :: FilePath -> TL.Text -> Either TL.Text Expr
 parseFile = runAlex' pig
 
-parseProg :: String -> Either String Expr
+parseProg :: TL.Text -> Either TL.Text Expr
 parseProg s = runAlex s pig
 
 }

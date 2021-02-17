@@ -1,4 +1,14 @@
+
+{-# LANGUAGE NoImplicitPrelude #-}
 module Lang.Tokens where
+
+import           RIO                            ( Show(..)
+                                                , Char
+                                                , Double
+                                                )
+import           Data.Text.Lazy                 ( Text
+                                                , unpack
+                                                )
 
 data TokenType = TIf
            | TElIf
@@ -35,9 +45,9 @@ data TokenType = TIf
            | TFalse
            | TNull
            | TNum Double
-           | TStr String
+           | TStr Text
            | TChar Char
-           | TSym String
+           | TSym Text
            | TComma
            | TSemi
            | TEOF
@@ -78,9 +88,9 @@ instance Show TokenType where
   show TFalse    = "false"
   show TNull     = "null"
   show (TNum  x) = show x
-  show (TStr  s) = s
+  show (TStr  s) = unpack s
   show (TChar c) = [c]
-  show (TSym  s) = s
+  show (TSym  s) = unpack s
   show TComma    = ","
   show TSemi     = ";"
   show TEOF      = "EOF"

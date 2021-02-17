@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 36ac0d04caf269787fbda36c88c5bfbb513b4f8dabe96ec49a63d1b916d9b3fc
+-- hash: d9b372341439b3c7c22745ae588fac6d068cfc30fb0aeee1daf467057ba7c19a
 
 name:           PiG
-version:        0.16.1
+version:        0.17.0
 description:    Please see the README on Github at <https://github.com/PKopel/PiG#readme>
 homepage:       https://github.com/PKopel/PiG#readme
 bug-reports:    https://github.com/PKopel/PiG/issues
@@ -38,6 +38,7 @@ library
       Run
       Utils.Completion
       Utils.Interp
+      Utils.IO
       Utils.Types
       Utils.Types.App
       Utils.Util
@@ -49,6 +50,7 @@ library
   build-depends:
       QuickCheck
     , array
+    , attoparsec
     , base >=4.11 && <10
     , containers
     , exceptions
@@ -56,7 +58,6 @@ library
     , hspec
     , hspec-core
     , mtl
-    , parsec
     , pretty-terminal
     , rio >=0.1.12.0
     , rio-orphans
@@ -74,6 +75,7 @@ executable pig
       PiG
     , QuickCheck
     , array
+    , attoparsec
     , base >=4.11 && <10
     , containers
     , exceptions
@@ -82,7 +84,6 @@ executable pig
     , hspec-core
     , mtl
     , optparse-simple
-    , parsec
     , pretty-terminal
     , rio >=0.1.12.0
     , rio-orphans
@@ -103,6 +104,7 @@ test-suite pig-test
       PiG
     , QuickCheck
     , array
+    , attoparsec
     , base >=4.11 && <10
     , containers
     , exceptions
@@ -110,7 +112,6 @@ test-suite pig-test
     , hspec
     , hspec-core
     , mtl
-    , parsec
     , pretty-terminal
     , rio >=0.1.12.0
     , rio-orphans
