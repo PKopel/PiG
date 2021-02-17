@@ -2,4 +2,4 @@
 *.swp
 tarballs/
 .stack-work/
-
+Lexer.hs

@@ -150,11 +150,11 @@ Val     : true              { BoolVal True }
 
 {
 lexwrap :: (Token -> Alex a) -> Alex a
-lexwrap = (alexMonadScan' >>=)
+lexwrap = (alexMonadScan >>=)
 
 happyError :: Token -> Alex a
 happyError (Token p t) =
-  alexError' p ("parse error at token '" ++ show t ++ "'")
+  alexError p ("parse error at token '" ++ show t ++ "'")
 
 parseFile :: FilePath -> String -> Either String Expr
 parseFile = runAlex' pig
