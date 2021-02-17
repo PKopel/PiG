@@ -11,9 +11,12 @@ import qualified Data.Map                      as Map
 import           Data.Sequence                  ( Seq(..) )
 import qualified Data.Sequence                 as Seq
 import           RIO
+import           Utils.Interp
 import           Utils.Types
 import           Utils.Types.App                ( Interp(..) )
-import           Utils.Interp
+import           Utils.IO                       ( putStr
+                                                , readFile
+                                                )
 import           Utils.Util                     ( getElems
                                                 , isVar
                                                 )
@@ -21,14 +24,12 @@ import           Interp.BIF                     ( evalBIF
                                                 , bifs
                                                 )
 import           Lang.Parser                    ( parseFile )
-import qualified Data.Text                     as T
-import           System.IO                      ( putStr )
 
 eval :: Expr -> Interp a Val
 eval (Val  n) = return n
 eval (Var  x) = readVar x
 eval (Load e) = eval e >>= \case
-  StrVal file -> withStore (Interp . lift . evalFile file) >> return Null
+  StrVal file -> withStore (evalFile file) >> return Null
   _           -> return Null
 eval (Binary op e1 e2) = appBin op <$> eval e1 <*> eval e2
 eval (Unary op e     ) = eval e <&> appUn op >>= \case
@@ -105,9 +106,9 @@ evalDoubleList = foldM
   []
 
 
-evalFile :: FilePath -> Store -> RIO a Store
+evalFile :: FilePath -> Store -> Interp a Store
 evalFile file store = do
-  contents <- parseFile file . T.unpack <$> readFileUtf8 file
+  contents <- parseFile file <$> readFile file
   case contents of
-    Left  err  -> liftIO (putStr err) >> return store
-    Right expr -> runWithStoreIO (eval expr) store
+    Left  err  -> putStr err >> return store
+    Right expr -> Interp . lift $ runWithStoreIO (eval expr) store

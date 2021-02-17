@@ -9,6 +9,7 @@ where
 
 import           RIO
 import qualified Data.Map                      as M
+import qualified Data.Text.Lazy                as TL
 import           Data.List                      ( isPrefixOf )
 import           System.Console.Haskeline       ( completeWord
                                                 , simpleCompletion
@@ -24,9 +25,13 @@ import           Interp.BIF
 
 
 searchFunc :: Store -> String -> [Completion]
-searchFunc (Right scopes) str = map simpleCompletion $ filter
-  ((&&) <$> (str `isPrefixOf`) <*> (':' `notElem`))
-  (M.keys (globalS scopes) ++ M.keys (localS scopes) ++ bifs)
+searchFunc (Right scopes) str =
+  map simpleCompletion
+    $  filter ((&&) <$> (str `isPrefixOf`) <*> (':' `notElem`))
+    .  map TL.unpack
+    $  M.keys (globalS scopes)
+    ++ M.keys (localS scopes)
+    ++ bifs
 searchFunc _ _ = []
 
 completion :: CompletionFunc (Interp a)

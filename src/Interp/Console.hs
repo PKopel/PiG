@@ -1,11 +1,14 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Interp.Console
   ( startREPL
   )
 where
 
 import           RIO
+import qualified Data.Text.Lazy                as TL
+import           Utils.IO
 import           Utils.Types.App                ( Interp )
 import           Utils.Types                    ( Val(StrVal)
                                                 , Expr(Val, Seq, FunApp)
@@ -25,7 +28,6 @@ import           System.Console.Pretty          ( Color(Green, Red)
 import           System.Console.Haskeline       ( InputT
                                                 , Settings
                                                 , getInputLine
-                                                , outputStrLn
                                                 , runInputT
                                                 )
 
@@ -37,13 +39,13 @@ runLine colour = lift getStore >>= \case
   Left _ -> return ()
   _      -> do
     line <- getInputLine $ (style Faint . color colour) "PiG" <> "> "
-    checkLine line
+    checkLine $ TL.pack <$> line
 
-checkLine :: Maybe String -> InputT (Interp a) ()
+checkLine :: Maybe TL.Text -> InputT (Interp a) ()
 checkLine (Just line) = if isDirective line
   then lift (runWithStore (execute line)) >> runLine Green
   else case parseProg line of
-    Left  err  -> outputStrLn err >> runLine Red
+    Left  err  -> putStrLn err >> runLine Red
     Right prog -> runProg prog
 checkLine _ = return ()
 

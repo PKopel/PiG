@@ -3,10 +3,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Utils.Interp
-  ( readVal
-  , printVal
-  , printString
-  , getStore
+  ( getStore
   , getScope
   , putStore
   , setScope
@@ -24,9 +21,6 @@ import           Control.Monad.State            ( StateT(runStateT)
                                                 , put
                                                 )
 import qualified Data.Map                      as Map
-import           System.IO                      ( getLine
-                                                , putStr
-                                                )
 import           RIO
 import           Utils.Types
 import           Utils.Types.App                ( Interp(..) )
@@ -77,12 +71,3 @@ writeVar x v = do
   s <- getScope
   withScopes $ (over $ scope s) (Map.insert x v)
   return v
-
-readVal :: Interp a String
-readVal = Interp . lift . liftIO $ getLine
-
-printVal :: Show v => v -> Interp a ()
-printVal = Interp . lift . liftIO . putStr . show
-
-printString :: String -> Interp a ()
-printString = Interp . lift . liftIO . putStr
