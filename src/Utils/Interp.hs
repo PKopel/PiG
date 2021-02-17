@@ -9,10 +9,10 @@ module Utils.Interp
   , setScope
   , withScopes
   , withStore
-  , readVar
-  , writeVar
+  , getVar
+  , putVar
   , runWithStore
-  , runWithStoreIO
+  , interpWithStore
   )
 where
 
@@ -49,16 +49,16 @@ withScopes f = getStore >>= \case
 withStore :: (Store -> Interp a Store) -> Interp a ()
 withStore fun = getStore >>= fun >>= putStore
 
-runWithStore :: Interp a v -> Interp a ()
-runWithStore interp = withStore $ Interp . lift . runWithStoreIO interp
+interpWithStore :: Interp a v -> Interp a ()
+interpWithStore interp = withStore $ Interp . lift . runWithStore interp
 
-runWithStoreIO :: Interp a v -> Store -> RIO a Store
-runWithStoreIO interp store@(Right _) =
+runWithStore :: Interp a v -> Store -> RIO a Store
+runWithStore interp store@(Right _) =
   (runStateT . runInterp) interp (globalL, store) <&> snd . snd
-runWithStoreIO _ _ = return (Left ())
+runWithStore _ _ = return (Left ())
 
-readVar :: Var -> Interp a Val
-readVar x = getStore >>= \case
+getVar :: Var -> Interp a Val
+getVar x = getStore >>= \case
   Right store -> case Map.lookup x (view (scope localL) store) of
     Just v  -> return v
     Nothing -> case Map.lookup x (view (scope globalL) store) of
@@ -66,8 +66,8 @@ readVar x = getStore >>= \case
       Nothing -> return Null
   _ -> return Null
 
-writeVar :: Var -> Val -> Interp a Val
-writeVar x v = do
+putVar :: Var -> Val -> Interp a Val
+putVar x v = do
   s <- getScope
   withScopes $ (over $ scope s) (Map.insert x v)
   return v

@@ -5,7 +5,6 @@ module Utils.Types.App
   ( Options(..)
   , App(..)
   , Interp(..)
-  , TestInterp
   )
 where
 
@@ -56,5 +55,3 @@ newtype Interp app v = Interp {runInterp :: StateT (Scope, Store) (RIO app) v}
       MonadMask,
       MonadState (Scope, Store)
     )
-
-type TestInterp = Interp ()

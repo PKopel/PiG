@@ -15,7 +15,7 @@ import           Utils.Types.App                ( App
                                                   )
                                                 , Options(optionsLoad)
                                                 )
-import           Utils.Interp                   ( runWithStoreIO )
+import           Utils.Interp                   ( runWithStore )
 import           Utils.Types                    ( Val(StrVal)
                                                 , Expr(Val, Load)
                                                 , emptyStore
@@ -36,9 +36,8 @@ run = do
         <> fromString (showVersion version)
         <> "\ntype ':help' or ':h' for more information "
         )
-      void $ runWithStoreIO (startREPL settings) store
+      void $ runWithStore (startREPL settings) store
  where
   startStore ops = case optionsLoad ops of
-    [] -> return $ Right emptyStore
-    file ->
-      runWithStoreIO (eval . Load . Val . StrVal $ file) $ Right emptyStore
+    []   -> return $ Right emptyStore
+    file -> runWithStore (eval . Load . Val . StrVal $ file) $ Right emptyStore

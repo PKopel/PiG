@@ -1,7 +1,11 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Interp.Directives where
+module Interp.Directives
+  ( isDirective
+  , execute
+  )
+where
 
 import           RIO
 import qualified Data.Text.Lazy                as TL

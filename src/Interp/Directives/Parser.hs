@@ -1,6 +1,10 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Interp.Directives.Parser where
+module Interp.Directives.Parser
+  ( parseDrct
+  , Drct(..)
+  )
+where
 
 import           RIO                     hiding ( many
                                                 , optional

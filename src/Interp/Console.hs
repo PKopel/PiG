@@ -14,7 +14,7 @@ import           Utils.Types                    ( Val(StrVal)
                                                 , Expr(Val, Seq, FunApp)
                                                 )
 import           Utils.Interp                   ( getStore
-                                                , runWithStore
+                                                , interpWithStore
                                                 )
 import           Interp.Statements              ( eval )
 import           Interp.Directives              ( isDirective
@@ -43,7 +43,7 @@ runLine colour = lift getStore >>= \case
 
 checkLine :: Maybe TL.Text -> InputT (Interp a) ()
 checkLine (Just line) = if isDirective line
-  then lift (runWithStore (execute line)) >> runLine Green
+  then lift (interpWithStore (execute line)) >> runLine Green
   else case parseProg line of
     Left  err  -> putStrLn err >> runLine Red
     Right prog -> runProg prog
@@ -55,4 +55,4 @@ runProg expr =
     -- kind of a hack, but works
         e@(Seq _) -> FunApp ":print" [e, Val (StrVal "\n")]
         other     -> other
-  in  lift (runWithStore (eval expr')) >> runLine Green
+  in  lift (interpWithStore (eval expr')) >> runLine Green

@@ -3,7 +3,6 @@
 
 module Interp.Statements
   ( eval
-  , evalFile
   )
 where
 
@@ -27,18 +26,18 @@ import           Lang.Parser                    ( parseFile )
 
 eval :: Expr -> Interp a Val
 eval (Val  n) = return n
-eval (Var  x) = readVar x
+eval (Var  x) = getVar x
 eval (Load e) = eval e >>= \case
   StrVal file -> withStore (evalFile file) >> return Null
   _           -> return Null
 eval (Binary op e1 e2) = appBin op <$> eval e1 <*> eval e2
 eval (Unary op e     ) = eval e <&> appUn op >>= \case
   ListVal (h :<| t :<| Empty) ->
-    let (iv, x) = isVar e in when iv (void (writeVar x t)) >> return h
+    let (iv, x) = isVar e in when iv (void (putVar x t)) >> return h
   other -> return other
 eval (ListLiteral es) = ListVal . Seq.fromList <$> mapM eval es
 eval (FunApp n vs) | n `elem` bifs = mapM eval vs >>= evalBIF n
-                   | otherwise     = readVar n >>= evalFunApp vs
+                   | otherwise     = getVar n >>= evalFunApp vs
 eval (Seq []             ) = return Null
 eval (Seq [s     ]       ) = eval s
 eval (Seq (s : ss)       ) = eval s >> eval (Seq ss)
@@ -51,11 +50,11 @@ eval (If ((c, e1) : t) e2) = eval c >>= \case
 eval (While e s   ) = ListVal <$> evalWhile e s Empty
 eval (Assign x i e) = do
   v <- eval e
-  readVar x >>= \case
+  getVar x >>= \case
     ListVal l -> eval i >>= \case
-      AlgVal ind -> writeVar x . ListVal $ Seq.update (round ind) v l
-      _          -> writeVar x v
-    _ -> writeVar x v
+      AlgVal ind -> putVar x . ListVal $ Seq.update (round ind) v l
+      _          -> putVar x v
+    _ -> putVar x v
 
 evalWhile :: Expr -> Expr -> Seq Val -> Interp a (Seq Val)
 evalWhile e s acc = eval e >>= \case
@@ -111,4 +110,4 @@ evalFile file store = do
   contents <- parseFile file <$> readFile file
   case contents of
     Left  err  -> putStr err >> return store
-    Right expr -> Interp . lift $ runWithStoreIO (eval expr) store
+    Right expr -> Interp . lift $ runWithStore (eval expr) store

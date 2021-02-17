@@ -8,7 +8,7 @@ where
 
 import           Utils.Types
 import           RIO
-import Data.Text.Lazy
+import           Data.Text.Lazy
 import           Test.Hspec
 import           Test.QuickCheck
 
