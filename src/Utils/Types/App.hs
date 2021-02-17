@@ -24,9 +24,8 @@ import           Control.Monad.State            ( MonadState
                                                 , StateT(StateT)
                                                 )
 
-data Options = Options
-  { optionsVerbose :: !Bool,
-    optionsLoad :: !String
+newtype Options = Options
+  { optionsLoad :: String
   }
 
 data App = App

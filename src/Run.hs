@@ -16,6 +16,7 @@ import           Utils.Types.App                ( App
                                                 , Options(optionsLoad)
                                                 )
 import           Utils.Interp                   ( runWithStore )
+import           Utils.IO                       ( putStrLn )
 import           Utils.Types                    ( Val(StrVal)
                                                 , Expr(Val, Load)
                                                 , emptyStore
@@ -31,7 +32,7 @@ run = do
   case store of
     Left  _ -> return ()
     Right _ -> do
-      logInfo
+      putStrLn
         (  "We're inside the experimental PiG interpreter!\nversion: "
         <> fromString (showVersion version)
         <> "\ntype ':help' or ':h' for more information "

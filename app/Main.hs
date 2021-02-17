@@ -6,7 +6,7 @@ module Main
   )
 where
 
-import           Utils.Completion
+import           Utils.Completion               ( completion )
 import           Utils.Types.App
 import           Options.Applicative.Simple
 import qualified Paths_PiG
@@ -18,7 +18,7 @@ import           System.Console.Haskeline
 main :: IO ()
 main = do
   options <- fst <$> pigOptions
-  lo      <- logOptionsHandle stderr (optionsVerbose options)
+  lo      <- logOptionsHandle stderr False
   pc      <- mkDefaultProcessContext
   let settings = Settings { complete       = completion
                           , historyFile    = Nothing
@@ -38,9 +38,7 @@ pigOptions = simpleOptions
   $(simpleVersion Paths_PiG.version)
   "PiG - interpreter for a simple imperative language"
   "start the interpreter"
-  (   Options
-  <$> switch (long "verbose" <> short 'v' <> help "verbose output")
-  <*> strOption
+  (   Options <$> strOption
         (long "load" <> short 'l' <> metavar "FILE" <> value "" <> help
           "start interpreter with FILE loaded"
         )

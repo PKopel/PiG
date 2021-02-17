@@ -1,5 +1,9 @@
 # Changelog for PiG
 
+### 0.17.1
+* rename runWithStore* and read/writeVar
+* remove option `-v|--verbose`
+
 ### 0.17.0
 * change lexer and parser to use Text.Lazy
 * add Utils.IO to simplify IO
