@@ -1,5 +1,5 @@
-
 {-# LANGUAGE NoImplicitPrelude #-}
+
 module Lang.Tokens where
 
 import           RIO                            ( Show(..)

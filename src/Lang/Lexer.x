@@ -1,6 +1,7 @@
 {
 {-# OPTIONS -w  #-}
 {-# LANGUAGE OverloadedStrings #-}
+
 module Lang.Lexer
   ( alexMonadScan
   , alexError

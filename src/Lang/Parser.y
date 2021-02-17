@@ -1,6 +1,7 @@
 {
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
+
 module Lang.Parser 
         ( parseFile
         , parseProg
