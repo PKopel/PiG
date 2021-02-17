@@ -1,5 +1,5 @@
 {
-{-# OPTIONS -w  #-}
+{-# OPTIONS -w -funbox-strict-fields #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Lang.Lexer
@@ -154,9 +154,7 @@ data AlexState = AlexState {
         alex_fp :: FilePath      -- the current file path
     }
 
--- Compile with -funbox-strict-fields for best results!
 -- Alex monad
-
 runAlex :: TL.Text -> Alex a -> Either TL.Text a
 runAlex input (Alex f) =
   case
@@ -250,27 +248,6 @@ alexMonadScan = do
 
 
 type AlexAction result = AlexInput -> Int -> Alex result
-
-
--- just ignore this token and scan another one
-skip :: AlexAction Token
-skip _input _len = alexMonadScan
-
--- ignore this token, but set the start code to a new value
-begin :: Int -> AlexAction Token
-begin code _input _len = do
-  alexSetStartCode code
-  alexMonadScan
-
--- perform an action for this token, and set the start code to a new value
-andBegin :: AlexAction result -> Int -> AlexAction result
-(action `andBegin` code) input len = do
-  alexSetStartCode code
-  action input len
-
-
-token :: (AlexInput -> Int -> token) -> AlexAction token
-token t input len = return (t input len)
  
 data Token = Token AlexPosn TokenType
   deriving ( Show )

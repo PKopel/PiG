@@ -57,7 +57,6 @@ import Utils.Util
     '['             { Token _ TLBracket }
     ','             { Token _ TComma }
     ';'             { Token _ TSemi }
-    eof             { Token _ TEOF }
     true            { Token _ TTrue }
     false           { Token _ TFalse }
     null            { Token _ TNull }
