@@ -29,9 +29,11 @@ parseDrct s = case parse drctParser s of
 
 drctParser :: Parser Drct
 drctParser =
-  many' (char ' ')
-    *>  try (string ":e" $> Exit)
-    <|> try (string ":h" $> Help)
-    <|> try (string ":c" $> Clear)
+  try (drct ":exit" ":e" $> Exit)
+    <|> try (drct ":help" ":h" $> Help)
+    <|> try (drct ":clear" ":c" $> Clear)
     <|> try (string ":rm " *> (Rm <$> takeLazyText))
     <?> "PiG directives"
+ where
+  drct long short =
+    (try (string long) <|> try (string short)) *> many' (char ' ') *> endOfInput

@@ -29,8 +29,9 @@ isDirective s = ":" `Lazy.isPrefixOf` s
 
 execute :: Lazy.Text -> Interp a ()
 execute str = case parseDrct str of
-  Left  err  -> putStr $ fromString err <> "\n"
-  Right drct -> exec drct
+  Left  "string" -> putStr $ "no directive '" <> str <> "', try ':h'\n"
+  Left  err      -> putStr $ fromString err <> "\n"
+  Right drct     -> exec drct
 
 exec :: Drct -> Interp a ()
 exec Exit  = putStore (Left ())

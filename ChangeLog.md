@@ -1,5 +1,8 @@
 # Changelog for PiG
 
+### 0.17.2
+* fix Interp.Directives.Parser
+
 ### 0.17.1
 * rename runWithStore* and read/writeVar
 * remove option `-v|--verbose`

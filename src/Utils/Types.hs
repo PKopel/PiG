@@ -125,7 +125,8 @@ instance Show Expr where
   show (If a b) =
     unwords ["if", intercalate " elif " (show <$> a), "else", show b]
   show (ListLiteral v) = '[' : intercalate ", " (show <$> v) ++ "]"
-  show (FunApp a b) = Lazy.unpack a ++ '(' : intercalate ", " (show <$> b) ++ ")"
+  show (FunApp a b) =
+    Lazy.unpack a ++ '(' : intercalate ", " (show <$> b) ++ ")"
 
 data Val
   = AlgVal Double
