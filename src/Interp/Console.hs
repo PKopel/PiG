@@ -40,7 +40,7 @@ runLine colour = lift getStore >>= \case
   Left _ -> return ()
   _      -> do
     line <- getInputLine $ (style Faint . color colour) "PiG" <> "> "
-    checkLine $ Lazy.stripStart . fromString <$> line
+    checkLine $ Lazy.strip . fromString <$> line
 
 checkLine :: Maybe Lazy.Text -> InputT (Interp a) ()
 checkLine (Just line)

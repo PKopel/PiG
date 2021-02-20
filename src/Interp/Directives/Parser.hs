@@ -35,5 +35,4 @@ drctParser =
     <|> try (string ":rm " *> (Rm <$> takeLazyText))
     <?> "PiG directives"
  where
-  drct long short =
-    (try (string long) <|> try (string short)) *> many' (char ' ') *> endOfInput
+  drct long short = (try (string long) <|> try (string short)) *> endOfInput
