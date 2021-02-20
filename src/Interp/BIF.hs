@@ -11,17 +11,17 @@ import           Utils.Types.App                ( Interp )
 import           Utils.Types                    ( Val(Null, StrVal, AlgVal) )
 import           Utils.Interp                   ( putStore )
 import           RIO
-import qualified Data.Text.Lazy                as TL
+import qualified Data.Text.Lazy                as Lazy
 import           System.IO                      ( getLine
                                                 , putStr
                                                 )
 
 
-bifs :: [TL.Text]
+bifs :: [Lazy.Text]
 bifs = ["read", "print", "exit", "strToNum", ":print"]
 
 
-evalBIF :: TL.Text -> [Val] -> Interp a Val
+evalBIF :: Lazy.Text -> [Val] -> Interp a Val
 evalBIF "read"   _  = StrVal <$> liftIO getLine
 evalBIF "print"  vs = evalPrint True vs
 evalBIF ":print" vs = evalPrint False vs

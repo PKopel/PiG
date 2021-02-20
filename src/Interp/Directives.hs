@@ -8,7 +8,7 @@ module Interp.Directives
 where
 
 import           RIO
-import qualified Data.Text.Lazy                as TL
+import qualified Data.Text.Lazy                as Lazy
 import           Utils.IO                       ( putStr )
 import           Utils.Types.App                ( Interp )
 import           Utils.Types                    ( Scope(scope)
@@ -24,12 +24,12 @@ import           Data.Map                       ( delete
                                                 , empty
                                                 )
 
-isDirective :: TL.Text -> Bool
-isDirective s = ":" `TL.isPrefixOf` s
+isDirective :: Lazy.Text -> Bool
+isDirective s = ":" `Lazy.isPrefixOf` s
 
-execute :: TL.Text -> Interp a ()
+execute :: Lazy.Text -> Interp a ()
 execute str = case parseDrct str of
-  Left  err  -> putStr $ TL.pack err <> "\n"
+  Left  err  -> putStr $ fromString err <> "\n"
   Right drct -> exec drct
 
 exec :: Drct -> Interp a ()

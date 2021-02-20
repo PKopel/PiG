@@ -7,17 +7,17 @@ import           RIO                            ( FilePath
                                                 , MonadIO(..)
                                                 , (.)
                                                 )
-import qualified Data.Text.Lazy                as TL
-import qualified Data.Text.Lazy.IO             as TLIO
+import qualified Data.Text.Lazy                as Lazy
+import qualified Data.Text.Lazy.IO             as LazyIO
 
-getLine :: MonadIO m => m TL.Text
-getLine = liftIO TLIO.getLine
+getLine :: MonadIO m => m Lazy.Text
+getLine = liftIO LazyIO.getLine
 
-putStr :: MonadIO m => TL.Text -> m ()
-putStr = liftIO . TLIO.putStr
+putStr :: MonadIO m => Lazy.Text -> m ()
+putStr = liftIO . LazyIO.putStr
 
-putStrLn :: MonadIO m => TL.Text -> m ()
-putStrLn = liftIO . TLIO.putStrLn
+putStrLn :: MonadIO m => Lazy.Text -> m ()
+putStrLn = liftIO . LazyIO.putStrLn
 
-readFile :: MonadIO m => FilePath -> m TL.Text
-readFile = liftIO . TLIO.readFile
+readFile :: MonadIO m => FilePath -> m Lazy.Text
+readFile = liftIO . LazyIO.readFile

@@ -17,7 +17,7 @@ import           Control.Applicative           as App
 import           Data.Word                      ( Word8 )
 import           Data.Char                      ( ord )
 import qualified Data.Bits
-import qualified Data.Text.Lazy                as TL
+import qualified Data.Text.Lazy                as Lazy
 import           Control.Monad                  ( liftM )
 import           Lang.Tokens
 }
@@ -71,9 +71,9 @@ tokens :-
     "true"                 { tok' TTrue }
     "false"                { tok' TFalse }
     "null"                 { tok' TNull }
-    @double                { tok (TNum . read . TL.unpack) }
+    @double                { tok (TNum . read . Lazy.unpack) }
     @char                  { tok lexChar }
-    @string                { tok (lexString TL.empty) }
+    @string                { tok (lexString Lazy.empty) }
     @id                    { tok TSym}
     @comment_line.*                   ;
     @comment_start(.*\n)*@comment_end ;
@@ -113,7 +113,7 @@ type AlexInput
   = (AlexPosn,     -- current position,
                Char,         -- previous char
                      [Byte],       -- pending bytes on current char
-                             TL.Text)       -- current input string
+                             Lazy.Text)       -- current input string
 
 ignorePendingBytes :: AlexInput -> AlexInput
 ignorePendingBytes (p, c, _ps, s) = (p, c, [], s)
@@ -123,10 +123,10 @@ alexInputPrevChar (_p, c, _bs, _s) = c
 
 alexGetByte :: AlexInput -> Maybe (Byte, AlexInput)
 alexGetByte (p, c, (b : bs), s ) = Just (b, (p, c, bs, s))
-alexGetByte (_, _, []      , s ) | TL.null s = Nothing
+alexGetByte (_, _, []      , s ) | Lazy.null s = Nothing
 alexGetByte (p, _, [], text) =
-  let c  = TL.head text
-      s  = TL.tail text
+  let c  = Lazy.head text
+      s  = Lazy.tail text
       p' = alexMove p c
   in  case utf8Encode' c of
         (b, bs) -> p' `seq` Just (b, (p', c, bs, s))
@@ -147,7 +147,7 @@ alexMove (AlexPn a l c) _    = AlexPn (a + 1) l (c + 1)
 
 data AlexState = AlexState {
         alex_pos :: !AlexPosn,  -- position at current input location
-        alex_inp :: TL.Text,     -- the current input
+        alex_inp :: Lazy.Text,     -- the current input
         alex_chr :: !Char,      -- the character before the input
         alex_bytes :: [Byte],
         alex_scd :: !Int,        -- the current startcode
@@ -155,7 +155,7 @@ data AlexState = AlexState {
     }
 
 -- Alex monad
-runAlex :: TL.Text -> Alex a -> Either TL.Text a
+runAlex :: Lazy.Text -> Alex a -> Either Lazy.Text a
 runAlex input (Alex f) =
   case
       f
@@ -171,10 +171,10 @@ runAlex input (Alex f) =
       Left  msg    -> Left msg
       Right (_, a) -> Right a
 
-runAlex' :: Alex a -> FilePath -> TL.Text -> Either TL.Text a
+runAlex' :: Alex a -> FilePath -> Lazy.Text -> Either Lazy.Text a
 runAlex' a fp input = runAlex input (alexSetFilePath fp >> a)
 
-newtype Alex a = Alex { unAlex :: AlexState -> Either TL.Text (AlexState, a) }
+newtype Alex a = Alex { unAlex :: AlexState -> Either Lazy.Text (AlexState, a) }
 
 instance Functor Alex where
   fmap f a = Alex $ \s -> case unAlex a s of
@@ -206,15 +206,15 @@ alexSetInput (pos, c, bs, inp__) = Alex $ \s ->
   case s { alex_pos = pos, alex_chr = c, alex_bytes = bs, alex_inp = inp__ } of
     state__@(AlexState{}) -> Right (state__, ())
 
-alexError :: AlexPosn -> TL.Text -> Alex a
+alexError :: AlexPosn -> Lazy.Text -> Alex a
 alexError (AlexPn _ l c) msg = do
   fp <- alexGetFilePath
   Alex $ const $ Left
-    (  TL.pack fp
+    (  Lazy.pack fp
     <> ":"
-    <> TL.pack (show l)
+    <> Lazy.pack (show l)
     <> ":"
-    <> TL.pack (show c)
+    <> Lazy.pack (show c)
     <> ": "
     <> msg
     )
@@ -238,7 +238,7 @@ alexMonadScan = do
   case alexScan inp sc of
     AlexEOF -> alexEOF
     AlexError (p, _, _, s) ->
-      alexError p ("lexical error at character '" <> TL.take 1 s <> "'")
+      alexError p ("lexical error at character '" <> Lazy.take 1 s <> "'")
     AlexSkip inp' len -> do
       alexSetInput inp'
       alexMonadScan
@@ -257,8 +257,8 @@ alexEOF = do
   (p, _, _, _) <- alexGetInput
   return $ Token p TEOF
 
-tok :: (TL.Text -> TokenType) -> AlexAction Token
-tok f = \(p, _, _, s) i -> return $ Token p (f (TL.take (fromIntegral i) s))
+tok :: (Lazy.Text -> TokenType) -> AlexAction Token
+tok f = \(p, _, _, s) i -> return $ Token p (f (Lazy.take (fromIntegral i) s))
 
 tok' :: TokenType -> AlexAction Token
 tok' = tok . const
@@ -271,22 +271,22 @@ escape c = case c of
   '0' -> '\0'
   o   -> o
 
-lexString :: TL.Text -> TL.Text -> TokenType
-lexString acc str | TL.null str         = TStr (TL.reverse acc)
-                  | TL.head str == '"'  = lexString acc s
-                  | TL.head str == '\\' = lexString (ec `TL.cons` acc) $ TL.tail s
-                  | otherwise           = lexString (c `TL.cons` acc) s
+lexString :: Lazy.Text -> Lazy.Text -> TokenType
+lexString acc str | Lazy.null str         = TStr (Lazy.reverse acc)
+                  | Lazy.head str == '"'  = lexString acc s
+                  | Lazy.head str == '\\' = lexString (ec `Lazy.cons` acc) $ Lazy.tail s
+                  | otherwise           = lexString (c `Lazy.cons` acc) s
  where
-  ec = escape . TL.head $ TL.tail str
-  c  = TL.head str
-  s  = TL.tail str
+  ec = escape . Lazy.head $ Lazy.tail str
+  c  = Lazy.head str
+  s  = Lazy.tail str
 
 
-lexChar :: TL.Text -> TokenType
-lexChar str | TL.head str == '\'' = lexChar $ TL.tail str
-            | TL.head str == '\\' = TChar (escape c)
+lexChar :: Lazy.Text -> TokenType
+lexChar str | Lazy.head str == '\'' = lexChar $ Lazy.tail str
+            | Lazy.head str == '\\' = TChar (escape c)
             | otherwise           = TChar c
-  where c = TL.head str
+  where c = Lazy.head str
 
 }
 

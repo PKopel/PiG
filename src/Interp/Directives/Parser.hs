@@ -11,7 +11,7 @@ import           RIO                     hiding ( many
                                                 , optional
                                                 , try
                                                 )
-import qualified Data.Text.Lazy                as TL
+import qualified Data.Text.Lazy                as Lazy
 import           Utils.Types                    ( Var )
 
 import           Data.Attoparsec.Text.Lazy
@@ -22,7 +22,7 @@ data Drct
   | Help
   | Rm Var
 
-parseDrct :: TL.Text -> Either String Drct
+parseDrct :: Lazy.Text -> Either String Drct
 parseDrct s = case parse drctParser s of
   Fail _ _ err -> Left err
   Done _ drct  -> Right drct

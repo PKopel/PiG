@@ -12,7 +12,7 @@ import Lang.Tokens
 import Lang.Lexer
 import Control.Monad.Except
 import qualified Data.Sequence as Seq
-import qualified Data.Text.Lazy as TL
+import qualified Data.Text.Lazy as Lazy
 import Utils.Types   
 import Utils.Util           
 }
@@ -147,7 +147,7 @@ Val     : true              { BoolVal True }
         | null              { Null }
         | NUM               { AlgVal $1 }
         | CHAR              { CharVal $1 }
-        | STR               { StrVal $ TL.unpack $1 }
+        | STR               { StrVal $ Lazy.unpack $1 }
         | FunVal '=>' InSeq { FunVal $1 $3 }                  
 
 {
@@ -156,12 +156,12 @@ lexwrap = (alexMonadScan >>=)
 
 happyError :: Token -> Alex a
 happyError (Token p t) =
-  alexError p ("parse error at token '" <> TL.pack (show t) <> "'")
+  alexError p ("parse error at token '" <> Lazy.pack (show t) <> "'")
 
-parseFile :: FilePath -> TL.Text -> Either TL.Text Expr
+parseFile :: FilePath -> Lazy.Text -> Either Lazy.Text Expr
 parseFile = runAlex' pig
 
-parseProg :: TL.Text -> Either TL.Text Expr
+parseProg :: Lazy.Text -> Either Lazy.Text Expr
 parseProg s = runAlex s pig
 
 }

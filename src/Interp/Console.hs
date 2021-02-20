@@ -7,8 +7,8 @@ module Interp.Console
   )
 where
 
-import           RIO
-import qualified Data.Text.Lazy                as TL
+import           RIO hiding (Text)
+import qualified Data.Text.Lazy                as Lazy
 import           Utils.IO
 import           Utils.Types.App                ( Interp )
 import           Utils.Types                    ( Val(StrVal)
@@ -40,9 +40,9 @@ runLine colour = lift getStore >>= \case
   Left _ -> return ()
   _      -> do
     line <- getInputLine $ (style Faint . color colour) "PiG" <> "> "
-    checkLine $ TL.pack <$> line
+    checkLine $ fromString <$> line
 
-checkLine :: Maybe TL.Text -> InputT (Interp a) ()
+checkLine :: Maybe Lazy.Text -> InputT (Interp a) ()
 checkLine (Just line) = if isDirective line
   then lift (interpWithStore (execute line)) >> runLine Green
   else case parseProg line of
