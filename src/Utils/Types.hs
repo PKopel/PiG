@@ -3,30 +3,12 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedLists #-}
 
 module Utils.Types where
-import           Data.List                      ( intercalate
-                                                , (!!)
-                                                )
-import qualified Data.Sequence                 as Seq
+import           Data.List                      ( intercalate )
 import qualified Data.Text.Lazy                as Lazy
 import           RIO
-
-class Container c where
-  (!?) :: c a -> Int -> Maybe a
-  (|>) :: c a -> a -> c a
-  (<|) :: a -> c a -> c a
-
-instance Container Seq.Seq where
-  (!?) = (Seq.!?)
-  (|>) = (Seq.|>)
-  (<|) = (Seq.<|)
-
-instance Container [] where
-  l !? i | length l < i = Nothing
-         | otherwise    = Just (l !! i)
-  (<|) = (:)
-  l |> a = l ++ [a]
 
 class UnaryOp op where
   appUn :: op -> Val -> Val
@@ -40,9 +22,8 @@ instance UnaryOp (Bool -> Bool) where
   appUn _  _           = Null
 
 instance UnaryOp (Seq Val -> (Val, Seq Val)) where
-  appUn op (ListVal a) =
-    let (v, l) = op a in ListVal $ Seq.fromList [v, ListVal l]
-  appUn _ _ = Null
+  appUn op (ListVal a) = let (v, l) = op a in ListVal [v, ListVal l]
+  appUn _  _           = Null
 
 class BinaryOp op where
   appBin :: op -> Val -> Val -> Val
@@ -76,11 +57,11 @@ instance BinaryOp (String -> String -> String) where
     toStr (FunVal _ _) = ""
     toStr v            = show v
 
-instance BinaryOp (Seq.Seq Val -> Seq.Seq Val -> Seq.Seq Val) where
+instance BinaryOp (Seq Val -> Seq Val -> Seq Val) where
   appBin op a b = ListVal $ op (toSeq a) (toSeq b)
    where
     toSeq (ListVal v) = v
-    toSeq v           = Seq.singleton v
+    toSeq v           = [v]
 
 data Expr
   = Var Var
@@ -165,7 +146,7 @@ instance Eq Scopes where
 type Store = Either () Scopes
 
 emptyStore :: Scopes
-emptyStore = Scopes { globalS = mempty, localS = mempty }
+emptyStore = Scopes { globalS = [], localS = [] }
 
 globalL :: Scope
 globalL = Scope $ lens globalS (\x y -> x { globalS = y })

@@ -10,13 +10,30 @@ module Utils.Util
   )
 where
 
-import           Data.Sequence                  ( Seq(..) )
+import           Data.Sequence                  ( Seq(..)
+                                                , (!?)
+                                                , (<|)
+                                                )
+import           Data.List                      ( (!!) )
 import           RIO
 import           Utils.Types
 
+class Container c where
+  (!!?) :: c a -> Int -> Maybe a
+  (<:) :: a -> c a -> c a
+
+instance Container Seq where
+  (!!?) = (!?)
+  (<:)  = (<|)
+
+instance Container [] where
+  l !!? i | length l < i = Nothing
+          | otherwise    = Just (l !! i)
+  (<:) = (:)
+
 getElems :: (Foldable t, Container s, Monoid (s a)) => s a -> t Double -> s a
 getElems list = foldl'
-  (\acc v -> fromMaybe acc ((<|) <$> list !? round v <*> pure acc))
+  (\acc v -> fromMaybe acc ((<:) <$> list !!? round v <*> pure acc))
   mempty
 
 isVar :: Expr -> (Bool, Var)
