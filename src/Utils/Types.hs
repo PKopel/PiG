@@ -95,19 +95,19 @@ instance Ord Expr where
   _        <= _        = False
 
 instance Show Expr where
-  show (Var v       ) = "Var " <> Lazy.unpack v
-  show (Val v       ) = "Val " <> show v
+  show (Var v       ) = Lazy.unpack v
+  show (Val v       ) = show v
   show (Assign a b c) = unwords [Lazy.unpack a, show b, " = ", show c]
-  show (Load e      ) = "Load " ++ show e
-  show (While a b   ) = unwords ["While", show a, show b]
-  show (Seq v       ) = '{' : intercalate "; " (show <$> v) ++ "}"
-  show (Binary _ a b) = unwords ["Binary", show a, show b]
-  show (Unary _ a   ) = "Unary " <> show a
+  show (Load e      ) = "load " <> show e
+  show (While a b   ) = unwords ["while", show a, show b]
+  show (Seq v       ) = '{' : intercalate "; " (show <$> v) <> "}"
+  show (Binary _ a b) = unwords ["binary op", show a, show b]
+  show (Unary _ a   ) = "unary op " <> show a
   show (If a b) =
     unwords ["if", intercalate " elif " (show <$> a), "else", show b]
-  show (ListLiteral v) = '[' : intercalate ", " (show <$> v) ++ "]"
+  show (ListLiteral v) = '[' : intercalate ", " (show <$> v) <> "]"
   show (FunApp a b) =
-    Lazy.unpack a ++ '(' : intercalate ", " (show <$> b) ++ ")"
+    Lazy.unpack a <> "(" <> intercalate ", " (show <$> b) <> ")"
 
 data Val
   = AlgVal Double
@@ -125,8 +125,8 @@ instance Show Val where
   show (BoolVal True ) = "true"
   show (BoolVal False) = "false"
   show (StrVal  v    ) = v
-  show (ListVal v    ) = '[' : intercalate ", " (toList $ show <$> v) ++ "]"
-  show (FunVal n _) = '(' : intercalate ", " (show <$> n) ++ ")" ++ " => func"
+  show (ListVal v    ) = '[' : intercalate ", " (toList $ show <$> v) <> "]"
+  show (FunVal n _   ) = "fun(" <> intercalate ", " (show <$> n) <> ")"
   show Null            = "null"
 
 type Var = Lazy.Text
