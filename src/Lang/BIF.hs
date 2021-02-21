@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Interp.BIF
+module Lang.BIF
   ( bifs
   , evalBIF
   )

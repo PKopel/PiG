@@ -2,6 +2,7 @@
 
 ### 0.17.2
 * fix Interp.Directives.Parser
+* move BIF.hs from Interp to Lang
 
 ### 0.17.1
 * rename runWithStore* and read/writeVar

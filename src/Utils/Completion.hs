@@ -8,7 +8,7 @@ module Utils.Completion
 where
 
 import           RIO
-import qualified Data.Map                      as M
+import qualified Data.Map                      as Map
 import qualified Data.Text.Lazy                as Lazy
 import           Data.List                      ( isPrefixOf )
 import           System.Console.Haskeline       ( completeWord
@@ -21,7 +21,7 @@ import           Utils.Types                    ( Store
                                                 , Scopes(globalS, localS)
                                                 )
 import           Utils.Interp                   ( getStore )
-import           Interp.BIF
+import           Lang.BIF                       ( bifs )
 
 
 searchFunc :: Store -> String -> [Completion]
@@ -29,8 +29,8 @@ searchFunc (Right scopes) str =
   map simpleCompletion
     $  filter ((&&) <$> (str `isPrefixOf`) <*> (':' `notElem`))
     .  map Lazy.unpack
-    $  M.keys (globalS scopes)
-    ++ M.keys (localS scopes)
+    $  Map.keys (globalS scopes)
+    ++ Map.keys (localS scopes)
     ++ bifs
 searchFunc _ _ = []
 

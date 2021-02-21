@@ -19,7 +19,7 @@ import           Utils.IO                       ( putStr
 import           Utils.Util                     ( getElems
                                                 , isVar
                                                 )
-import           Interp.BIF                     ( evalBIF
+import           Lang.BIF                       ( evalBIF
                                                 , bifs
                                                 )
 import           Lang.Parser                    ( parseFile )
