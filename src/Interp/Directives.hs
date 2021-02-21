@@ -42,5 +42,5 @@ exec Help =
     \:help | :h - display this message\n\
     \:exit | :e or Ctrl+d - leave the interpreter\n\
     \:clear | :c - remove all variables\n\
-    \:rm <name> - remove variable <name>\n"
+    \:rm VAR - remove variable VAR\n"
 exec (Rm var) = withScopes $ (over . scope) globalL (delete var)
