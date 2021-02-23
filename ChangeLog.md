@@ -2,6 +2,7 @@
 
 ### 0.17.3
 * replace ":print" with expresion in PiG
+* add bifs 'is<type>'
 
 ### 0.17.2
 * fix Interp.Directives.Parser

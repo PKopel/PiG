@@ -27,7 +27,7 @@ import           Lang.BIF                       ( bifs )
 searchFunc :: Store -> String -> [Completion]
 searchFunc (Right scopes) str =
   map simpleCompletion
-    $  filter ((&&) <$> (str `isPrefixOf`) <*> (':' `notElem`))
+    $  filter (str `isPrefixOf`)
     .  map Lazy.unpack
     $  Map.keys (globalS scopes)
     ++ Map.keys (localS scopes)
@@ -35,6 +35,6 @@ searchFunc (Right scopes) str =
 searchFunc _ _ = []
 
 completion :: CompletionFunc (Interp a)
-completion = completeWord Nothing " \t" $ \str -> do
+completion = completeWord Nothing "\t" $ \str -> do
   store <- getStore
   return $ searchFunc store str

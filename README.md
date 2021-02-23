@@ -28,7 +28,16 @@ In PiG, everything is an expression:
 * function application, in form `<name>(<arg1>,...,<argn>)`
 * expressions with build-in keywords and operators
 
-There are four build-in functions provided: `print(arg1,...,argn)` which prints all its arguments to stdout, `read()`, which reads string from stdin, `strToNum(arg)` which parses number from string and `exit()` which closes interpreter.
+Build-in functions provided: 
+* `print(arg1,...,argn)` prints all its arguments to stdout
+* `read()` reads string from stdin
+* `strToNum(arg)` parses number from string 
+* `isNum(arg)` checks if `arg` is a number
+* `isBool(arg)` checks if `arg` is a boolean
+* `isList(arg)` checks if `arg` is a list
+* `isStr(arg)` checks if `arg` is a string
+* `isFun(arg)` checks if `arg` is a function
+* `exit()` closes interpreter
 
 Keyword `load "<file name>"` executes code from other files. 
 

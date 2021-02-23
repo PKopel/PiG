@@ -55,8 +55,9 @@ checkLine _ = return ()
 runProg :: Expr -> InputT (Interp a) ()
 runProg expr = lift (interpWithStore (eval expr')) >> runLine Green
  where
-  expr'  = Seq [assign, cond]
+  expr'  = Seq [assign, If [(cond, print)] (Val Null)]
   assign = Assign "$$" (Val Null) expr
-  cond =
-    If [(Var "$$", FunApp "print" [Var "$$", Val (StrVal "\n")])] (Val Null)
+  cond   = Binary ((/=) :: (Val -> Val -> Bool)) (Var "$$") (Val Null)
+  print  = FunApp "print" [Var "$$", Val (StrVal "\n")]
+
 
