@@ -1,5 +1,8 @@
 # Changelog for PiG
 
+### 0.17.3
+* replace ":print" with expresion in PiG
+
 ### 0.17.2
 * fix Interp.Directives.Parser
 * move BIF.hs from Interp to Lang

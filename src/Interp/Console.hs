@@ -11,8 +11,8 @@ import           RIO                     hiding ( Text )
 import qualified Data.Text.Lazy                as Lazy
 import           Utils.IO
 import           Utils.Types.App                ( Interp )
-import           Utils.Types                    ( Val(StrVal)
-                                                , Expr(Val, Seq, FunApp)
+import           Utils.Types                    ( Val(..)
+                                                , Expr(..)
                                                 )
 import           Utils.Interp                   ( getStore
                                                 , interpWithStore
@@ -53,9 +53,10 @@ checkLine (Just line)
 checkLine _ = return ()
 
 runProg :: Expr -> InputT (Interp a) ()
-runProg expr =
-  let expr' = case expr of
-    -- kind of a hack, but works
-        e@(Seq _) -> FunApp ":print" [e, Val (StrVal "\n")]
-        other     -> other
-  in  lift (interpWithStore (eval expr')) >> runLine Green
+runProg expr = lift (interpWithStore (eval expr')) >> runLine Green
+ where
+  expr'  = Seq [assign, cond]
+  assign = Assign "$$" (Val Null) expr
+  cond =
+    If [(Var "$$", FunApp "print" [Var "$$", Val (StrVal "\n")])] (Val Null)
+
