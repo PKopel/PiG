@@ -1,9 +1,9 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedLists #-}
 
 module Lang.BIF
   ( bifs
-  , evalBIF
   )
 where
 
@@ -17,34 +17,40 @@ import           System.IO                      ( getLine
                                                 )
 
 
-bifs :: [Lazy.Text]
+bifs :: Map Lazy.Text ([Val] -> Interp a Val)
 bifs =
-  [ "read"
-  , "print"
-  , "exit"
-  , "strToNum"
-  , "isNum"
-  , "isStr"
-  , "isBool"
-  , "isList"
-  , "isFun"
+  [ ("read"    , read)
+  , ("print"   , print)
+  , ("exit"    , exit)
+  , ("strToNum", strToNum)
+  , ("isNum"   , isNum)
+  , ("isStr"   , isStr)
+  , ("isBool"  , isBool)
+  , ("isList"  , isList)
+  , ("isFun"   , isFun)
   ]
 
 
-evalBIF :: Lazy.Text -> [Val] -> Interp a Val
-evalBIF "isNum"  [AlgVal _]   = return $ BoolVal True
-evalBIF "isNum"  _            = return $ BoolVal False
-evalBIF "isStr"  [StrVal _]   = return $ BoolVal True
-evalBIF "isStr"  _            = return $ BoolVal False
-evalBIF "isBool" [BoolVal _]  = return $ BoolVal True
-evalBIF "isBool" _            = return $ BoolVal False
-evalBIF "isList" [ListVal _]  = return $ BoolVal True
-evalBIF "isList" _            = return $ BoolVal False
-evalBIF "isFun"  [FunVal _ _] = return $ BoolVal True
-evalBIF "isFun"  _            = return $ BoolVal False
-evalBIF "read"   _            = StrVal <$> liftIO getLine
-evalBIF "print"  (e : es)     = liftIO (putStr (show e)) >> evalBIF "print" es
-evalBIF "exit"   _            = putStore (Left ()) >> return Null
-evalBIF "strToNum" ((StrVal str) : _) =
-  return $ maybe Null AlgVal (readMaybe str)
-evalBIF _ _ = return Null
+isNum, isStr, isBool, isList, isFun :: [Val] -> Interp a Val
+isNum [AlgVal _] = return $ BoolVal True
+isNum _          = return $ BoolVal False
+isStr [StrVal _] = return $ BoolVal True
+isStr _          = return $ BoolVal False
+isBool [BoolVal _] = return $ BoolVal True
+isBool _           = return $ BoolVal False
+isList [ListVal _] = return $ BoolVal True
+isList _           = return $ BoolVal False
+isFun [FunVal _ _] = return $ BoolVal True
+isFun _            = return $ BoolVal False
+
+read, print :: [Val] -> Interp a Val
+read _ = StrVal <$> liftIO getLine
+print (e : es) = liftIO (putStr (show e)) >> print es
+print _        = return Null
+
+exit :: [Val] -> Interp a Val
+exit _ = putStore (Left ()) >> return Null
+
+strToNum :: [Val] -> Interp a Val
+strToNum ((StrVal str) : _) = return $ maybe Null AlgVal (readMaybe str)
+strToNum _                  = return Null

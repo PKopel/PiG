@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module Interp.Statements
+module REPL.Statements
   ( eval
   )
 where
@@ -19,9 +19,7 @@ import           Utils.IO                       ( putStr
 import           Utils.Util                     ( getElems
                                                 , isVar
                                                 )
-import           Lang.BIF                       ( evalBIF
-                                                , bifs
-                                                )
+import           Lang.BIF                       ( bifs )
 import           Lang.Parser                    ( parseFile )
 
 eval :: Expr -> Interp a Val
@@ -36,8 +34,9 @@ eval (Unary op e     ) = eval e <&> appUn op >>= \case
     let (iv, x) = isVar e in when iv (void (putVar x t)) >> return h
   other -> return other
 eval (ListLiteral es) = ListVal . Seq.fromList <$> mapM eval es
-eval (FunApp n vs) | n `elem` bifs = mapM eval vs >>= evalBIF n
-                   | otherwise     = getVar n >>= evalFunApp vs
+eval (FunApp n vs   ) = case Map.lookup n bifs of
+  Just bif -> mapM eval vs >>= bif
+  Nothing  -> getVar n >>= evalFunApp vs
 eval (Seq []             ) = return Null
 eval (Seq [s     ]       ) = eval s
 eval (Seq (s : ss)       ) = eval s >> eval (Seq ss)

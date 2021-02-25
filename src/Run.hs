@@ -8,11 +8,7 @@ where
 
 import           Data.Version                   ( showVersion )
 import           RIO
-import           Utils.Types.App                ( App
-                                                  ( appVersion
-                                                  , appSettings
-                                                  , appOptions
-                                                  )
+import           Utils.Types.App                ( App(..)
                                                 , Options(optionsLoad)
                                                 )
 import           Utils.Interp                   ( runWithStore )
@@ -21,8 +17,8 @@ import           Utils.Types                    ( Val(StrVal)
                                                 , Expr(Val, Load)
                                                 , emptyStore
                                                 )
-import           Interp.Console                 ( startREPL )
-import           Interp.Statements              ( eval )
+import           REPL.Console                   ( startREPL )
+import           REPL.Statements                ( eval )
 
 run :: RIO App ()
 run = do

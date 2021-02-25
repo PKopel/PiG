@@ -1,5 +1,9 @@
 # Changelog for PiG
 
+### 0.17.4
+* rename Interp to REPL
+* change bifs to `Map Text ([Val] -> Interp a Val)`
+
 ### 0.17.3
 * replace ":print" with expresion in PiG
 * add bifs 'is<type>'

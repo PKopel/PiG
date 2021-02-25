@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Interp.Directives
+module REPL.Directives
   ( isDirective
   , execute
   )
@@ -17,7 +17,7 @@ import           Utils.Types                    ( Scope(scope)
 import           Utils.Interp                   ( putStore
                                                 , withScopes
                                                 )
-import           Interp.Directives.Parser       ( parseDrct
+import           REPL.Directives.Parser         ( parseDrct
                                                 , Drct(..)
                                                 )
 import           Data.Map                       ( delete

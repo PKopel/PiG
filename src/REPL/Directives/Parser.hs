@@ -1,7 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Interp.Directives.Parser
+module REPL.Directives.Parser
   ( parseDrct
   , Drct(..)
   )

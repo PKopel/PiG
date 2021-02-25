@@ -2,7 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Interp.Console
+module REPL.Console
   ( startREPL
   )
 where
@@ -17,8 +17,8 @@ import           Utils.Types                    ( Val(..)
 import           Utils.Interp                   ( getStore
                                                 , interpWithStore
                                                 )
-import           Interp.Statements              ( eval )
-import           Interp.Directives              ( isDirective
+import           REPL.Statements                ( eval )
+import           REPL.Directives                ( isDirective
                                                 , execute
                                                 )
 import           Lang.Parser                    ( parseProg )

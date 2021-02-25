@@ -31,7 +31,7 @@ searchFunc (Right scopes) str =
     .  map Lazy.unpack
     $  Map.keys (globalS scopes)
     ++ Map.keys (localS scopes)
-    ++ bifs
+    ++ Map.keys bifs
 searchFunc _ _ = []
 
 completion :: CompletionFunc (Interp a)
