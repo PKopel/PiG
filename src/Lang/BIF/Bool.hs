@@ -1,4 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
+
 module Lang.BIF.Bool where
 
 import           RIO
