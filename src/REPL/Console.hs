@@ -57,7 +57,7 @@ runProg expr = lift (interpWithStore (eval expr')) >> runLine Green
  where
   expr'  = Seq [assign, If [(cond, print)] (Val Null)]
   assign = Assign "$$" (Val Null) expr
-  cond   = Binary ((/=) :: (Val -> Val -> Bool)) (Var "$$") (Val Null)
+  cond   = FunApp "neq" [Var "$$", Val Null]
   print  = FunApp "print" [Var "$$", Val (StrVal "\n")]
 
 

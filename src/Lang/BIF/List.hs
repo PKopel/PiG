@@ -3,7 +3,6 @@
 module Lang.BIF.List where
 
 import           RIO
-import           Data.Sequence                  ( Seq(..) )
 import           Utils.Types                    ( Val(..) )
 
 catl :: [Val] -> Val
@@ -31,19 +30,3 @@ seqBinOp op (a : b :        vals) = seqBinOp
   toSeq (ListVal v) = v
   toSeq v           = [v]
 seqBinOp _ _ = Null
-
-fst', lst' :: [Val] -> Val
-fst' = unOp (>-)
-lst' = unOp (-<)
-
-(>-) :: Seq Val -> (Val, Seq Val)
-(>-) (h :<| t) = (h, t)
-(>-) l         = (Null, l)
-
-(-<) :: Seq Val -> (Val, Seq Val)
-(-<) (i :|> l) = (l, i)
-(-<) l         = (Null, l)
-
-unOp :: (Seq Val -> (Val, Seq Val)) -> [Val] -> Val
-unOp op [ListVal a] = let (v, l) = op a in ListVal [v, ListVal l]
-unOp _  _           = Null

@@ -47,8 +47,6 @@ bifs =
   , ("neq"     , return . neq)
   , ("catl"    , return . catl)
   , ("cats"    , return . cats)
-  , ("fst"     , return . fst')
-  , ("lst"     , return . lst')
   ]
 
 
