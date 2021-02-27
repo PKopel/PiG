@@ -1,5 +1,10 @@
 # Changelog for PiG
 
+### 0.18.0
+* remove Unary and Binary constructors from Expr
+* remove classes UnaryOp and BinaryOp
+* add bifs for operators
+
 ### 0.17.4
 * rename Interp to REPL
 * change bifs to `Map Text ([Val] -> Interp a Val)`

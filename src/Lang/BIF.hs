@@ -45,8 +45,8 @@ bifs =
   , ("gt"      , return . gt)
   , ("eq"      , return . eq)
   , ("neq"     , return . neq)
-  , ("catl"    , return . catl)
-  , ("cats"    , return . cats)
+  , ("catList" , return . catl)
+  , ("catStr"  , return . cats)
   ]
 
 
