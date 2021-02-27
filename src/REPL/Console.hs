@@ -9,7 +9,7 @@ where
 
 import           RIO                     hiding ( Text )
 import qualified Data.Text.Lazy                as Lazy
-import           Utils.IO
+import           Utils.IO                       ( putStrLn )
 import           Utils.Types.App                ( Interp )
 import           Utils.Types                    ( Val(..)
                                                 , Expr(..)
@@ -17,7 +17,7 @@ import           Utils.Types                    ( Val(..)
 import           Utils.Interp                   ( getStore
                                                 , interpWithStore
                                                 )
-import           REPL.Statements                ( eval )
+import           REPL.Eval                      ( eval )
 import           REPL.Directives                ( isDirective
                                                 , execute
                                                 )
@@ -57,7 +57,7 @@ runProg expr = lift (interpWithStore (eval expr')) >> runLine Green
  where
   expr'  = Seq [assign, If [(cond, print)] (Val Null)]
   assign = Assign "$$" (Val Null) expr
-  cond   = Binary ((/=) :: (Val -> Val -> Bool)) (Var "$$") (Val Null)
+  cond   = FunApp "neq" [Var "$$", Val Null]
   print  = FunApp "print" [Var "$$", Val (StrVal "\n")]
 
 

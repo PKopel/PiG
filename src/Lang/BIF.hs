@@ -15,6 +15,9 @@ import qualified Data.Text.Lazy                as Lazy
 import           System.IO                      ( getLine
                                                 , putStr
                                                 )
+import           Lang.BIF.Alg
+import           Lang.BIF.Bool
+import           Lang.BIF.List
 
 
 bifs :: Map Lazy.Text ([Val] -> Interp a Val)
@@ -28,6 +31,22 @@ bifs =
   , ("isBool"  , isBool)
   , ("isList"  , isList)
   , ("isFun"   , isFun)
+  , ("add"     , return . add)
+  , ("sub"     , return . sub)
+  , ("mul"     , return . mul)
+  , ("div"     , return . div')
+  , ("mod"     , return . modulo)
+  , ("pow"     , return . pow)
+  , ("neg"     , return . neg)
+  , ("not"     , return . not')
+  , ("and"     , return . and')
+  , ("or"      , return . or')
+  , ("lt"      , return . lt)
+  , ("gt"      , return . gt)
+  , ("eq"      , return . eq)
+  , ("neq"     , return . neq)
+  , ("catList" , return . catl)
+  , ("catStr"  , return . cats)
   ]
 
 

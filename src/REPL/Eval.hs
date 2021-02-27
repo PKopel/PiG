@@ -1,7 +1,9 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedLists #-}
+{-# LANGUAGE OverloadedStrings #-}
 
-module REPL.Statements
+module REPL.Eval
   ( eval
   )
 where
@@ -16,9 +18,7 @@ import           Utils.Types.App                ( Interp(..) )
 import           Utils.IO                       ( putStr
                                                 , readFile
                                                 )
-import           Utils.Util                     ( getElems
-                                                , isVar
-                                                )
+import           Utils.Util
 import           Lang.BIF                       ( bifs )
 import           Lang.Parser                    ( parseFile )
 
@@ -28,13 +28,10 @@ eval (Var  x) = getVar x
 eval (Load e) = eval e >>= \case
   StrVal file -> withStore (evalFile file) >> return Null
   _           -> return Null
-eval (Binary op e1 e2) = appBin op <$> eval e1 <*> eval e2
-eval (Unary op e     ) = eval e <&> appUn op >>= \case
-  ListVal (h :<| t :<| Empty) ->
-    let (iv, x) = isVar e in when iv (void (putVar x t)) >> return h
-  other -> return other
-eval (ListLiteral es) = ListVal . Seq.fromList <$> mapM eval es
-eval (FunApp n vs   ) = case Map.lookup n bifs of
+eval (ListLiteral es  ) = ListVal . Seq.fromList <$> mapM eval es
+eval (FunApp "fst" [e]) = evalListUnOp (>-) e
+eval (FunApp "lst" [e]) = evalListUnOp (-<) e
+eval (FunApp n     vs ) = case Map.lookup n bifs of
   Just bif -> mapM eval vs >>= bif
   Nothing  -> getVar n >>= evalFunApp vs
 eval (Seq []             ) = return Null
@@ -64,6 +61,16 @@ evalWhile e s acc = eval e >>= \case
  where
   while cond =
     if cond then eval s >>= evalWhile e s . (acc Seq.|>) else return acc
+
+evalListUnOp :: (Seq Val -> (Val, Seq Val)) -> Expr -> Interp a Val
+evalListUnOp op e = eval e <&> unOp op >>= \case
+  ListVal (h :<| t :<| Empty) ->
+    let (iv, x) = isVar e in when iv (void (putVar x t)) >> return h
+  other -> return other
+
+unOp :: (Seq Val -> (Val, Seq Val)) -> Val -> Val
+unOp op (ListVal a) = let (v, l) = op a in ListVal [v, ListVal l]
+unOp _  _           = Null
 
 evalFunApp :: [Expr] -> Val -> Interp a Val
 -- execute function with arguments from args
