@@ -88,24 +88,24 @@ Expr    : Atom                          { $1 }
         | while Expr do InSeq           { While $2 $4 }
         | while Expr do Expr            { While $2 $4 }
         | VAR FunAppl                   { FunApp $1 $2}
-        | Expr '+' Expr                 { Binary ((+) :: Double -> Double -> Double) $1 $3 }
-        | Expr '-' Expr                 { Binary ((-) :: Double -> Double -> Double) $1 $3 }
-        | Expr '*' Expr                 { Binary ((*) :: Double -> Double -> Double) $1 $3 }
-        | Expr '/' Expr                 { Binary ((/) :: Double -> Double -> Double) $1 $3 }
-        | Expr '^' Expr                 { Binary ((**) :: Double -> Double -> Double) $1 $3 }
-        | Expr '%' Expr                 { Binary (mod :: Integer -> Integer -> Integer) $1 $3}
-        | '-' Expr                      { Unary (negate :: Double -> Double) $2 }
-        | '~' Expr                      { Unary not $2 }
-        | Expr '&&' Expr                { Binary (&&) $1 $3 }
-        | Expr '||' Expr                { Binary (||) $1 $3 }
-        | Expr '==' Expr                { Binary ((==) :: Val -> Val -> Bool) $1 $3 }
-        | Expr '!=' Expr                { Binary ((/=) :: Val -> Val -> Bool) $1 $3 }
-        | Expr '<' Expr                 { Binary ((<) :: Val -> Val -> Bool) $1 $3 }
-        | Expr '>' Expr                 { Binary ((>) :: Val -> Val -> Bool) $1 $3 }
-        | '-<' Expr                     { Unary (-<) $2}
-        | '>-' Expr                     { Unary (>-) $2}
-        | Expr '<>' Expr                { Binary ((<>) :: Seq.Seq Val -> Seq.Seq Val -> Seq.Seq Val) $1 $3 }
-        | Expr '><' Expr                { Binary ((<>) :: String -> String -> String) $1 $3 }
+        | Expr '+' Expr                 { FunApp "add" [$1,$3] }
+        | Expr '-' Expr                 { FunApp "sub" [$1,$3] }
+        | Expr '*' Expr                 { FunApp "mul" [$1,$3] }
+        | Expr '/' Expr                 { FunApp "div" [$1,$3] }
+        | Expr '^' Expr                 { FunApp "pow" [$1,$3] }
+        | Expr '%' Expr                 { FunApp "mod" [$1,$3] }
+        | '-' Expr                      { FunApp "neg" [$2] }
+        | '~' Expr                      { FunApp "not" [$2] }
+        | Expr '&&' Expr                { FunApp "and" [$1,$3] }
+        | Expr '||' Expr                { FunApp "or" [$1,$3] }
+        | Expr '==' Expr                { FunApp "eq" [$1,$3] }
+        | Expr '!=' Expr                { FunApp "neq" [$1,$3] }
+        | Expr '<' Expr                 { FunApp "lt" [$1,$3] }
+        | Expr '>' Expr                 { FunApp "gt" [$1,$3] }
+        | '-<' Expr                     { FunApp "lst" [$2] }
+        | '>-' Expr                     { FunApp "fst" [$2] }
+        | Expr '<>' Expr                { FunApp "catl" [$1,$3] }
+        | Expr '><' Expr                { FunApp "cats" [$1,$3] }
 
 If      : if IfList                     { If $2 (Val Null) }
         | if IfList else InSeq          { If $2 $4 }
