@@ -5,13 +5,10 @@
 module Utils.Util
   ( isVar
   , getElems
-  , (>-)
-  , (-<)
   )
 where
 
-import           Data.Sequence                  ( Seq(..)
-                                                , (!?)
+import           Data.Sequence                  ( (!?)
                                                 , (<|)
                                                 )
 import           Data.List                      ( (!!) )
@@ -39,11 +36,3 @@ getElems list = foldl'
 isVar :: Expr -> (Bool, Var)
 isVar (Var x) = (True, x)
 isVar _       = (False, "")
-
-(>-) :: Seq Val -> (Val, Seq Val)
-(>-) (h :<| t) = (h, t)
-(>-) l         = (Null, l)
-
-(-<) :: Seq Val -> (Val, Seq Val)
-(-<) (i :|> l) = (l, i)
-(-<) l         = (Null, l)

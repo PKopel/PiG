@@ -9,7 +9,7 @@ where
 
 import           RIO                     hiding ( Text )
 import qualified Data.Text.Lazy                as Lazy
-import           Utils.IO
+import           Utils.IO                       ( putStrLn )
 import           Utils.Types.App                ( Interp )
 import           Utils.Types                    ( Val(..)
                                                 , Expr(..)
@@ -17,7 +17,7 @@ import           Utils.Types                    ( Val(..)
 import           Utils.Interp                   ( getStore
                                                 , interpWithStore
                                                 )
-import           REPL.Statements                ( eval )
+import           REPL.Eval                      ( eval )
 import           REPL.Directives                ( isDirective
                                                 , execute
                                                 )

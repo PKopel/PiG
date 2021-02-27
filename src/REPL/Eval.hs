@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module REPL.Statements
+module REPL.Eval
   ( eval
   )
 where

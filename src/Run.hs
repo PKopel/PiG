@@ -18,7 +18,7 @@ import           Utils.Types                    ( Val(StrVal)
                                                 , emptyStore
                                                 )
 import           REPL.Console                   ( startREPL )
-import           REPL.Statements                ( eval )
+import           REPL.Eval                      ( eval )
 
 run :: RIO App ()
 run = do

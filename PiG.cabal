@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e0d1caeedf2e929ffd408e307ad55aed5b0b37eedcf1b41fe7b90809602e53af
+-- hash: 4e012082a921927a2af0c61a235779910254de9a896b990ad8617472f94abca9
 
 name:           PiG
 version:        0.17.4
@@ -28,13 +28,16 @@ source-repository head
 library
   exposed-modules:
       Lang.BIF
+      Lang.BIF.Alg
+      Lang.BIF.Bool
+      Lang.BIF.List
       Lang.Lexer
       Lang.Parser
       Lang.Tokens
       REPL.Console
       REPL.Directives
       REPL.Directives.Parser
-      REPL.Statements
+      REPL.Eval
       Run
       Utils.Completion
       Utils.Interp
