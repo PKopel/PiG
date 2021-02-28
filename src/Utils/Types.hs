@@ -1,11 +1,56 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedLists #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Utils.Types where
 import           Data.List                      ( intercalate )
 import qualified Data.Text.Lazy                as Lazy
+import           Data.Version                   ( Version )
 import           RIO
+import           RIO.Orphans                    ( )
+import           RIO.Process                    ( HasProcessContext(..)
+                                                , ProcessContext
+                                                )
+import           System.Console.Haskeline       ( Settings )
+
+import           Control.Monad.Catch            ( MonadMask
+                                                , MonadCatch
+                                                )
+import           Control.Monad.State            ( MonadState
+                                                , StateT(StateT)
+                                                )
+
+newtype Options = Options
+  { optionsLoad :: String
+  }
+
+data App = App
+  { appLogFunc :: !LogFunc,
+    appProcessContext :: !ProcessContext,
+    appOptions :: !Options,
+    appSettings :: !(Settings (Interp App)),
+    appVersion :: !Version
+  }
+
+instance HasLogFunc App where
+  logFuncL = lens appLogFunc (\x y -> x { appLogFunc = y })
+
+instance HasProcessContext App where
+  processContextL =
+    lens appProcessContext (\x y -> x { appProcessContext = y })
+
+newtype Interp app v = Interp {runInterp :: StateT (Scope, Store) (RIO app) v}
+  deriving
+    ( Functor,
+      Applicative,
+      Monad,
+      MonadIO,
+      MonadThrow,
+      MonadCatch,
+      MonadMask,
+      MonadState (Scope, Store)
+    )
 
 data Expr
   = Var Var

@@ -104,8 +104,8 @@ Expr    : Atom                          { $1 }
         | Expr '>' Expr                 { FunApp "gt" [$1,$3] }
         | '-<' Expr                     { FunApp "lst" [$2] }
         | '>-' Expr                     { FunApp "fst" [$2] }
-        | Expr '<>' Expr                { FunApp "catl" [$1,$3] }
-        | Expr '><' Expr                { FunApp "cats" [$1,$3] }
+        | Expr '<>' Expr                { FunApp "catList" [$1,$3] }
+        | Expr '><' Expr                { FunApp "catStr" [$1,$3] }
 
 If      : if IfList                     { If $2 (Val Null) }
         | if IfList else InSeq          { If $2 $4 }

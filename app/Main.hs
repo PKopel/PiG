@@ -7,7 +7,7 @@ module Main
 where
 
 import           Utils.Completion               ( completion )
-import           Utils.Types.App
+import           Utils.Types
 import           Options.Applicative.Simple
 import qualified Paths_PiG
 import           RIO

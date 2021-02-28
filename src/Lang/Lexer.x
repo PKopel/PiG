@@ -285,8 +285,8 @@ lexString acc str | Lazy.null str         = TStr (Lazy.reverse acc)
 lexChar :: Lazy.Text -> TokenType
 lexChar str | Lazy.head str == '\'' = lexChar $ Lazy.tail str
             | Lazy.head str == '\\' = TChar (escape c)
-            | otherwise           = TChar c
-  where c = Lazy.head str
+            | otherwise           = TChar (Lazy.head str)
+  where c = Lazy.head $ Lazy.tail str
 
 }
 

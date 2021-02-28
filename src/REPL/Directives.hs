@@ -10,9 +10,9 @@ where
 import           RIO
 import qualified Data.Text.Lazy                as Lazy
 import           Utils.IO                       ( putStr )
-import           Utils.Types.App                ( Interp )
 import           Utils.Types                    ( Scope(scope)
                                                 , globalL
+                                                , Interp
                                                 )
 import           Utils.Interp                   ( putStore
                                                 , withScopes

@@ -7,8 +7,9 @@ module Lang.BIF
   )
 where
 
-import           Utils.Types.App                ( Interp )
-import           Utils.Types                    ( Val(..) )
+import           Utils.Types                    ( Interp
+                                                , Val(..)
+                                                )
 import           Utils.Interp                   ( putStore )
 import           RIO
 import qualified Data.Text.Lazy                as Lazy

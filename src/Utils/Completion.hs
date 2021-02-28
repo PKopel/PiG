@@ -16,9 +16,9 @@ import           System.Console.Haskeline       ( completeWord
                                                 , Completion
                                                 , CompletionFunc
                                                 )
-import           Utils.Types.App                ( Interp )
 import           Utils.Types                    ( Store
                                                 , Scopes(globalS, localS)
+                                                , Interp
                                                 )
 import           Utils.Interp                   ( getStore )
 import           Lang.BIF                       ( bifs )
@@ -28,7 +28,8 @@ searchFunc :: Store -> String -> [Completion]
 searchFunc (Right scopes) str =
   map simpleCompletion
     $  filter (str `isPrefixOf`)
-    .  map Lazy.unpack
+    .  ("load" :)
+    .  map ((++ "(") . Lazy.unpack)
     $  Map.keys (globalS scopes)
     ++ Map.keys (localS scopes)
     ++ Map.keys bifs

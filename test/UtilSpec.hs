@@ -5,11 +5,7 @@ module UtilSpec
   )
 where
 
-import           Utils.Types.App                ( Interp(runInterp) )
-import           Utils.Types                    ( Scope(scope)
-                                                , Store
-                                                , Val
-                                                )
+import           Utils.Types
 import           Utils.Interp                   ( getScope
                                                 , getStore
                                                 , putStore

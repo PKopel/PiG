@@ -8,15 +8,9 @@ where
 
 import           Data.Version                   ( showVersion )
 import           RIO
-import           Utils.Types.App                ( App(..)
-                                                , Options(optionsLoad)
-                                                )
 import           Utils.Interp                   ( runWithStore )
 import           Utils.IO                       ( putStrLn )
-import           Utils.Types                    ( Val(StrVal)
-                                                , Expr(Val, Load)
-                                                , emptyStore
-                                                )
+import           Utils.Types
 import           REPL.Console                   ( startREPL )
 import           REPL.Eval                      ( eval )
 

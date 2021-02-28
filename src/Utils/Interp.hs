@@ -23,7 +23,6 @@ import           Control.Monad.State            ( StateT(runStateT)
 import qualified Data.Map                      as Map
 import           RIO
 import           Utils.Types
-import           Utils.Types.App                ( Interp(..) )
 
 getStore :: Interp a Store
 getStore = get <&> snd

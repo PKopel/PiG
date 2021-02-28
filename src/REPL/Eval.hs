@@ -14,7 +14,6 @@ import qualified Data.Sequence                 as Seq
 import           RIO
 import           Utils.Interp
 import           Utils.Types
-import           Utils.Types.App                ( Interp(..) )
 import           Utils.IO                       ( putStr
                                                 , readFile
                                                 )
