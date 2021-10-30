@@ -6,8 +6,12 @@ Interpreter for a simple language, build with [Alex](https://www.haskell.org/ale
 
 Use
 * `stack exec pig` to start interpreter
-* `stack exec pig -- -l|--load <file>` to start interpreter with `<file>` loaded.
-* `stack exec pig -- --help` to see more info.
+* `stack install` to install `pig` executable on your machine
+
+### Options
+* `--version` show version of interpreter
+* `--help`: show options with short description
+* `-l|--load FILE`: start interpreter with `FILE` loaded
 
 ## Language
 
@@ -55,7 +59,7 @@ Interpreter also provides four directives:
 
 See [examples](https://github.com/PKopel/PiG/tree/master/examples) for more info.
 
-### Dependencies
+## Dependencies
 * **[RIO](https://hackage.haskell.org/package/rio)**
 * **[attoparsec](https://hackage.haskell.org/package/attoparsec)**
 * **[Haskeline](https://hackage.haskell.org/package/haskeline)**
@@ -64,6 +68,6 @@ See [examples](https://github.com/PKopel/PiG/tree/master/examples) for more info
 * **[QuickCheck](https://hackage.haskell.org/package/QuickCheck)**
 * **[array](https://gitlab.haskell.org/ghc/packages/array)**
 
-### Author
+## Author
 
 * **[Paweł Kopel](https://github.com/PKopel)**
