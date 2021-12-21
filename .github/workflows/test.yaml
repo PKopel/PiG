@@ -6,7 +6,7 @@ on:
 
 jobs:
   stack:
-    name: stack / ghc ${{ matrix.ghc }}
+    name: stack ${{ matrix.stack }} / resolver ${{ matrix.resolver }} / ghc ${{ matrix.ghc }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -24,7 +24,7 @@ jobs:
           ghc-version: ${{ matrix.ghc }}
           stack-version: ${{ matrix.stack }}
 
-      - name: Install tools
+      - name: Install alex and happy
         run: |
           sudo apt -y install alex happy
 
