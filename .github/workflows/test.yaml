@@ -15,7 +15,7 @@ jobs:
         resolver: [lts-17.2]
 
     steps:
-      - uses: actions/checkout@v2.1.3
+      - uses: actions/checkout@v2
         name: Checkout
 
       - uses: actions/setup-haskell@v1.1.4
