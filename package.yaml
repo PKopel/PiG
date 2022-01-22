@@ -1,10 +1,10 @@
 name: PiG
-version: 0.0.18.1
+version: 0.0.18.2
 github: PKopel/PiG
 license: BSD3
 author: Paweł Kopel
 maintainer: pawel.kopel2@gmail.com
-copyright: 2020 Paweł Kopel
+copyright: 2022 Paweł Kopel
 
 extra-source-files:
   - README.md
