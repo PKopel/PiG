@@ -1,19 +1,19 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 22da95dfb5489edac7a7f7a56ebee21fc04053364115b68f9ebc0b428dbc00ca
+-- hash: 2c26da7c9ca0ad3b1cc96bba8b8b1462e78d181fa192e705d6c050a576730e6d
 
 name:           PiG
-version:        0.0.18.1
+version:        0.0.18.2
 description:    Please see the README on Github at <https://github.com/PKopel/PiG#readme>
 homepage:       https://github.com/PKopel/PiG#readme
 bug-reports:    https://github.com/PKopel/PiG/issues
 author:         Paweł Kopel
 maintainer:     pawel.kopel2@gmail.com
-copyright:      2020 Paweł Kopel
+copyright:      2022 Paweł Kopel
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple

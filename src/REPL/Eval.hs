@@ -99,7 +99,7 @@ evalFunApp args (StrVal l) = do
     [  v    ] -> return $ CharVal v -- one argument in vs, result is a single char
     v@(_ : _) -> return $ StrVal v -- more than one argument in vs, result is a string
     _         -> return Null
-evalFunApp _ _ = return Null
+evalFunApp _ anyVal = return anyVal
 
 evalDoubleList :: [Expr] -> Interp a [Double]
 evalDoubleList = foldM

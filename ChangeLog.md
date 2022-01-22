@@ -1,5 +1,8 @@
 # Changelog for PiG
 
+### 0.0.18.2
+* treat non-lambda values as constant functions
+
 ### 0.0.18.1
 * move contents of module Utils.Types.App to Utils.Types
 * fix catList & catStr
