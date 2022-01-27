@@ -1,5 +1,8 @@
 # Changelog for PiG
 
+### 0.0.19.0
+* add open, close, readFile and writeFile functions and file handle type
+
 ### 0.0.18.2
 * treat non-lambda values as constant functions
 

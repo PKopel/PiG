@@ -2,6 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 
 module Utils.Types where
 import           Data.List                      ( intercalate )
@@ -77,11 +78,15 @@ instance Show Expr where
   show (FunApp a b) =
     Lazy.unpack a <> "(" <> intercalate ", " (show <$> b) <> ")"
 
+instance Ord Handle where
+  _ <= _ = False
+
 data Val
   = AlgVal Double
   | BoolVal Bool
   | CharVal Char
   | StrVal String
+  | IOVal Handle
   | ListVal (Seq Val)
   | FunVal [Var] Expr
   | Null
@@ -93,6 +98,7 @@ instance Show Val where
   show (BoolVal True ) = "true"
   show (BoolVal False) = "false"
   show (StrVal  v    ) = v
+  show (IOVal   v    ) = show v
   show (ListVal v    ) = '[' : intercalate ", " (toList $ show <$> v) <> "]"
   show (FunVal n _   ) = "fun(" <> intercalate ", " (show <$> n) <> ")"
   show Null            = "null"
