@@ -35,6 +35,10 @@ In PiG, everything is an expression:
 Build-in functions provided: 
 * `print(arg1,...,argn)` prints all its arguments to stdout
 * `read()` reads string from stdin
+* `open(<file path>[, <mode string>])` opens file and returns its handle
+* `close(<handle>)` closes file
+* `readFile(<handle>)` reads line form file
+* `writeFile(<hande>,arg1,...,argn)` writes all its arguments except handle to file
 * `strToNum(arg)` parses number from string 
 * `isNum(arg)` checks if `arg` is a number
 * `isBool(arg)` checks if `arg` is a boolean
