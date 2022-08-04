@@ -46,6 +46,9 @@ ghc-options:
 
 library:
   source-dirs: src
+  build-tools:
+    - alex
+    - happy
 
 executables:
   pig:
