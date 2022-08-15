@@ -2,6 +2,10 @@
 
 ## Changes
 
+### 0.0.20.0
+
+* fix open and readFile functions
+
 ### 0.0.19.0
 
 * add open, close, readFile and writeFile functions and file handle type
