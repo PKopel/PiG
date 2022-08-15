@@ -10,15 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        stack: ["2.7.3"]
-        ghc: ["8.10.3"]
-        resolver: [lts-17.2]
+        stack: ["2.7.5"]
+        ghc: ["8.10.7"]
+        resolver: [lts-18.19]
 
     steps:
       - uses: actions/checkout@v2
         name: Checkout
 
-      - uses: actions/setup-haskell@v1.1.4
+      - uses: haskell/actions/setup@v2
         name: Setup Haskell Stack
         with:
           ghc-version: ${{ matrix.ghc }}

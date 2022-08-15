@@ -17,7 +17,6 @@ import           System.IO                      ( getLine
                                                 , hGetLine
                                                 , hPutStr
                                                 , putStr
-                                                , openFile
                                                 )
 import           Lang.BIF.Alg
 import           Lang.BIF.Bool
@@ -83,14 +82,15 @@ open [StrVal p, StrVal m] = IOVal <$> liftIO (openFile p mode)
     ('r' : _) -> ReadMode
     ('w' : _) -> WriteMode
     _         -> AppendMode
-open [StrVal p] = IOVal <$> liftIO (openFile p AppendMode)
+open [StrVal p] = IOVal <$> liftIO (openFile p ReadWriteMode)
 open _          = return Null
 close [IOVal h] = liftIO (hClose h) $> Null
 close _         = return Null
 
 readFile, writeFile :: [Val] -> Interp a Val
-readFile [IOVal h] = StrVal <$> liftIO (hGetLine h)
-readFile x         = read x
+readFile [IOVal h] =
+  StrVal <$> liftIO (hIsEOF h >>= \eof -> if eof then return "" else hGetLine h)
+readFile x = read x
 writeFile (IOVal h : e : es) =
   liftIO (hPutStr h $ show e) >> writeFile (IOVal h : es)
 writeFile [IOVal _] = return Null
