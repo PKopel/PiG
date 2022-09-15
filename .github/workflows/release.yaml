@@ -50,7 +50,7 @@ jobs:
 
       - name: Set env
         run: |
-          echo "tag_name=${{ github.ref }}" >> $GITHUB_ENV
+          echo "tag_name=$(echo ${{ github.ref }} | cut -d. -f3-)" >> $GITHUB_ENV
 
       - if: matrix.os == 'ubuntu-latest'
         run: |
