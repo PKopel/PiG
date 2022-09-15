@@ -51,11 +51,19 @@ jobs:
       - name: Set env
         run: |
           echo "tag_name=${{ github.ref }}" >> $GITHUB_ENV
-          if [[ ${{ runner.os }} == Linux ]]; then
-            echo "os_name=linux" >> $GITHUB_ENV
-          else
-            echo "os_name=darwin" >> $GITHUB_ENV
-          fi
+
+      - if: matrix.os == 'ubuntu-latest'
+        run: |
+          echo "os_name=linux" >> $GITHUB_ENV
+
+      - if: matrix.os == 'macOS-latest'
+        run: |
+          echo "os_name=darwin" >> $GITHUB_ENV
+
+      - if: matrix.os == 'windows-latest'
+        run: |
+          echo "os_name=darwin" >> $GITHUB_ENV
+          echo "EXT=.exe" >> $GITHUB_ENV
 
       - uses: haskell/actions/setup@v2
         name: Setup Haskell Stack
@@ -72,10 +80,6 @@ jobs:
       - name: Build
         run: |
           stack --system-ghc build --no-run-tests --no-run-benchmarks --copy-bins --local-bin-path ./bin
-
-      - if: matrix.os == 'windows-latest'
-        name: Set extension to .exe on Windows
-        run: echo "EXT=.exe" >> $GITHUB_ENV
 
       - name: Set binary path name
         run: echo "BINARY_PATH=./bin/pig${{ env.EXT }}" >> $GITHUB_ENV
