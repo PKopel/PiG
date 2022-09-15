@@ -2,13 +2,18 @@
 
 ## Changes
 
+### 0.1.0
+
+* change versioning convention
+* add `strToList` and `listToStr` bifs
+
 ### 0.0.20.0
 
-* fix open and readFile functions
+* fix `open` and `readFile` functions
 
 ### 0.0.19.0
 
-* add open, close, readFile and writeFile functions and file handle type
+* add `open`, `close`, `readFile` and `writeFile` functions and file handle type
 
 ### 0.0.18.2
 
@@ -17,7 +22,7 @@
 ### 0.0.18.1
 
 * move contents of module Utils.Types.App to Utils.Types
-* fix catList & catStr
+* fix `catList` & `catStr`
 * improve autocompletion
 
 ### 0.0.18.0

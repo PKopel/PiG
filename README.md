@@ -43,6 +43,8 @@ Build-in functions provided:
 * `readFile(<handle>)` reads line form file
 * `writeFile(<hande>,arg1,...,argn)` writes all its arguments except handle to file
 * `strToNum(arg)` parses number from string
+* `strToList(arg)` turns string to a list of chars
+* `listToStr(arg)` turns a list of chars to string
 * `isNum(arg)` checks if `arg` is a number
 * `isBool(arg)` checks if `arg` is a boolean
 * `isList(arg)` checks if `arg` is a list

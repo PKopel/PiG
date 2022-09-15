@@ -4,7 +4,9 @@
 module Lang.BIF.List where
 
 import           RIO
-import           Utils.Types                    ( Val(..) )
+import           Utils.Types                    ( Interp
+                                                , Val(..)
+                                                )
 
 catl :: [Val] -> Val
 catl = seqBinOp (<>)
@@ -31,3 +33,10 @@ seqBinOp op (a : b :        vals) = seqBinOp
   toSeq (ListVal v) = v
   toSeq v           = [v]
 seqBinOp _ _ = Null
+
+listToStr :: [Val] -> Interp a Val
+listToStr ((ListVal l) : _) = return . StrVal $ foldr toStr [] l
+ where
+  toStr (CharVal c) s = c : s
+  toStr _           s = s
+listToStr _ = return Null

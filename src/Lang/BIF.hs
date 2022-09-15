@@ -4,23 +4,23 @@
 
 module Lang.BIF
   ( bifs
-  )
-where
+  ) where
 
-import           Utils.Types                    ( Interp
-                                                , Val(..)
-                                                )
-import           Utils.Interp                   ( putStore )
-import           RIO
 import qualified Data.Text.Lazy                as Lazy
+import           Lang.BIF.Alg
+import           Lang.BIF.Bool
+import           Lang.BIF.List
+import           Lang.BIF.Str
+import           RIO
 import           System.IO                      ( getLine
                                                 , hGetLine
                                                 , hPutStr
                                                 , putStr
                                                 )
-import           Lang.BIF.Alg
-import           Lang.BIF.Bool
-import           Lang.BIF.List
+import           Utils.Interp                   ( putStore )
+import           Utils.Types                    ( Interp
+                                                , Val(..)
+                                                )
 
 
 bifs :: Map Lazy.Text ([Val] -> Interp a Val)
@@ -33,6 +33,8 @@ bifs =
   , ("writeFile", writeFile)
   , ("exit"     , exit)
   , ("strToNum" , strToNum)
+  , ("strToList", strToList)
+  , ("listToStr", listToStr)
   , ("isNum"    , isNum)
   , ("isStr"    , isStr)
   , ("isBool"   , isBool)
@@ -98,7 +100,3 @@ writeFile x         = print x
 
 exit :: [Val] -> Interp a Val
 exit _ = putStore (Left ()) >> return Null
-
-strToNum :: [Val] -> Interp a Val
-strToNum ((StrVal str) : _) = return $ maybe Null AlgVal (readMaybe str)
-strToNum _                  = return Null
