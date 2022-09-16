@@ -62,7 +62,8 @@ jobs:
           echo "EXT=.exe" >> $GITHUB_ENV
 
       - uses: haskell/actions/setup@v2
-        name: Setup Haskell Stack
+        name: Setup Haskell
+        id: setup-haskell-cabal
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
