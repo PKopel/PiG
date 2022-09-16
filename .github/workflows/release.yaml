@@ -88,7 +88,7 @@ jobs:
       - name: Compress binary
         uses: svenstaro/upx-action@2.0.1
         with:
-          file: ./bin/pig${{ env.EXT }}
+          file: ${{ env.BINARY_PATH }}
 
       - name: Load Release URL File from release job
         uses: actions/download-artifact@v1
