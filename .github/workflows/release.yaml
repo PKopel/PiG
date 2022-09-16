@@ -86,7 +86,8 @@ jobs:
       - name: Set binary path name
         run: echo "BINARY_PATH=./bin/pig${{ env.EXT }}" >> $GITHUB_ENV
 
-      - name: Compress binary
+      - if: matrix.os != 'windows-latest'
+        name: Compress binary
         uses: svenstaro/upx-action@2.0.1
         with:
           file: ${{ env.BINARY_PATH }}
