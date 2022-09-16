@@ -58,8 +58,8 @@ jobs:
 
       - if: matrix.os == 'windows-latest'
         run: |
-          echo "os_name=windows" >> $GITHUB_ENV
-          echo "EXT=.exe" >> $GITHUB_ENV
+          echo "os_name=windows" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "EXT=.exe" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - uses: haskell/actions/setup@v2
         name: Setup Haskell
@@ -84,10 +84,14 @@ jobs:
           cabal install exe:pig --install-method=copy --overwrite-policy=always --installdir=bin
 
       - name: Set binary path name
+        if: matrix.os != 'windows-latest'
         run: echo "BINARY_PATH=./bin/pig${{ env.EXT }}" >> $GITHUB_ENV
 
-      - if: matrix.os != 'windows-latest'
-        name: Compress binary
+      - name: Set binary path name
+        if: matrix.os == 'windows-latest'
+        run: echo "BINARY_PATH=./bin/pig${{ env.EXT }}" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Compress binary
         uses: svenstaro/upx-action@2.0.1
         with:
           file: ${{ env.BINARY_PATH }}
