@@ -2,6 +2,10 @@
 
 ## Changes
 
+### 0.1.1
+
+* fix prompt on windows
+
 ### 0.1.0
 
 * change versioning convention

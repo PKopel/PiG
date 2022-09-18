@@ -4,56 +4,60 @@
 
 module REPL.Console
   ( startREPL
-  )
-where
+  ) where
 
-import           RIO                     hiding ( Text )
-import qualified Data.Text.Lazy                as Lazy
-import           Utils.IO                       ( putStrLn )
-import           Utils.Types                    ( Val(..)
-                                                , Expr(..)
-                                                , Interp
-                                                )
-import           Utils.Interp                   ( getStore
-                                                , interpWithStore
+import qualified Data.Text.Lazy                as L
+import           Lang.Parser                    ( parseProg )
+import           REPL.Directives                ( execute
+                                                , isDirective
                                                 )
 import           REPL.Eval                      ( eval )
-import           REPL.Directives                ( isDirective
-                                                , execute
-                                                )
-import           Lang.Parser                    ( parseProg )
-import           System.Console.Pretty          ( Color(Green, Red)
-                                                , Pretty(color, style)
-                                                , Style(Faint)
-                                                )
+import           RIO                     hiding ( Text )
 import           System.Console.Haskeline       ( InputT
                                                 , Settings
                                                 , getInputLine
                                                 , runInputT
                                                 )
+import           System.Console.Pretty          ( Color(Green, Red)
+                                                , Pretty(color, style)
+                                                , Style(Faint)
+                                                , supportsPretty
+                                                )
+import           Utils.IO                       ( putStrLn )
+import           Utils.Interp                   ( getStore
+                                                , interpWithStore
+                                                )
+import           Utils.Types                    ( Expr(..)
+                                                , Interp
+                                                , Val(..)
+                                                )
+
+type REPL a = InputT (Interp a) ()
 
 startREPL :: Settings (Interp a) -> Interp a ()
-startREPL settings = runInputT settings $ runLine Green
+startREPL settings = liftIO supportsPretty
+  >>= \prettyPrompt -> runInputT settings $ runLine prettyPrompt Green
 
-runLine :: Color -> InputT (Interp a) ()
-runLine colour = lift getStore >>= \case
+runLine :: Bool -> Color -> REPL a
+runLine pretty colour = lift getStore >>= \case
   Left _ -> return ()
-  _      -> do
-    line <- getInputLine $ (style Faint . color colour) "PiG" <> "> "
-    checkLine $ Lazy.strip . fromString <$> line
+  _right -> do
+    let prompt = if pretty then style Faint . color colour else id
+    line <- getInputLine $ prompt "PiG" <> "> "
+    checkLine (runLine pretty) $ L.strip . fromString <$> line
 
-checkLine :: Maybe Lazy.Text -> InputT (Interp a) ()
-checkLine (Just line)
-  | Lazy.null line = runLine Green
+checkLine :: (Color -> REPL a) -> Maybe L.Text -> REPL a
+checkLine runLine' (Just line)
+  | L.null line = runLine' Green
   | otherwise = if isDirective line
-    then lift (interpWithStore (execute line)) >> runLine Green
+    then lift (interpWithStore (execute line)) >> runLine' Green
     else case parseProg line of
-      Left  err  -> putStrLn err >> runLine Red
-      Right prog -> runProg prog
-checkLine _ = return ()
+      Left  err  -> putStrLn err >> runLine' Red
+      Right prog -> runProg runLine' prog
+checkLine _ _ = return ()
 
-runProg :: Expr -> InputT (Interp a) ()
-runProg expr = lift (interpWithStore (eval expr')) >> runLine Green
+runProg :: (Color -> REPL a) -> Expr -> REPL a
+runProg runLine' expr = lift (interpWithStore (eval expr')) >> runLine' Green
  where
   expr'  = Seq [assign, If [(cond, print)] (Val Null)]
   assign = Assign "$$" (Val Null) expr
