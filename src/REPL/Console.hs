@@ -12,11 +12,6 @@ import           Prettyprinter                  ( annotate
                                                 , defaultLayoutOptions
                                                 , layoutPretty
                                                 )
--- import           System.Console.Pretty          ( Color(Green, Red)
---                                                 , Pretty(color, style)
---                                                 , Style(Faint)
---                                                 , supportsPretty
---                                                 )
 import           Prettyprinter.Render.Terminal  ( Color(Green, Red)
                                                 , colorDull
                                                 , renderLazy
