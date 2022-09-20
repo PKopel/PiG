@@ -30,7 +30,8 @@ dependencies:
   - attoparsec
   - exceptions
   - haskeline >= 0.8
-  - pretty-terminal
+  - prettyprinter-ansi-terminal
+  - prettyprinter
   - hspec
   - hspec-core
   - QuickCheck

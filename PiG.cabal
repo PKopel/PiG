@@ -62,7 +62,8 @@ library
     , hspec
     , hspec-core
     , mtl
-    , pretty-terminal
+    , prettyprinter
+    , prettyprinter-ansi-terminal
     , rio >=0.1.12.0
     , rio-orphans
     , text
@@ -88,7 +89,8 @@ executable pig
     , hspec-core
     , mtl
     , optparse-simple
-    , pretty-terminal
+    , prettyprinter
+    , prettyprinter-ansi-terminal
     , rio >=0.1.12.0
     , rio-orphans
     , text
@@ -116,7 +118,8 @@ test-suite pig-test
     , hspec
     , hspec-core
     , mtl
-    , pretty-terminal
+    , prettyprinter
+    , prettyprinter-ansi-terminal
     , rio >=0.1.12.0
     , rio-orphans
     , text
