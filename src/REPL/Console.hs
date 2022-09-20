@@ -8,6 +8,19 @@ module REPL.Console
 
 import qualified Data.Text.Lazy                as L
 import           Lang.Parser                    ( parseProg )
+import           Prettyprinter                  ( annotate
+                                                , defaultLayoutOptions
+                                                , layoutPretty
+                                                )
+-- import           System.Console.Pretty          ( Color(Green, Red)
+--                                                 , Pretty(color, style)
+--                                                 , Style(Faint)
+--                                                 , supportsPretty
+--                                                 )
+import           Prettyprinter.Render.Terminal  ( Color(Green, Red)
+                                                , colorDull
+                                                , renderLazy
+                                                )
 import           REPL.Directives                ( execute
                                                 , isDirective
                                                 )
@@ -17,11 +30,6 @@ import           System.Console.Haskeline       ( InputT
                                                 , Settings
                                                 , getInputLine
                                                 , runInputT
-                                                )
-import           System.Console.Pretty          ( Color(Green, Red)
-                                                , Pretty(color, style)
-                                                , Style(Faint)
-                                                , supportsPretty
                                                 )
 import           Utils.IO                       ( putStrLn )
 import           Utils.Interp                   ( getStore
@@ -35,29 +43,29 @@ import           Utils.Types                    ( Expr(..)
 type REPL a = InputT (Interp a) ()
 
 startREPL :: Settings (Interp a) -> Interp a ()
-startREPL settings = liftIO supportsPretty
-  >>= \prettyPrompt -> runInputT settings $ runLine prettyPrompt Green
+startREPL settings = runInputT settings $ runLine Green
 
-runLine :: Bool -> Color -> REPL a
-runLine pretty colour = lift getStore >>= \case
+runLine :: Color -> REPL a
+runLine colour = lift getStore >>= \case
   Left _ -> return ()
   _right -> do
-    let prompt = if pretty then style Faint . color colour else id
-    line <- getInputLine $ prompt "PiG" <> "> "
-    checkLine (runLine pretty) $ L.strip . fromString <$> line
+    let promptAnsi = annotate (colorDull colour) "PiG" <> "> "
+        promptSDoc = layoutPretty defaultLayoutOptions promptAnsi
+    line <- getInputLine . L.unpack . renderLazy $ promptSDoc
+    checkLine $ L.strip . fromString <$> line
 
-checkLine :: (Color -> REPL a) -> Maybe L.Text -> REPL a
-checkLine runLine' (Just line)
-  | L.null line = runLine' Green
+checkLine :: Maybe L.Text -> REPL a
+checkLine (Just line)
+  | L.null line = runLine Green
   | otherwise = if isDirective line
-    then lift (interpWithStore (execute line)) >> runLine' Green
+    then lift (interpWithStore (execute line)) >> runLine Green
     else case parseProg line of
-      Left  err  -> putStrLn err >> runLine' Red
-      Right prog -> runProg runLine' prog
-checkLine _ _ = return ()
+      Left  err  -> putStrLn err >> runLine Red
+      Right prog -> runProg prog
+checkLine _ = return ()
 
-runProg :: (Color -> REPL a) -> Expr -> REPL a
-runProg runLine' expr = lift (interpWithStore (eval expr')) >> runLine' Green
+runProg :: Expr -> REPL a
+runProg expr = lift (interpWithStore (eval expr')) >> runLine Green
  where
   expr'  = Seq [assign, If [(cond, print)] (Val Null)]
   assign = Assign "$$" (Val Null) expr
