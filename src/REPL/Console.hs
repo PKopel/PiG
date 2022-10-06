@@ -9,21 +9,15 @@ module REPL.Console
 
 import qualified Data.Text.Lazy                as L
 import           Lang.Parser                    ( parseProg )
-import           Prettyprinter                  ( annotate
-                                                , defaultLayoutOptions
-                                                , layoutPretty
-                                                )
-#ifndef mingw32_HOST_OS
-import           Prettyprinter.Render.Terminal  ( Color(Green, Red)
-                                                , colorDull
-                                                , renderLazy
-                                                )
-#endif
 import           REPL.Directives                ( execute
                                                 , isDirective
                                                 )
 import           REPL.Eval                      ( eval )
 import           RIO                     hiding ( Text )
+import           System.Console.Pretty          ( Color(Green, Red)
+                                                , Pretty(color, style)
+                                                , Style(Faint)
+                                                )
 import           System.Console.Haskeline       ( InputT
                                                 , Settings
                                                 , getInputLine
@@ -48,13 +42,10 @@ runLine colour = lift getStore >>= \case
   Left _ -> return ()
   _right -> do
 #ifndef mingw32_HOST_OS
-    let promptAnsi = annotate (colorDull colour) "PiG" <> "> "
-        promptSDoc = layoutPretty defaultLayoutOptions promptAnsi
-        prompt = renderLazy promptSDoc
+    line <- getInputLine $ (style Faint . color colour) "PiG" <> "> "
 #else
-    let prompt = "PiG" <> "> "
+    line <- getInputLine $ "PiG" <> "> "
 #endif
-    line <- getInputLine . L.unpack $ prompt
     checkLine $ L.strip . fromString <$> line
 
 checkLine :: Maybe L.Text -> REPL a

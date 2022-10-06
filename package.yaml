@@ -29,9 +29,8 @@ dependencies:
   - array
   - attoparsec
   - exceptions
-  - haskeline >= 0.7.5.0
-  - prettyprinter-ansi-terminal
-  - prettyprinter
+  - haskeline >= 0.8
+  - pretty-terminal
 
 ghc-options:
   - -Wall

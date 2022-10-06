@@ -54,10 +54,9 @@ library
     , base >=4.11 && <10
     , containers
     , exceptions
-    , haskeline >=0.7.5.0
+    , haskeline >=0.8
     , mtl
-    , prettyprinter
-    , prettyprinter-ansi-terminal
+    , pretty-terminal
     , rio >=0.1.12.0
     , rio-orphans
     , text
@@ -77,11 +76,10 @@ executable pig
     , base >=4.11 && <10
     , containers
     , exceptions
-    , haskeline >=0.7.5.0
+    , haskeline >=0.8
     , mtl
     , optparse-simple
-    , prettyprinter
-    , prettyprinter-ansi-terminal
+    , pretty-terminal
     , rio >=0.1.12.0
     , rio-orphans
     , text
@@ -105,12 +103,11 @@ test-suite pig-test
     , base >=4.11 && <10
     , containers
     , exceptions
-    , haskeline >=0.7.5.0
+    , haskeline >=0.8
     , hspec
     , hspec-core
     , mtl
-    , prettyprinter
-    , prettyprinter-ansi-terminal
+    , pretty-terminal
     , rio >=0.1.12.0
     , rio-orphans
     , text
