@@ -29,12 +29,9 @@ dependencies:
   - array
   - attoparsec
   - exceptions
-  - haskeline >= 0.8
+  - haskeline >= 0.7.5.0
   - prettyprinter-ansi-terminal
   - prettyprinter
-  - hspec
-  - hspec-core
-  - QuickCheck
 
 ghc-options:
   - -Wall
@@ -70,6 +67,8 @@ tests:
     dependencies:
       - PiG
       - hspec
+      - hspec-core
+      - QuickCheck
 
     ghc-options:
       - -threaded

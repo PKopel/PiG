@@ -1,6 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE CPP #-}
 
 module REPL.Console
   ( startREPL
@@ -12,10 +13,12 @@ import           Prettyprinter                  ( annotate
                                                 , defaultLayoutOptions
                                                 , layoutPretty
                                                 )
+#ifndef mingw32_HOST_OS
 import           Prettyprinter.Render.Terminal  ( Color(Green, Red)
                                                 , colorDull
                                                 , renderLazy
                                                 )
+#endif
 import           REPL.Directives                ( execute
                                                 , isDirective
                                                 )
@@ -44,9 +47,14 @@ runLine :: Color -> REPL a
 runLine colour = lift getStore >>= \case
   Left _ -> return ()
   _right -> do
+#ifndef mingw32_HOST_OS
     let promptAnsi = annotate (colorDull colour) "PiG" <> "> "
         promptSDoc = layoutPretty defaultLayoutOptions promptAnsi
-    line <- getInputLine . L.unpack . renderLazy $ promptSDoc
+        prompt = renderLazy promptSDoc
+#else
+    let prompt = "PiG" <> "> "
+#endif
+    line <- getInputLine . L.unpack $ prompt
     checkLine $ L.strip . fromString <$> line
 
 checkLine :: Maybe L.Text -> REPL a

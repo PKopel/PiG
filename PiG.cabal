@@ -52,15 +52,12 @@ library
       alex
     , happy
   build-depends:
-      QuickCheck
-    , array
+      array
     , attoparsec
     , base >=4.11 && <10
     , containers
     , exceptions
-    , haskeline >=0.8
-    , hspec
-    , hspec-core
+    , haskeline >=0.7.5.0
     , mtl
     , prettyprinter
     , prettyprinter-ansi-terminal
@@ -78,15 +75,12 @@ executable pig
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       PiG
-    , QuickCheck
     , array
     , attoparsec
     , base >=4.11 && <10
     , containers
     , exceptions
-    , haskeline >=0.8
-    , hspec
-    , hspec-core
+    , haskeline >=0.7.5.0
     , mtl
     , optparse-simple
     , prettyprinter
@@ -114,7 +108,7 @@ test-suite pig-test
     , base >=4.11 && <10
     , containers
     , exceptions
-    , haskeline >=0.8
+    , haskeline >=0.7.5.0
     , hspec
     , hspec-core
     , mtl
