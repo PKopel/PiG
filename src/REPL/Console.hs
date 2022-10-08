@@ -1,6 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE CPP #-}
 
 module REPL.Console
   ( startREPL
@@ -8,19 +9,15 @@ module REPL.Console
 
 import qualified Data.Text.Lazy                as L
 import           Lang.Parser                    ( parseProg )
-import           Prettyprinter                  ( annotate
-                                                , defaultLayoutOptions
-                                                , layoutPretty
-                                                )
-import           Prettyprinter.Render.Terminal  ( Color(Green, Red)
-                                                , colorDull
-                                                , renderLazy
-                                                )
 import           REPL.Directives                ( execute
                                                 , isDirective
                                                 )
 import           REPL.Eval                      ( eval )
 import           RIO                     hiding ( Text )
+import           System.Console.Pretty          ( Color(Green, Red)
+                                                , Pretty(color, style)
+                                                , Style(Faint)
+                                                )
 import           System.Console.Haskeline       ( InputT
                                                 , Settings
                                                 , getInputLine
@@ -44,9 +41,11 @@ runLine :: Color -> REPL a
 runLine colour = lift getStore >>= \case
   Left _ -> return ()
   _right -> do
-    let promptAnsi = annotate (colorDull colour) "PiG" <> "> "
-        promptSDoc = layoutPretty defaultLayoutOptions promptAnsi
-    line <- getInputLine . L.unpack . renderLazy $ promptSDoc
+#ifndef mingw32_HOST_OS
+    line <- getInputLine $ (style Faint . color colour) "PiG" <> "> "
+#else
+    line <- getInputLine $ "PiG" <> "> "
+#endif
     checkLine $ L.strip . fromString <$> line
 
 checkLine :: Maybe L.Text -> REPL a

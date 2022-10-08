@@ -11,10 +11,11 @@ import           Lang.BIF.Alg
 import           Lang.BIF.Bool
 import           Lang.BIF.List
 import           Lang.BIF.Str
-import           RIO
+import           RIO                     hiding ( openFile )
 import           System.IO                      ( getLine
                                                 , hGetLine
                                                 , hPutStr
+                                                , openFile
                                                 , putStr
                                                 )
 import           Utils.Interp                   ( putStore )

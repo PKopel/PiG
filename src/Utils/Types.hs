@@ -15,8 +15,8 @@ import           RIO.Process                    ( HasProcessContext(..)
                                                 )
 import           System.Console.Haskeline       ( Settings )
 
-import           Control.Monad.Catch            ( MonadMask
-                                                , MonadCatch
+import           Control.Monad.Catch            ( MonadCatch
+                                                , MonadMask
                                                 )
 import           Control.Monad.State            ( MonadState
                                                 , StateT(StateT)
@@ -27,11 +27,11 @@ newtype Options = Options
   }
 
 data App = App
-  { appLogFunc :: !LogFunc,
-    appProcessContext :: !ProcessContext,
-    appOptions :: !Options,
-    appSettings :: !(Settings (Interp App)),
-    appVersion :: !Version
+  { appLogFunc        :: !LogFunc
+  , appProcessContext :: !ProcessContext
+  , appOptions        :: !Options
+  , appSettings       :: !(Settings (Interp App))
+  , appVersion        :: !Version
   }
 
 instance HasLogFunc App where
@@ -112,7 +112,11 @@ newtype Scope = Scope {scope :: Lens' Scopes Bindings}
 instance Show Scope where
   show _ = "scope"
 
-data Scopes = Scopes {globalS :: Bindings, localS :: Bindings} deriving (Show)
+data Scopes = Scopes
+  { globalS :: Bindings
+  , localS  :: Bindings
+  }
+  deriving Show
 
 instance Eq Scopes where
   s1 == s2 = (globalS s1 == globalS s2) && (localS s1 == localS s2)

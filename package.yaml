@@ -1,5 +1,5 @@
 name: PiG
-version: 0.1.1
+version: 0.1.2
 github: PKopel/PiG
 license: BSD3
 author: Paweł Kopel
@@ -30,11 +30,7 @@ dependencies:
   - attoparsec
   - exceptions
   - haskeline >= 0.8
-  - prettyprinter-ansi-terminal
-  - prettyprinter
-  - hspec
-  - hspec-core
-  - QuickCheck
+  - pretty-terminal
 
 ghc-options:
   - -Wall
@@ -47,9 +43,6 @@ ghc-options:
 
 library:
   source-dirs: src
-  build-tools:
-    - alex
-    - happy
 
 executables:
   pig:
@@ -70,6 +63,8 @@ tests:
     dependencies:
       - PiG
       - hspec
+      - hspec-core
+      - QuickCheck
 
     ghc-options:
       - -threaded
