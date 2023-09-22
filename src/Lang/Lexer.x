@@ -41,6 +41,7 @@ tokens :-
     "while"                { tok' TWhile }
     "do"                   { tok' TDo }
     "load"                 { tok' TLoad }
+    "return"               { tok' TReturn }
     "+"                    { tok' TPlus }
     "-"                    { tok' TMinus }
     "*"                    { tok' TStar }

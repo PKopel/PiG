@@ -24,7 +24,7 @@ In PiG, everything is an expression:
   * `true`/`false`
   * numbers (integral and real)
   * characters like `'a'` and strings like `"abcd"`
-  * functions (lambdas) in form `(<arg1>,...,<argn>) => <sequence>`
+  * functions (lambdas) in form `(<arg1>,...,<argn>) => <sequence>`. Return value of a function is either the value of its last expression or value explicitly marked with the `return` keyword.
   * lists in form `[<expr1>,...,<exprn>]`
 * assignments: `<name> = <expr>`, where name consists of alphanumeric characters, or `<name>(<number>) = <expr>` to assign value to a specific element of a list. Value of assignment is the value of expression on the right.
 * sequence of expressions, separated and optionally ended by `;`. When sequence is enclosed by braces (`{...}`), it is treated as a single expression (sequences can be nested, like `{ <expr1>; { <expr2>; <expr3> }; }`). Value of a sequence is the value of the last expression in it.

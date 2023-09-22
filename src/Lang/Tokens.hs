@@ -16,6 +16,7 @@ data TokenType = TIf
            | TWhile
            | TDo
            | TLoad
+           | TReturn
            | TPlus
            | TMinus
            | TStar
@@ -59,6 +60,7 @@ instance Show TokenType where
   show TWhile    = "while"
   show TDo       = "do"
   show TLoad     = "load"
+  show TReturn   = "eturn"
   show TPlus     = "+"
   show TMinus    = "-"
   show TStar     = "*"

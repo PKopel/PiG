@@ -3,8 +3,8 @@ length = (a) => {
     while a do {
         i = i + 1;
         >- a;
-    };
-    i; 
+    }
+    i
 };
 
 quick = (a) => {
@@ -14,10 +14,10 @@ quick = (a) => {
         while a do {
             c = >- a;
             if c > p do gt = gt <> c else ls = ls <> c;
-        };
+        }
         x = quick(ls) <> p <> quick(gt); 
     } else x = [];
-    x;
+    x
 };
 
 bubble = (a) => {
@@ -30,10 +30,10 @@ bubble = (a) => {
             if p > a(j+1) do {
                 a(j) = a(j+1);
                 a(j+1) = p;
-            };
+            }
             j = j + 1;
-        };
+        }
         i = i + 1;
     };
-    a;
+    a
 }

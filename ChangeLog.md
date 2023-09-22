@@ -2,6 +2,10 @@
 
 ## Changes
 
+### 0.1.3
+
+* add `return` keyword
+
 ### 0.1.1
 
 * fix prompt on windows
