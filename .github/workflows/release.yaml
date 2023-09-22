@@ -92,7 +92,7 @@ jobs:
         run: echo "BINARY_PATH=./bin/pig${{ env.EXT }}" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Compress binary
-        uses: svenstaro/upx-action@2.0.1
+        uses: svenstaro/upx-action@2.3.0
         with:
           file: ${{ env.BINARY_PATH }}
 
