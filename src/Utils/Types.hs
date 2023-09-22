@@ -3,6 +3,7 @@
 {-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
 module Utils.Types where
 import           Data.List                      ( intercalate )
@@ -63,6 +64,7 @@ data Expr
   | While Expr Expr
   | If [(Expr, Expr)] Expr
   | Seq [Expr]
+  | Return Expr
   deriving(Eq, Ord)
 
 instance Show Expr where
@@ -72,6 +74,7 @@ instance Show Expr where
   show (Load e      ) = "load " <> show e
   show (While a b   ) = unwords ["while", show a, show b]
   show (Seq v       ) = '{' : intercalate "; " (show <$> v) <> "}"
+  show (Return v    ) = "return" <> show v
   show (If a b) =
     unwords ["if", intercalate " elif " (show <$> a), "else", show b]
   show (ListLiteral v) = '[' : intercalate ", " (show <$> v) <> "]"
@@ -102,6 +105,8 @@ instance Show Val where
   show (ListVal v    ) = '[' : intercalate ", " (toList $ show <$> v) <> "]"
   show (FunVal n _   ) = "fun(" <> intercalate ", " (show <$> n) <> ")"
   show Null            = "null"
+
+instance Exception Val
 
 type Var = Lazy.Text
 

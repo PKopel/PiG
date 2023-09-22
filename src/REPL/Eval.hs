@@ -2,6 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module REPL.Eval
   ( eval
@@ -11,7 +12,7 @@ where
 import qualified Data.Map                      as Map
 import           Data.Sequence                  ( Seq(..) )
 import qualified Data.Sequence                 as Seq
-import           RIO
+import           RIO                           hiding (catch)
 import           Utils.Interp
 import           Utils.Types
 import           Utils.IO                       ( putStr
@@ -20,6 +21,7 @@ import           Utils.IO                       ( putStr
 import           Utils.Util
 import           Lang.BIF                       ( bifs )
 import           Lang.Parser                    ( parseFile )
+import Control.Monad.Catch (catch)
 
 eval :: Expr -> Interp a Val
 eval (Val  n) = return n
@@ -27,6 +29,7 @@ eval (Var  x) = getVar x
 eval (Load e) = eval e >>= \case
   StrVal file -> withStore (evalFile file) >> return Null
   _           -> return Null
+eval (Return e) = eval e >>= throwM
 eval (ListLiteral es  ) = ListVal . Seq.fromList <$> mapM eval es
 eval (FunApp "fst" [e]) = evalListUnOp (>-) e
 eval (FunApp "lst" [e]) = evalListUnOp (-<) e
@@ -79,8 +82,8 @@ evalFunApp args (FunVal as body) = getStore >>= \case
     newLocals <- Map.fromList <$> zipWithM (\v a -> eval v <&> (,) a) args as
     oldScope  <- getScope
     withScopes $ (over . scope) localL (const newLocals) -- introducing local variables
-    setScope localL -- from now variables are declared in local scope
-    retVal <- eval body
+    setScope localL -- from now on variables are declared in local scope
+    retVal <- catch (eval body) return
     setScope oldScope -- end of local scope
     withScopes $ (over . scope) localL (const oldLocals) -- removing local variables
     return retVal

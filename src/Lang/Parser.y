@@ -30,6 +30,7 @@ import Utils.Util
     while           { Token _ TWhile }
     do              { Token _ TDo }
     load            { Token _ TLoad }
+    return          { Token _ TReturn }
     '+'             { Token _ TPlus }
     '-'             { Token _ TMinus }
     '*'             { Token _ TStar }
@@ -83,6 +84,8 @@ Expr    : Atom                          { $1 }
         | If                            { $1 }
         | '(' Expr ')'                  { $2 }
         | load Expr                     { Load $2 }
+        | return Expr                   { Return $2 }
+        | return                        { Return (Val Null) }
         | VAR '(' Expr ')' '=' Expr     { Assign $1 $3 $6 }
         | VAR '=' Expr                  { Assign $1 (Val Null) $3 }
         | while Expr do InSeq           { While $2 $4 }
@@ -117,9 +120,10 @@ IfList  : Expr do InSeq elif IfList     { ($1,$3):$5 }
         | Expr do Expr                  { [($1,$3)] }
 
 InSeq   : '{' ExprList '}'      { Seq $2 } 
-        | '{' '}'               { Seq [] }      
+        | '{' '}'               { Seq [] }    
 
 ExprList : Expr ';' ExprList    { $1:$3 }
+         | Expr ExprList        { $1:$2 }
          | Expr ';'             { [$1] }
          | Expr                 { [$1] }
 
@@ -156,7 +160,7 @@ lexwrap = (alexMonadScan >>=)
 
 happyError :: Token -> Alex a
 happyError (Token p t) =
-  alexError p ("parse error at token '" <> Lazy.pack (show t) <> "'")
+  alexError p ("parse error at token '" <> Lazy.pack (show t) <> "'\n")
 
 parseFile :: FilePath -> Lazy.Text -> Either Lazy.Text Expr
 parseFile = runAlex' pig
