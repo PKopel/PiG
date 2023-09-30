@@ -13,8 +13,7 @@ module Utils.Interp
   , putVar
   , runWithStore
   , interpWithStore
-  )
-where
+  ) where
 
 import           Control.Monad.State            ( StateT(runStateT)
                                                 , get
@@ -54,7 +53,7 @@ interpWithStore interp = withStore $ Interp . lift . runWithStore interp
 runWithStore :: Interp a v -> Store -> RIO a Store
 runWithStore interp store@(Right _) =
   (runStateT . runInterp) interp (globalL, store) <&> snd . snd
-runWithStore _ _ = return (Left ())
+runWithStore _ left = return left
 
 getVar :: Var -> Interp a Val
 getVar x = getStore >>= \case

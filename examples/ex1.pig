@@ -8,6 +8,7 @@ main = () => {
     z = fun2(x,y);
     t = fun3(x,y,z);
     x + y + z + t;
+    exit();
 };
 
 main();

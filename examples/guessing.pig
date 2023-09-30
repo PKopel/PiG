@@ -25,4 +25,4 @@ even = (a) => {
 
 guessing();
 
-exit();
+return 0;

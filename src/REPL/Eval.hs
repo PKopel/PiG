@@ -6,6 +6,7 @@
 
 module REPL.Eval
   ( eval
+  , evalWithCach
   )
 where
 
@@ -119,3 +120,12 @@ evalFile file store = do
   case contents of
     Left  err  -> putStr err >> return store
     Right expr -> Interp . lift $ runWithStore (eval expr) store
+
+
+evalWithCach :: Expr -> Interp a Val
+evalWithCach expr = catch (eval expr) $ \v -> (putStore . Left $ handleReturn v) >> return v
+
+handleReturn :: Val -> Int
+handleReturn (AlgVal val) = round val
+handleReturn Null         = 0
+handleReturn _            = 1

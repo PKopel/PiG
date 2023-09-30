@@ -73,7 +73,7 @@ instance Show Expr where
   show (Assign a b c) = unwords [Lazy.unpack a, show b, " = ", show c]
   show (Load e      ) = "load " <> show e
   show (While a b   ) = unwords ["while", show a, show b]
-  show (Seq v       ) = '{' : intercalate "; " (show <$> v) <> "}"
+  show (Seq    v    ) = '{' : intercalate "; " (show <$> v) <> "}"
   show (Return v    ) = "return" <> show v
   show (If a b) =
     unwords ["if", intercalate " elif " (show <$> a), "else", show b]
@@ -126,7 +126,7 @@ data Scopes = Scopes
 instance Eq Scopes where
   s1 == s2 = (globalS s1 == globalS s2) && (localS s1 == localS s2)
 
-type Store = Either () Scopes
+type Store = Either Int Scopes
 
 emptyStore :: Scopes
 emptyStore = Scopes { globalS = [], localS = [] }

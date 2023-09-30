@@ -1,21 +1,21 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Main
   ( main
-  )
-where
+  ) where
 
-import           Utils.Completion               ( completion )
-import           Utils.Types
 import           Options.Applicative.Simple
 import qualified Paths_PiG
 import           RIO
 import           RIO.Process                    ( mkDefaultProcessContext )
 import           Run                            ( run )
 import           System.Console.Haskeline
+import           Utils.Completion               ( completion )
+import           Utils.Types
 
-main :: IO ()
+main :: IO Int
 main = do
   options <- fst <$> pigOptions
   lo      <- logOptionsHandle stderr False
@@ -31,7 +31,9 @@ main = do
                   , appSettings       = settings
                   , appVersion        = Paths_PiG.version
                   }
-    in  runRIO app run
+    in  runRIO app run >>= \case
+          0 -> exitSuccess
+          x -> exitWith (ExitFailure x)
 
 pigOptions :: IO (Options, ())
 pigOptions = simpleOptions

@@ -4,24 +4,23 @@
 module REPL.Directives
   ( isDirective
   , execute
-  )
-where
+  ) where
 
-import           RIO
-import qualified Data.Text.Lazy                as Lazy
-import           Utils.IO                       ( putStr )
-import           Utils.Types                    ( Scope(scope)
-                                                , globalL
-                                                , Interp
+import           Data.Map                       ( delete
+                                                , empty
                                                 )
+import qualified Data.Text.Lazy                as Lazy
+import           REPL.Directives.Parser         ( Drct(..)
+                                                , parseDrct
+                                                )
+import           RIO
+import           Utils.IO                       ( putStr )
 import           Utils.Interp                   ( putStore
                                                 , withScopes
                                                 )
-import           REPL.Directives.Parser         ( parseDrct
-                                                , Drct(..)
-                                                )
-import           Data.Map                       ( delete
-                                                , empty
+import           Utils.Types                    ( Interp
+                                                , Scope(scope)
+                                                , globalL
                                                 )
 
 isDirective :: Lazy.Text -> Bool
@@ -34,7 +33,7 @@ execute str = case parseDrct str of
   Right drct     -> exec drct
 
 exec :: Drct -> Interp a ()
-exec Exit  = putStore (Left ())
+exec Exit  = putStore $ Left 0
 exec Clear = withScopes $ (over . scope) globalL (const empty)
 exec Help =
   putStr
