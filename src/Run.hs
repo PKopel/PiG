@@ -1,34 +1,36 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Run
   ( run
-  )
-where
+  ) where
 
 import           Data.Version                   ( showVersion )
-import           RIO
-import           Utils.Interp                   ( runWithStore )
-import           Utils.IO                       ( putStrLn )
-import           Utils.Types
 import           REPL.Console                   ( startREPL )
-import           REPL.Eval                      ( eval )
+import           REPL.Eval                      ( evalWithCach )
+import           RIO
+import           Utils.IO                       ( putStrLn )
+import           Utils.Interp                   ( runWithStore )
+import           Utils.Types
 
-run :: RIO App ()
+run :: RIO App Int
 run = do
   version  <- view $ to appVersion
   settings <- view $ to appSettings
   store    <- view (to appOptions) >>= startStore
   case store of
-    Left  _ -> return ()
-    Right _ -> do
+    Left  val -> return val
+    Right _   -> do
       putStrLn
         (  "We're inside the experimental PiG interpreter!\nversion: "
         <> fromString (showVersion version)
         <> "\ntype ':help' or ':h' for more information "
         )
-      void $ runWithStore (startREPL settings) store
+      runWithStore (startREPL settings) store >>= \case
+        Left  val -> return val
+        Right _   -> return 0
  where
   startStore ops = case optionsLoad ops of
     []   -> return $ Right emptyStore
-    file -> runWithStore (eval . Load . Val . StrVal $ file) $ Right emptyStore
+    file -> runWithStore (evalWithCach . Load . Val . StrVal $ file) $ Right emptyStore

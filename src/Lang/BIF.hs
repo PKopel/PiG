@@ -100,4 +100,6 @@ writeFile [IOVal _] = return Null
 writeFile x         = print x
 
 exit :: [Val] -> Interp a Val
-exit _ = putStore (Left ()) >> return Null
+exit []                 = putStore (Left 0) >> return Null
+exit ((AlgVal val) : _) = putStore (Left . round $ val) >> return Null
+exit (_            : _) = putStore (Left 1) >> return Null

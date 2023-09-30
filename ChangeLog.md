@@ -2,6 +2,11 @@
 
 ## Changes
 
+### 0.1.4
+
+* handle `return` keyword outside of function bodies
+* update `exit` function to handle status codes
+
 ### 0.1.3
 
 * add `return` keyword

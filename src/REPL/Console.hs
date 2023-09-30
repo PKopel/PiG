@@ -12,35 +12,38 @@ import           Lang.Parser                    ( parseProg )
 import           REPL.Directives                ( execute
                                                 , isDirective
                                                 )
-import           REPL.Eval                      ( eval )
-import           RIO                     hiding ( Text )
-import           System.Console.Pretty          ( Color(Green, Red)
-                                                , Pretty(color, style)
-                                                , Style(Faint)
+import           REPL.Eval                      ( evalWithCach )
+import           RIO                     hiding ( Text
+                                                , catch
                                                 )
 import           System.Console.Haskeline       ( InputT
                                                 , Settings
                                                 , getInputLine
                                                 , runInputT
                                                 )
+import           System.Console.Pretty          ( Color(Green, Red)
+                                                , Pretty(color, style)
+                                                , Style(Faint)
+                                                )
 import           Utils.IO                       ( putStrLn )
 import           Utils.Interp                   ( getStore
                                                 , interpWithStore
+                                                
                                                 )
 import           Utils.Types                    ( Expr(..)
                                                 , Interp
                                                 , Val(..)
                                                 )
 
-type REPL a = InputT (Interp a) ()
+type REPL a = InputT (Interp a) Int
 
-startREPL :: Settings (Interp a) -> Interp a ()
+startREPL :: Settings (Interp a) -> Interp a Int
 startREPL settings = runInputT settings $ runLine Green
 
 runLine :: Color -> REPL a
 runLine colour = lift getStore >>= \case
-  Left _ -> return ()
-  _right -> do
+  Left val -> return val
+  _right   -> do
 #ifndef mingw32_HOST_OS
     line <- getInputLine $ (style Faint . color colour) "PiG" <> "> "
 #else
@@ -56,14 +59,13 @@ checkLine (Just line)
     else case parseProg line of
       Left  err  -> putStrLn err >> runLine Red
       Right prog -> runProg prog
-checkLine _ = return ()
+checkLine _ = return 1
 
 runProg :: Expr -> REPL a
-runProg expr = lift (interpWithStore (eval expr')) >> runLine Green
+runProg expr = lift (interpWithStore $ evalWithCach expr') >> runLine Green
  where
   expr'  = Seq [assign, If [(cond, print)] (Val Null)]
   assign = Assign "$$" (Val Null) expr
   cond   = FunApp "neq" [Var "$$", Val Null]
   print  = FunApp "print" [Var "$$", Val (StrVal "\n")]
-
 
