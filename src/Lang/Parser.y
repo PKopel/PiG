@@ -90,25 +90,25 @@ Expr    : Atom                          { $1 }
         | VAR '=' Expr                  { Assign $1 (Val Null) $3 }
         | while Expr do InSeq           { While $2 $4 }
         | while Expr do Expr            { While $2 $4 }
-        | VAR FunAppl                   { FunApp $1 $2}
-        | Expr '+' Expr                 { FunApp "add" [$1,$3] }
-        | Expr '-' Expr                 { FunApp "sub" [$1,$3] }
-        | Expr '*' Expr                 { FunApp "mul" [$1,$3] }
-        | Expr '/' Expr                 { FunApp "div" [$1,$3] }
-        | Expr '^' Expr                 { FunApp "pow" [$1,$3] }
-        | Expr '%' Expr                 { FunApp "mod" [$1,$3] }
-        | '-' Expr                      { FunApp "neg" [$2] }
-        | '~' Expr                      { FunApp "not" [$2] }
-        | Expr '&&' Expr                { FunApp "and" [$1,$3] }
-        | Expr '||' Expr                { FunApp "or" [$1,$3] }
-        | Expr '==' Expr                { FunApp "eq" [$1,$3] }
-        | Expr '!=' Expr                { FunApp "neq" [$1,$3] }
-        | Expr '<' Expr                 { FunApp "lt" [$1,$3] }
-        | Expr '>' Expr                 { FunApp "gt" [$1,$3] }
-        | '-<' Expr                     { FunApp "lst" [$2] }
-        | '>-' Expr                     { FunApp "fst" [$2] }
-        | Expr '<>' Expr                { FunApp "catList" [$1,$3] }
-        | Expr '><' Expr                { FunApp "catStr" [$1,$3] }
+        | FunAppl                       { $1 }
+        | Expr '+' Expr                 { FunApp (Var "add") [$1,$3] }
+        | Expr '-' Expr                 { FunApp (Var "sub") [$1,$3] }
+        | Expr '*' Expr                 { FunApp (Var "mul") [$1,$3] }
+        | Expr '/' Expr                 { FunApp (Var "div") [$1,$3] }
+        | Expr '^' Expr                 { FunApp (Var "pow") [$1,$3] }
+        | Expr '%' Expr                 { FunApp (Var "mod") [$1,$3] }
+        | '-' Expr                      { FunApp (Var "neg") [$2] }
+        | '~' Expr                      { FunApp (Var "not") [$2] }
+        | Expr '&&' Expr                { FunApp (Var "and") [$1,$3] }
+        | Expr '||' Expr                { FunApp (Var "or") [$1,$3] }
+        | Expr '==' Expr                { FunApp (Var "eq") [$1,$3] }
+        | Expr '!=' Expr                { FunApp (Var "neq") [$1,$3] }
+        | Expr '<' Expr                 { FunApp (Var "lt") [$1,$3] }
+        | Expr '>' Expr                 { FunApp (Var "gt") [$1,$3] }
+        | '-<' Expr                     { FunApp (Var "lst") [$2] }
+        | '>-' Expr                     { FunApp (Var "fst") [$2] }
+        | Expr '<>' Expr                { FunApp (Var "catList") [$1,$3] }
+        | Expr '><' Expr                { FunApp (Var "catStr") [$1,$3] }
 
 If      : if IfList                     { If $2 (Val Null) }
         | if IfList else InSeq          { If $2 $4 }
@@ -128,9 +128,12 @@ ExprList : Expr ';' ExprList    { $1:$3 }
          | Expr                 { [$1] }
 
 ListLit : '[' List ']'      { ListLiteral $2 }
-        | '[' ']'           { ListLiteral [] }    
+        | '[' ']'           { ListLiteral [] }
 
-FunAppl : '(' List ')'      { $2 }
+FunAppl : VAR FunArgs       { FunApp (Var $1) $2 }
+        | FunAppl FunArgs   { FunApp $1 $2 }
+
+FunArgs : '(' List ')'      { $2 }
         | '(' Expr ')'      { [$2] }
         | '(' ')'           { [] }
 

@@ -66,6 +66,6 @@ runProg expr = lift (interpWithStore $ evalWithCach expr') >> runLine Green
  where
   expr'  = Seq [assign, If [(cond, print)] (Val Null)]
   assign = Assign "$$" (Val Null) expr
-  cond   = FunApp "neq" [Var "$$", Val Null]
-  print  = FunApp "print" [Var "$$", Val (StrVal "\n")]
+  cond   = FunApp (Var "neq") [Var "$$", Val Null]
+  print  = FunApp (Var "print") [Var "$$", Val (StrVal "\n")]
 
