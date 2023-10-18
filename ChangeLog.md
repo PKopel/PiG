@@ -2,6 +2,11 @@
 
 ## Changes
 
+### 0.1.5
+
+* improve parser to handle chained function calls, e.g. `fun(0)()`
+* improve directive's parser error message
+
 ### 0.1.4
 
 * handle `return` keyword outside of function bodies
