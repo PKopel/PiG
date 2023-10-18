@@ -35,7 +35,6 @@ library
       Lang.Tokens
       REPL.Console
       REPL.Directives
-      REPL.Directives.Parser
       REPL.Eval
       Run
       Utils.Completion
@@ -53,7 +52,6 @@ library
     , happy
   build-depends:
       array
-    , attoparsec
     , base >=4.11 && <10
     , containers
     , exceptions
@@ -75,7 +73,6 @@ executable pig
   build-depends:
       PiG
     , array
-    , attoparsec
     , base >=4.11 && <10
     , containers
     , exceptions
@@ -102,7 +99,6 @@ test-suite pig-test
       PiG
     , QuickCheck
     , array
-    , attoparsec
     , base >=4.11 && <10
     , containers
     , exceptions

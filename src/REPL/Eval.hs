@@ -32,11 +32,12 @@ eval (Load e) = eval e >>= \case
   _           -> return Null
 eval (Return e) = eval e >>= throwM
 eval (ListLiteral es  ) = ListVal . Seq.fromList <$> mapM eval es
-eval (FunApp "fst" [e]) = evalListUnOp (>-) e
-eval (FunApp "lst" [e]) = evalListUnOp (-<) e
-eval (FunApp n     vs ) = case Map.lookup n bifs of
+eval (FunApp (Var "fst") [e]) = evalListUnOp (>-) e
+eval (FunApp (Var "lst") [e]) = evalListUnOp (-<) e
+eval (FunApp (Var n)     vs ) = case Map.lookup n bifs of
   Just bif -> mapM eval vs >>= bif
   Nothing  -> getVar n >>= evalFunApp vs
+eval (FunApp e es) = eval e >>= evalFunApp es
 eval (Seq []             ) = return Null
 eval (Seq [s     ]       ) = eval s
 eval (Seq (s : ss)       ) = eval s >> eval (Seq ss)

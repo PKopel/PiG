@@ -4,6 +4,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE StrictData #-}
 
 module Utils.Types where
 import           Data.List                      ( intercalate )
@@ -28,11 +29,11 @@ newtype Options = Options
   }
 
 data App = App
-  { appLogFunc        :: !LogFunc
-  , appProcessContext :: !ProcessContext
-  , appOptions        :: !Options
-  , appSettings       :: !(Settings (Interp App))
-  , appVersion        :: !Version
+  { appLogFunc        :: LogFunc
+  , appProcessContext :: ProcessContext
+  , appOptions        :: Options
+  , appSettings       :: Settings (Interp App)
+  , appVersion        :: Version
   }
 
 instance HasLogFunc App where
@@ -59,7 +60,7 @@ data Expr
   | Val Val
   | Assign Var Expr Expr
   | ListLiteral [Expr]
-  | FunApp Var [Expr]
+  | FunApp Expr [Expr]
   | Load Expr
   | While Expr Expr
   | If [(Expr, Expr)] Expr
@@ -79,7 +80,7 @@ instance Show Expr where
     unwords ["if", intercalate " elif " (show <$> a), "else", show b]
   show (ListLiteral v) = '[' : intercalate ", " (show <$> v) <> "]"
   show (FunApp a b) =
-    Lazy.unpack a <> "(" <> intercalate ", " (show <$> b) <> ")"
+    show a <> "(" <> intercalate ", " (show <$> b) <> ")"
 
 instance Ord Handle where
   _ <= _ = False

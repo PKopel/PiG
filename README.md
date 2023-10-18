@@ -70,16 +70,6 @@ Interpreter also provides four directives:
 
 See [examples](https://github.com/PKopel/PiG/tree/master/examples) for more info.
 
-## Dependencies
-
-* **[RIO](https://hackage.haskell.org/package/rio)**
-* **[attoparsec](https://hackage.haskell.org/package/attoparsec)**
-* **[Haskeline](https://hackage.haskell.org/package/haskeline)**
-* **[pretty-terminal](https://github.com/loganmac/pretty-terminal)**
-* **[hspec](https://hspec.github.io)**
-* **[QuickCheck](https://hackage.haskell.org/package/QuickCheck)**
-* **[array](https://gitlab.haskell.org/ghc/packages/array)**
-
 ## Author
 
 * **[Paweł Kopel](https://github.com/PKopel)**
