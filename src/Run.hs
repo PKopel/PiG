@@ -33,4 +33,5 @@ run = do
  where
   startStore ops = case optionsLoad ops of
     []   -> return $ Right emptyStore
-    file -> runWithStore (evalWithCach . Load . Val . StrVal $ file) $ Right emptyStore
+    file -> runWithStore (evalWithCach . Load . Val . StrVal $ file)
+      $ Right emptyStore

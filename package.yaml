@@ -27,7 +27,6 @@ dependencies:
   - mtl
   - text
   - array
-  - attoparsec
   - exceptions
   - haskeline >= 0.8
   - pretty-terminal
