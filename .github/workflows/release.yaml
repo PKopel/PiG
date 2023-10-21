@@ -108,23 +108,23 @@ jobs:
           if-no-files-found: error
           retention-days: 5
 
-  provenance:
-    needs: [build]
-    strategy:
-      matrix:
-        os: [linux, macos, windows]
-    permissions:
-      actions: read # To read the workflow path.
-      id-token: write # To sign the provenance.
-      contents: write # To add assets to a release.
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.9.0
-    with:
-      base64-subjects: "${{ needs.build.outputs[format('hash-{0}', matrix.os)] }}"
-      upload-assets: true # Optional: Upload to a new release
-      continue-on-error: true
+  # provenance:
+  #   needs: [build]
+  #   strategy:
+  #     matrix:
+  #       os: [linux, macos, windows]
+  #   permissions:
+  #     actions: read # To read the workflow path.
+  #     id-token: write # To sign the provenance.
+  #     contents: write # To add assets to a release.
+  #   uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.9.0
+  #   with:
+  #     base64-subjects: "${{ needs.build.outputs[format('hash-{0}', matrix.os)] }}"
+  #     upload-assets: true # Optional: Upload to a new release
+  #     continue-on-error: true
 
   release:
-    needs: [build, provenance]
+    needs: [build] #, provenance]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
