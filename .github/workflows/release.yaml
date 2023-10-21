@@ -59,14 +59,15 @@ jobs:
         run: |
           mkdir bin
           cabal install exe:pig --install-method=copy --overwrite-policy=always --installdir=bin --enable-executable-stripping --enable-library-stripping
+          mv ./bin/pig${{ env.EXT }} ./bin/pig-amd64-${{ env.os_name }}${{ env.EXT }}
 
       - name: Set binary path name
         if: matrix.os != 'windows-latest'
-        run: echo "BINARY_PATH=./bin/pig${{ env.EXT }}" >> $GITHUB_ENV
+        run: echo "BINARY_PATH=./bin/pig-amd64-${{ env.os_name }}${{ env.EXT }}" >> $GITHUB_ENV
 
       - name: Set binary path name
         if: matrix.os == 'windows-latest'
-        run: echo "BINARY_PATH=./bin/pig${{ env.EXT }}" | Out-File -FilePath $env:GITHUB_ENV -Append
+        run: echo "BINARY_PATH=./bin/pig-amd64-${{ env.os_name }}${{ env.EXT }}" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Compress binary
         uses: svenstaro/upx-action@2.3.0
@@ -108,18 +109,8 @@ jobs:
           if-no-files-found: error
           retention-days: 5
 
-  check:
-    needs: [build]
-    strategy:
-      matrix:
-        hash: [hash-linux, hash-macos, hash-windows]
-    runs-on: ubuntu-latest
-    steps:
-      - name: echo hash
-        run: echo "${{ needs.build.outputs[matrix.hash] }}"
-
   provenance:
-    needs: [build, check]
+    needs: [build]
     strategy:
       matrix:
         hash: [hash-linux, hash-macos, hash-windows]
