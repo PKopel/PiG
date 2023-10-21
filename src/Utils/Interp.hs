@@ -1,5 +1,4 @@
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Utils.Interp
@@ -16,6 +15,7 @@ module Utils.Interp
   ) where
 
 import           Control.Monad.State            ( StateT(runStateT)
+                                                , gets
                                                 , get
                                                 , put
                                                 )
@@ -24,10 +24,10 @@ import           RIO
 import           Utils.Types
 
 getStore :: Interp a Store
-getStore = get <&> snd
+getStore = gets snd
 
 getScope :: Interp a Scope
-getScope = get <&> fst
+getScope = gets fst
 
 putStore :: Store -> Interp a ()
 putStore s' = do

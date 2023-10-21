@@ -1,5 +1,8 @@
 # PiG
 
+![tests](https://github.com/PKopel/PiG/actions/workflows/test.yaml/badge.svg)
+![release](https://github.com/PKopel/PiG/actions/workflows/release.yaml/badge.svg)
+
 Interpreter for a simple language, build with [Alex](https://www.haskell.org/alex/) and [Happy](https://www.haskell.org/happy/).
 
 ## Usage  
