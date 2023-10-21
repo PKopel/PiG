@@ -80,7 +80,7 @@ jobs:
           # sha256sum generates sha256 hash for all artifacts.
           # base64 -w0 encodes to base64 and outputs on a single line.
           # sha256sum artifact1 artifact2 ... | base64 -w0
-          echo "hash=$(sha256sum ${{ env.BINARY_PATH }} | base64 -w0)" >> $GITHUB_ENV
+          echo "hash=$(sha256sum ${{ env.BINARY_PATH }} | base64 -w0)" >> $GITHUB_OUTPUT
 
       - name: Generate hashes
         if: matrix.os == 'macOS-latest'
@@ -89,7 +89,7 @@ jobs:
           # sha256sum generates sha256 hash for all artifacts.
           # base64 -w0 encodes to base64 and outputs on a single line.
           # sha256sum artifact1 artifact2 ... | base64 -w0
-          echo "hash=$(shasum -a 256 ${{ env.BINARY_PATH }} | base64)" >> $GITHUB_ENV
+          echo "hash=$(shasum -a 256 ${{ env.BINARY_PATH }} | base64)" >> $GITHUB_OUTPUT
 
       - name: Generate hashes
         if: matrix.os == 'windows-latest'
@@ -98,7 +98,7 @@ jobs:
           # sha256sum generates sha256 hash for all artifacts.
           # base64 -w0 encodes to base64 and outputs on a single line.
           # sha256sum artifact1 artifact2 ... | base64 -w0
-          echo "hash=$(sha256sum ${{ env.BINARY_PATH }} | base64 -w0)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "hash=$(sha256sum ${{ env.BINARY_PATH }} | base64 -w0)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
       - name: Upload binary
         uses: actions/upload-artifact@v3.1.0
