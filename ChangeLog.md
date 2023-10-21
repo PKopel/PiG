@@ -2,6 +2,11 @@
 
 ## Changes
 
+### 0.1.6
+
+* update ghc version to 9.6.3
+* improve conversion between numbers and strings
+
 ### 0.1.5
 
 * improve parser to handle chained function calls, e.g. `fun(0)()`

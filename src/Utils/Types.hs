@@ -79,8 +79,7 @@ instance Show Expr where
   show (If a b) =
     unwords ["if", intercalate " elif " (show <$> a), "else", show b]
   show (ListLiteral v) = '[' : intercalate ", " (show <$> v) <> "]"
-  show (FunApp a b) =
-    show a <> "(" <> intercalate ", " (show <$> b) <> ")"
+  show (FunApp a b   ) = show a <> "(" <> intercalate ", " (show <$> b) <> ")"
 
 instance Ord Handle where
   _ <= _ = False
@@ -97,7 +96,8 @@ data Val
   deriving (Eq, Ord)
 
 instance Show Val where
-  show (AlgVal  v    ) = show v
+  show (AlgVal v) | v == fromInteger (round v) = show $ (round v :: Integer)
+                  | otherwise                  = show v
   show (CharVal v    ) = [v]
   show (BoolVal True ) = "true"
   show (BoolVal False) = "false"
