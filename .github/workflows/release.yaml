@@ -10,9 +10,9 @@ on:
 jobs:
   build:
     outputs:
-      hash-linux: ${{ steps.hash.outputs.hash-ubuntu-latest }}
-      hash-macos: ${{ steps.hash.outputs.hash-macOS-latest }}
-      hash-windows: ${{ steps.hash-win.outputs.hash-windows-latest }}
+      hash-linux: ${{ steps.hash.outputs.hash }}
+      hash-macos: ${{ steps.hash-mac.outputs.hash }}
+      hash-windows: ${{ steps.hash-win.outputs.hash }}
     name: ${{ matrix.os }}/GHC ${{ matrix.ghc }}/${{ github.ref }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -80,7 +80,7 @@ jobs:
           # sha256sum generates sha256 hash for all artifacts.
           # base64 -w0 encodes to base64 and outputs on a single line.
           # sha256sum artifact1 artifact2 ... | base64 -w0
-          echo "hash-${{ matrix.os }}=$(sha256sum ${{ env.BINARY_PATH }} | base64 -w0)" >> $GITHUB_ENV
+          echo "hash=$(sha256sum ${{ env.BINARY_PATH }} | base64 -w0)" >> $GITHUB_ENV
 
       - name: Generate hashes
         if: matrix.os == 'macOS-latest'
@@ -89,7 +89,7 @@ jobs:
           # sha256sum generates sha256 hash for all artifacts.
           # base64 -w0 encodes to base64 and outputs on a single line.
           # sha256sum artifact1 artifact2 ... | base64 -w0
-          echo "hash-${{ matrix.os }}=$(shasum -a 256 ${{ env.BINARY_PATH }} | base64 -w0)" >> $GITHUB_ENV
+          echo "hash=$(shasum -a 256 ${{ env.BINARY_PATH }} | base64 -w0)" >> $GITHUB_ENV
 
       - name: Generate hashes
         if: matrix.os == 'windows-latest'
@@ -98,7 +98,7 @@ jobs:
           # sha256sum generates sha256 hash for all artifacts.
           # base64 -w0 encodes to base64 and outputs on a single line.
           # sha256sum artifact1 artifact2 ... | base64 -w0
-          echo "hash-${{ matrix.os }}=$(sha256sum ${{ env.BINARY_PATH }} | base64 -w0)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "hash=$(sha256sum ${{ env.BINARY_PATH }} | base64 -w0)" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Upload binary
         uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
