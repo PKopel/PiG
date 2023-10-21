@@ -74,13 +74,22 @@ jobs:
           files: ${{ env.BINARY_PATH }}
 
       - name: Generate hashes
-        if: matrix.os != 'windows-latest'
+        if: matrix.os == 'ubuntu-latest'
         id: hash
         run: |
           # sha256sum generates sha256 hash for all artifacts.
           # base64 -w0 encodes to base64 and outputs on a single line.
           # sha256sum artifact1 artifact2 ... | base64 -w0
           echo "hash-${{ matrix.os }}=$(sha256sum ${{ env.BINARY_PATH }} | base64 -w0)" >> $GITHUB_ENV
+
+      - name: Generate hashes
+        if: matrix.os == 'macOS-latest'
+        id: hash-mac
+        run: |
+          # sha256sum generates sha256 hash for all artifacts.
+          # base64 -w0 encodes to base64 and outputs on a single line.
+          # sha256sum artifact1 artifact2 ... | base64 -w0
+          echo "hash-${{ matrix.os }}=$(shasum -a 256 ${{ env.BINARY_PATH }} | base64 -w0)" >> $GITHUB_ENV
 
       - name: Generate hashes
         if: matrix.os == 'windows-latest'
