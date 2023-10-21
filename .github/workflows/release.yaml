@@ -75,6 +75,7 @@ jobs:
 
       - name: Generate hashes
         if: matrix.os != 'windows-latest'
+        id: hash
         run: |
           # sha256sum generates sha256 hash for all artifacts.
           # base64 -w0 encodes to base64 and outputs on a single line.
@@ -83,6 +84,7 @@ jobs:
 
       - name: Generate hashes
         if: matrix.os == 'windows-latest'
+        id: hash
         run: |
           # sha256sum generates sha256 hash for all artifacts.
           # base64 -w0 encodes to base64 and outputs on a single line.
@@ -110,6 +112,7 @@ jobs:
     with:
       base64-subjects: "${{ needs.build.outputs[format('hash-{0}', matrix.os)] }}"
       upload-assets: true # Optional: Upload to a new release
+      continue-on-error: true
 
   release:
     needs: [build, provenance]
