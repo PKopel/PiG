@@ -10,9 +10,9 @@ on:
 jobs:
   build:
     outputs:
-      hash-linux: ${{ steps.hash.outputs.handle }}
-      hash-macos: ${{ steps.hash-mac.outputs.handle }}
-      hash-windows: ${{ steps.hash-win.outputs.handle }}
+      hash-linux: ${{ steps.hash.outputs.hash }}
+      hash-macos: ${{ steps.hash-mac.outputs.hash }}
+      hash-windows: ${{ steps.hash-win.outputs.hash }}
     name: ${{ matrix.os }}/GHC ${{ matrix.ghc }}/${{ github.ref }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -75,39 +75,30 @@ jobs:
 
       - name: Generate hashes
         if: matrix.os == 'ubuntu-latest'
-        run: |
-          sha256sum ${{ env.BINARY_PATH }} | base64 -w0 > linux_hash.txt
-
-      - name: Upload hash
-        uses: slsa-framework/slsa-github-generator/actions/generator/generic/create-base64-subjects-from-file@v1.9.0
-        if: matrix.os == 'ubuntu-latest'
         id: hash
-        with:
-          path: linux_hash.txt
+        run: |
+          # sha256sum generates sha256 hash for all artifacts.
+          # base64 -w0 encodes to base64 and outputs on a single line.
+          # sha256sum artifact1 artifact2 ... | base64 -w0
+          echo "hash=$(sha256sum ${{ env.BINARY_PATH }} | base64 -w0)" >> $GITHUB_ENV
 
       - name: Generate hashes
-        if: matrix.os == 'macOS-latest'
-        run: |
-          shasum -a 256 ${{ env.BINARY_PATH }} | base64 > darwin_hash.txt
-
-      - name: Upload hash
-        uses: slsa-framework/slsa-github-generator/actions/generator/generic/create-base64-subjects-from-file@v1.9.0
         if: matrix.os == 'macOS-latest'
         id: hash-mac
-        with:
-          path: darwin_hash.txt
+        run: |
+          # sha256sum generates sha256 hash for all artifacts.
+          # base64 -w0 encodes to base64 and outputs on a single line.
+          # sha256sum artifact1 artifact2 ... | base64 -w0
+          echo "hash=$(shasum -a 256 ${{ env.BINARY_PATH }} | base64)" >> $GITHUB_ENV
 
       - name: Generate hashes
         if: matrix.os == 'windows-latest'
-        run: |
-          sha256sum ${{ env.BINARY_PATH }} | base64 -w0 | Out-File -FilePath windows_hash.txt
-
-      - name: Upload hash
-        uses: slsa-framework/slsa-github-generator/actions/generator/generic/create-base64-subjects-from-file@v1.9.0
-        if: matrix.os == 'windows-latest'
         id: hash-win
-        with:
-          path: windows_hash.txt
+        run: |
+          # sha256sum generates sha256 hash for all artifacts.
+          # base64 -w0 encodes to base64 and outputs on a single line.
+          # sha256sum artifact1 artifact2 ... | base64 -w0
+          echo "hash=$(sha256sum ${{ env.BINARY_PATH }} | base64 -w0)" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Upload binary
         uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
@@ -128,7 +119,7 @@ jobs:
       contents: write # To add assets to a release.
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.9.0
     with:
-      base64-subjects-as-file: "${{ needs.build.outputs[format('hash-{0}', matrix.os)] }}"
+      base64-subjects: "${{ needs.build.outputs[format('hash-{0}', matrix.os)] }}"
       upload-assets: true # Optional: Upload to a new release
       continue-on-error: true
 
