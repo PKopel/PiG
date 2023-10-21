@@ -8,34 +8,11 @@ on:
       - "v*"
 
 jobs:
-  create_release:
-    name: Create Github Release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: true
-          prerelease: false
-
-      - name: Output Release URL File
-        run: echo "${{ steps.create_release.outputs.upload_url }}" > release_url.txt
-      - name: Save Release URL File for publish
-        uses: actions/upload-artifact@v1
-        with:
-          name: release_url
-          path: release_url.txt
-
-  build_artifact:
-    needs: [create_release]
+  build:
+    outputs:
+      hash-linux: ${{ steps.hash.outputs.hash-ubuntu-latest }}
+      hash-macos: ${{ steps.hash.outputs.hash-macOS-latest }}
+      hash-windows: ${{ steps.hash.outputs.hash-windows-latest }}
     name: ${{ matrix.os }}/GHC ${{ matrix.ghc }}/${{ github.ref }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -94,28 +71,70 @@ jobs:
       - name: Compress binary
         uses: svenstaro/upx-action@2.3.0
         with:
-          file: ${{ env.BINARY_PATH }}
+          files: ${{ env.BINARY_PATH }}
 
-      - name: Load Release URL File from release job
-        uses: actions/download-artifact@v1
-        with:
-          name: release_url
-
-      - name: Get Release File Name & Upload URL
+      - name: Generate hashes
         if: matrix.os != 'windows-latest'
-        run: echo "UPLOAD_URL=$(cat release_url/release_url.txt)" >> $GITHUB_ENV
+        run: |
+          # sha256sum generates sha256 hash for all artifacts.
+          # base64 -w0 encodes to base64 and outputs on a single line.
+          # sha256sum artifact1 artifact2 ... | base64 -w0
+          echo "hash-${{ matrix.os }}=$(sha256sum ${{ env.BINARY_PATH }} | base64 -w0)" >> $GITHUB_ENV
 
-      - name: Get Release File Name & Upload URL
+      - name: Generate hashes
         if: matrix.os == 'windows-latest'
-        run: echo "UPLOAD_URL=$(cat release_url/release_url.txt)" | Out-File -FilePath $env:GITHUB_ENV -Append
+        run: |
+          # sha256sum generates sha256 hash for all artifacts.
+          # base64 -w0 encodes to base64 and outputs on a single line.
+          # sha256sum artifact1 artifact2 ... | base64 -w0
+          echo "hash-${{ matrix.os }}=$(sha256sum ${{ env.BINARY_PATH }} | base64 -w0)" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: shogo82148/actions-upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload binary
+        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
         with:
-          upload_url: ${{ env.UPLOAD_URL }}
-          asset_path: ${{ env.BINARY_PATH }}
-          asset_name: pig-amd64-${{ env.os_name }}${{ env.EXT }}
-          asset_content_type: application/octet-stream
+          name: pig-amd64-${{ env.os_name }}${{ env.EXT }}
+          path: ${{ env.BINARY_PATH }}
+          if-no-files-found: error
+          retention-days: 5
+
+  provenance:
+    needs: [build]
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+    permissions:
+      actions: read # To read the workflow path.
+      id-token: write # To sign the provenance.
+      contents: write # To add assets to a release.
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.9.0
+    with:
+      base64-subjects: "${{ needs.build.outputs[format('hash-{0}', matrix.os)] }}"
+      upload-assets: true # Optional: Upload to a new release
+
+  release:
+    needs: [build, provenance]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download linux binary
+        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 # tag=v2.1.0
+        with:
+          name: pig-amd64-linux
+
+      - name: Download macOS binary
+        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 # tag=v2.1.0
+        with:
+          name: pig-amd64-darwin
+
+      - name: Download windows binary
+        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 # tag=v2.1.0
+        with:
+          name: pig-amd64-windows.exe
+
+      - name: Upload assets
+        uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5 # v0.1.14
+        with:
+          files: |
+            pig-amd64-linux
+            pig-amd64-darwin
+            pig-amd64-windows.exe
