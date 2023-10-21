@@ -12,7 +12,7 @@ jobs:
     outputs:
       hash-linux: ${{ steps.hash.outputs.hash-ubuntu-latest }}
       hash-macos: ${{ steps.hash.outputs.hash-macOS-latest }}
-      hash-windows: ${{ steps.hash.outputs.hash-windows-latest }}
+      hash-windows: ${{ steps.hash-win.outputs.hash-windows-latest }}
     name: ${{ matrix.os }}/GHC ${{ matrix.ghc }}/${{ github.ref }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -84,7 +84,7 @@ jobs:
 
       - name: Generate hashes
         if: matrix.os == 'windows-latest'
-        id: hash
+        id: hash-win
         run: |
           # sha256sum generates sha256 hash for all artifacts.
           # base64 -w0 encodes to base64 and outputs on a single line.
