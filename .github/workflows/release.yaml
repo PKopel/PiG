@@ -108,20 +108,20 @@ jobs:
           if-no-files-found: error
           retention-days: 5
 
-  # provenance:
-  #   needs: [build]
-  #   strategy:
-  #     matrix:
-  #       os: [linux, macos, windows]
-  #   permissions:
-  #     actions: read # To read the workflow path.
-  #     id-token: write # To sign the provenance.
-  #     contents: write # To add assets to a release.
-  #   uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.9.0
-  #   with:
-  #     base64-subjects: "${{ needs.build.outputs[format('hash-{0}', matrix.os)] }}"
-  #     upload-assets: true # Optional: Upload to a new release
-  #     continue-on-error: true
+  provenance:
+    needs: [build]
+    strategy:
+      matrix:
+        hash: [hash-linux, hash-macos, hash-windows]
+    permissions:
+      actions: read # To read the workflow path.
+      id-token: write # To sign the provenance.
+      contents: write # To add assets to a release.
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.9.0
+    with:
+      base64-subjects: "${{ needs.build.outputs[matrix.hashs] }}"
+      upload-assets: ${{ startsWith(github.ref, 'refs/tags/') }} # Optional: Upload to a new release
+      continue-on-error: true
 
   release:
     needs: [build] #, provenance]
@@ -129,22 +129,22 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Download linux binary
-        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 # tag=v2.1.0
+        uses: actions/download-artifact@v3.0.2
         with:
           name: pig-amd64-linux
 
       - name: Download macOS binary
-        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 # tag=v2.1.0
+        uses: actions/download-artifact@v3.0.2
         with:
           name: pig-amd64-darwin
 
       - name: Download windows binary
-        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 # tag=v2.1.0
+        uses: actions/download-artifact@v3.0.2
         with:
           name: pig-amd64-windows.exe
 
       - name: Upload assets
-        uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5 # v0.1.14
+        uses: softprops/action-gh-release@v0.1.15
         with:
           files: |
             pig-amd64-linux
