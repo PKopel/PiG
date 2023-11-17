@@ -3,24 +3,24 @@ guessing = () => {
     print("answer 'less', 'more', 'yes' or 'stop'\n");
     h = 100;
     l = 0;
-    while (ans != "stop") do {
-        if (c = even(h - l)/2) == 0 do c = 1;
+    while (ans != "stop"): {
+        if (c = even(h - l)/2) == 0: c = 1;
         x = l + c;
         print("is your number equal ", x, "?\n");
         ans = read();
-        if ans == "less" do h = x
-        elif ans == "more" do l = x
-        elif ans == "yes" do { 
+        if ans == "less": h = x
+        elif ans == "more": l = x
+        elif ans == "yes": { 
             print("your number is ", x , "!\n");
             return;
         }
-        elif ans != "stop" do print("answer 'less', 'more', 'yes' or 'stop'\n");
+        elif ans != "stop": print("answer 'less', 'more', 'yes' or 'stop'\n");
     }
 };
 
 even = (a) => {
-    if a % 2 == 0 do a 
-    else a - 1;
+    if a % 2 == 0: a
+    else: a - 1;
 };
 
 guessing();

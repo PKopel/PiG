@@ -1,6 +1,6 @@
 length = (a) => {
     i = 0;
-    while a do {
+    while a: {
         i = i + 1;
         >- a;
     }
@@ -8,26 +8,26 @@ length = (a) => {
 };
 
 quick = (a) => {
-    if a do {
+    if a: {
         p = >- a;
         ls = gt = [];
-        while a do {
+        while a: {
             c = >- a;
-            if c > p do gt = gt <> c else ls = ls <> c;
+            if c > p: gt = gt <> c else: ls = ls <> c;
         }
         x = quick(ls) <> p <> quick(gt); 
-    } else x = [];
+    } else: x = [];
     x
 };
 
 bubble = (a) => {
     n = length(a);
     i = 0;
-    while i < n do {
+    while i < n: {
         j = 0;
-        while j < (n-i-1) do {
+        while j < (n-i-1): {
             p = a(j);
-            if p > a(j+1) do {
+            if p > a(j+1): {
                 a(j) = a(j+1);
                 a(j+1) = p;
             }
