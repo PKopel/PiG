@@ -28,7 +28,7 @@ import Utils.Util
     elif            { Token _ TElIf }
     else            { Token _ TElse }
     while           { Token _ TWhile }
-    do              { Token _ TDo }
+    ':'             { Token _ TDo }
     load            { Token _ TLoad }
     return          { Token _ TReturn }
     '+'             { Token _ TPlus }
@@ -88,8 +88,8 @@ Expr    : Atom                          { $1 }
         | return                        { Return (Val Null) }
         | VAR '(' Expr ')' '=' Expr     { Assign $1 $3 $6 }
         | VAR '=' Expr                  { Assign $1 (Val Null) $3 }
-        | while Expr do InSeq           { While $2 $4 }
-        | while Expr do Expr            { While $2 $4 }
+        | while Expr ':' InSeq          { While $2 $4 }
+        | while Expr ':' Expr           { While $2 $4 }
         | FunAppl                       { $1 }
         | Expr '+' Expr                 { FunApp (Var "add") [$1,$3] }
         | Expr '-' Expr                 { FunApp (Var "sub") [$1,$3] }
@@ -111,13 +111,13 @@ Expr    : Atom                          { $1 }
         | Expr '><' Expr                { FunApp (Var "catStr") [$1,$3] }
 
 If      : if IfList                     { If $2 (Val Null) }
-        | if IfList else InSeq          { If $2 $4 }
-        | if IfList else Expr           { If $2 $4 }
+        | if IfList else ':' InSeq      { If $2 $5 }
+        | if IfList else ':' Expr       { If $2 $5 }
 
-IfList  : Expr do InSeq elif IfList     { ($1,$3):$5 }
-        | Expr do Expr elif IfList      { ($1,$3):$5 }
-        | Expr do InSeq                 { [($1,$3)] }
-        | Expr do Expr                  { [($1,$3)] }
+IfList  : Expr ':' InSeq elif IfList     { ($1,$3):$5 }
+        | Expr ':' Expr elif IfList      { ($1,$3):$5 }
+        | Expr ':' InSeq                 { [($1,$3)] }
+        | Expr ':' Expr                  { [($1,$3)] }
 
 InSeq   : '{' ExprList '}'      { Seq $2 } 
         | '{' '}'               { Seq [] }    

@@ -39,7 +39,7 @@ tokens :-
     "elif"                 { tok' TElIf }
     "else"                 { tok' TElse }
     "while"                { tok' TWhile }
-    "do"                   { tok' TDo }
+    ":"                    { tok' TDo }
     "load"                 { tok' TLoad }
     "return"               { tok' TReturn }
     "+"                    { tok' TPlus }
