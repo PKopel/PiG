@@ -74,6 +74,10 @@ jobs:
         with:
           files: ${{ env.BINARY_PATH }}
 
+      - name: Check binary
+        run: |
+          ${{ env.BINARY_PATH }} --version
+
       - name: Generate hashes
         if: matrix.os == 'ubuntu-latest'
         id: hash
