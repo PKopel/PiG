@@ -19,11 +19,14 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
         cabal: ["3.10"]
+        stack: ["2.11.1"]
         ghc: ["9.6.3"]
 
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+
+      - uses: freckle/stack-cache-action@v2
 
       - if: matrix.os == 'ubuntu-latest'
         run: |
@@ -44,21 +47,12 @@ jobs:
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
-
-      - name: Freeze
-        run: |
-          cabal freeze
-
-      - name: Cache ~/.cabal/store
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.setup-haskell-cabal.outputs.cabal-store }}
-          key: ${{ runner.os }}-${{ matrix.ghc }}-${{ hashFiles('cabal.project.freeze') }}
+          stack-version: ${{ matrix.stack }}
 
       - name: Build binary
         run: |
           mkdir bin
-          cabal install exe:pig --install-method=copy --overwrite-policy=always --installdir=bin --enable-split-sections --enable-split-objs --enable-executable-stripping --enable-library-stripping
+          stack install --local-bin-path=bin
           mv ./bin/pig${{ env.EXT }} ./bin/pig-amd64-${{ env.os_name }}${{ env.EXT }}
 
       - name: Set binary path name
