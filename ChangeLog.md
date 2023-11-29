@@ -4,7 +4,9 @@
 
 ### 0.1.8
 
-* Remove unused dependency 'containers"
+* Change prompt for Windows to display "Err" instead of "PiG" if the last command failed
+* Remove unused dependency 'pretty-terminal' on Windows
+* Remove unused dependency 'containers'
 
 ### 0.1.7
 

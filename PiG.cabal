@@ -50,17 +50,28 @@ library
   build-tools:
       alex
     , happy
-  build-depends:
-      array
-    , base >=4.11 && <10
-    , exceptions
-    , haskeline >=0.8
-    , mtl
-    , pretty-terminal
-    , rio >=0.1.12.0
-    , rio-orphans
-    , text
   default-language: Haskell2010
+  if os(windows)
+    build-depends:
+        array
+      , base >=4.11 && <10
+      , exceptions
+      , haskeline >=0.8
+      , mtl
+      , rio >=0.1.12.0
+      , rio-orphans
+      , text
+  else
+    build-depends:
+        array
+      , base >=4.11 && <10
+      , exceptions
+      , haskeline >=0.8
+      , mtl
+      , pretty-terminal
+      , rio >=0.1.12.0
+      , rio-orphans
+      , text
 
 executable pig
   main-is: Main.hs
@@ -71,17 +82,29 @@ executable pig
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       PiG
-    , array
-    , base >=4.11 && <10
-    , exceptions
-    , haskeline >=0.8
-    , mtl
     , optparse-simple
-    , pretty-terminal
-    , rio >=0.1.12.0
-    , rio-orphans
-    , text
   default-language: Haskell2010
+  if os(windows)
+    build-depends:
+        array
+      , base >=4.11 && <10
+      , exceptions
+      , haskeline >=0.8
+      , mtl
+      , rio >=0.1.12.0
+      , rio-orphans
+      , text
+  else
+    build-depends:
+        array
+      , base >=4.11 && <10
+      , exceptions
+      , haskeline >=0.8
+      , mtl
+      , pretty-terminal
+      , rio >=0.1.12.0
+      , rio-orphans
+      , text
 
 test-suite pig-test
   type: exitcode-stdio-1.0
@@ -96,15 +119,27 @@ test-suite pig-test
   build-depends:
       PiG
     , QuickCheck
-    , array
-    , base >=4.11 && <10
-    , exceptions
-    , haskeline >=0.8
     , hspec
     , hspec-core
-    , mtl
-    , pretty-terminal
-    , rio >=0.1.12.0
-    , rio-orphans
-    , text
   default-language: Haskell2010
+  if os(windows)
+    build-depends:
+        array
+      , base >=4.11 && <10
+      , exceptions
+      , haskeline >=0.8
+      , mtl
+      , rio >=0.1.12.0
+      , rio-orphans
+      , text
+  else
+    build-depends:
+        array
+      , base >=4.11 && <10
+      , exceptions
+      , haskeline >=0.8
+      , mtl
+      , pretty-terminal
+      , rio >=0.1.12.0
+      , rio-orphans
+      , text
