@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           PiG
-version:        0.1.7
+version:        0.1.8
 description:    Please see the README on Github at <https://github.com/PKopel/PiG#readme>
 homepage:       https://github.com/PKopel/PiG#readme
 bug-reports:    https://github.com/PKopel/PiG/issues
@@ -53,7 +53,6 @@ library
   build-depends:
       array
     , base >=4.11 && <10
-    , containers
     , exceptions
     , haskeline >=0.8
     , mtl
@@ -69,12 +68,11 @@ executable pig
       Paths_PiG
   hs-source-dirs:
       app
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N -dynamic
   build-depends:
       PiG
     , array
     , base >=4.11 && <10
-    , containers
     , exceptions
     , haskeline >=0.8
     , mtl
@@ -100,7 +98,6 @@ test-suite pig-test
     , QuickCheck
     , array
     , base >=4.11 && <10
-    , containers
     , exceptions
     , haskeline >=0.8
     , hspec

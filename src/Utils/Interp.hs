@@ -15,12 +15,12 @@ module Utils.Interp
   ) where
 
 import           Control.Monad.State            ( StateT(runStateT)
-                                                , gets
                                                 , get
+                                                , gets
                                                 , put
                                                 )
-import qualified Data.Map                      as Map
 import           RIO
+import qualified RIO.Map                       as Map
 import           Utils.Types
 
 getStore :: Interp a Store

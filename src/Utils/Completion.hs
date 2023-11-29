@@ -3,24 +3,23 @@
 
 module Utils.Completion
   ( completion
-  )
-where
+  ) where
 
-import           RIO
-import qualified Data.Map                      as Map
-import qualified Data.Text.Lazy                as Lazy
 import           Data.List                      ( isPrefixOf )
-import           System.Console.Haskeline       ( completeWord
-                                                , simpleCompletion
-                                                , Completion
+import qualified Data.Text.Lazy                as Lazy
+import           Lang.BIF                       ( bifs )
+import           RIO
+import qualified RIO.Map                       as Map
+import           System.Console.Haskeline       ( Completion
                                                 , CompletionFunc
-                                                )
-import           Utils.Types                    ( Store
-                                                , Scopes(globalS, localS)
-                                                , Interp
+                                                , completeWord
+                                                , simpleCompletion
                                                 )
 import           Utils.Interp                   ( getStore )
-import           Lang.BIF                       ( bifs )
+import           Utils.Types                    ( Interp
+                                                , Scopes(globalS, localS)
+                                                , Store
+                                                )
 
 
 searchFunc :: Store -> String -> [Completion]

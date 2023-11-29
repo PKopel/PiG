@@ -6,15 +6,14 @@ module Utils.Util
   , getElems
   , (>-)
   , (-<)
-  )
-where
+  ) where
 
-import           Data.Sequence                  ( Seq(..)
-                                                , (!?)
-                                                , (<|)
-                                                )
 import           Data.List                      ( (!!) )
 import           RIO
+import           RIO.Seq                        ( (!?)
+                                                , (<|)
+                                                , Seq(..)
+                                                )
 import           Utils.Types
 
 class Container c where

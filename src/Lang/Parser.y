@@ -11,7 +11,7 @@ where
 import Lang.Tokens
 import Lang.Lexer
 import Control.Monad.Except
-import qualified Data.Sequence as Seq
+import qualified RIO.Seq as Seq
 import qualified Data.Text.Lazy as Lazy
 import Utils.Types   
 import Utils.Util           

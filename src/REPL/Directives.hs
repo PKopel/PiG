@@ -6,11 +6,11 @@ module REPL.Directives
   , execute
   ) where
 
-import           Data.Map                       ( delete
-                                                , empty
-                                                )
 import qualified Data.Text.Lazy                as Lazy
 import           RIO
+import           RIO.Map                        ( delete
+                                                , empty
+                                                )
 import           Utils.IO                       ( putStr )
 import           Utils.Interp                   ( putStore
                                                 , withScopes

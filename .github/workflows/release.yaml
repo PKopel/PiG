@@ -69,10 +69,11 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: echo "BINARY_PATH=./bin/pig-amd64-${{ env.os_name }}${{ env.EXT }}" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-      - name: Compress binary
-        uses: svenstaro/upx-action@2.3.0
-        with:
-          files: ${{ env.BINARY_PATH }}
+      # disabled because it causes issues with windows and mac
+      # - name: Compress binary with upx
+      #   uses: svenstaro/upx-action@2.3.0
+      #   with:
+      #     files: ${{ env.BINARY_PATH }}
 
       - name: Check binary
         run: |

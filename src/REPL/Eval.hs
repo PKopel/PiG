@@ -7,22 +7,21 @@
 module REPL.Eval
   ( eval
   , evalWithCach
-  )
-where
+  ) where
 
-import qualified Data.Map                      as Map
-import           Data.Sequence                  ( Seq(..) )
-import qualified Data.Sequence                 as Seq
-import           RIO                           hiding (catch)
-import           Utils.Interp
-import           Utils.Types
+import           Control.Monad.Catch            ( catch )
+import           Lang.BIF                       ( bifs )
+import           Lang.Parser                    ( parseFile )
+import           RIO                     hiding ( catch )
+import qualified RIO.Map                       as Map
+import           RIO.Seq                        ( Seq(..) )
+import qualified RIO.Seq                       as Seq
 import           Utils.IO                       ( putStr
                                                 , readFile
                                                 )
+import           Utils.Interp
+import           Utils.Types
 import           Utils.Util
-import           Lang.BIF                       ( bifs )
-import           Lang.Parser                    ( parseFile )
-import Control.Monad.Catch (catch)
 
 eval :: Expr -> Interp a Val
 eval (Val  n) = return n
@@ -30,14 +29,14 @@ eval (Var  x) = getVar x
 eval (Load e) = eval e >>= \case
   StrVal file -> withStore (evalFile file) >> return Null
   _           -> return Null
-eval (Return e) = eval e >>= throwM
-eval (ListLiteral es  ) = ListVal . Seq.fromList <$> mapM eval es
+eval (Return      e         ) = eval e >>= throwM
+eval (ListLiteral es        ) = ListVal . Seq.fromList <$> mapM eval es
 eval (FunApp (Var "fst") [e]) = evalListUnOp (>-) e
 eval (FunApp (Var "lst") [e]) = evalListUnOp (-<) e
-eval (FunApp (Var n)     vs ) = case Map.lookup n bifs of
+eval (FunApp (Var n    ) vs ) = case Map.lookup n bifs of
   Just bif -> mapM eval vs >>= bif
   Nothing  -> getVar n >>= evalFunApp vs
-eval (FunApp e es) = eval e >>= evalFunApp es
+eval (FunApp e es        ) = eval e >>= evalFunApp es
 eval (Seq []             ) = return Null
 eval (Seq [s     ]       ) = eval s
 eval (Seq (s : ss)       ) = eval s >> eval (Seq ss)
@@ -124,7 +123,8 @@ evalFile file store = do
 
 
 evalWithCach :: Expr -> Interp a Val
-evalWithCach expr = catch (eval expr) $ \v -> (putStore . Left $ handleReturn v) >> return v
+evalWithCach expr =
+  catch (eval expr) $ \v -> (putStore . Left $ handleReturn v) >> return v
 
 handleReturn :: Val -> Int
 handleReturn (AlgVal val) = round val
