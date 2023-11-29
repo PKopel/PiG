@@ -75,6 +75,9 @@ jobs:
       #   with:
       #     files: ${{ env.BINARY_PATH }}
 
+      - name: Strip binary
+        run: strip ${{ env.BINARY_PATH }}
+
       - name: Check binary
         run: |
           ${{ env.BINARY_PATH }} --version
