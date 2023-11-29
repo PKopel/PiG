@@ -2,6 +2,14 @@
 
 ## Changes
 
+### 0.1.8
+
+* Remove unused dependency 'containers"
+
+### 0.1.7
+
+* Change `do` to `:` in `if`s and `while`s
+
 ### 0.1.6
 
 * update ghc version to 9.6.3
