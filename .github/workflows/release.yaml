@@ -58,14 +58,7 @@ jobs:
       - name: Build binary
         run: |
           mkdir bin
-          cabal install exe:pig \
-            --install-method=copy \
-            --overwrite-policy=always \
-            --installdir=bin \
-            --enable-split-sections \
-            --enable-split-objs \
-            --enable-executable-stripping \
-            --enable-library-stripping
+          cabal install exe:pig --install-method=copy --overwrite-policy=always --installdir=bin --enable-split-sections --enable-split-objs --enable-executable-stripping --enable-library-stripping
           mv ./bin/pig${{ env.EXT }} ./bin/pig-amd64-${{ env.os_name }}${{ env.EXT }}
 
       - name: Set binary path name
