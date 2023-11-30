@@ -2,6 +2,11 @@
 
 ## Changes
 
+### 0.2.0
+
+* Add support for command line arguments for pig scripts
+* Enable use with shebang
+
 ### 0.1.8
 
 * Change prompt for Windows to display "Err" instead of "PiG" if the last command failed
