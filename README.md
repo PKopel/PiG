@@ -18,6 +18,10 @@ Use
 * `--help`: show options with short description
 * `-l|--load FILE`: start interpreter with `FILE` loaded
 
+Command line arguments for scripts are stored in a list of strings named `args`. To distinguish script arguments from intepreter's arguments use `--`, for example with command `pig -l script.pig -- help` string `help` will be available in the script as `args(0)`.
+
+PiG interpreter can also be used with shebang with `#!<path>/<to>/<pig> -l`, see [example](./examples/hello.pig).
+
 ## Language
 
 In PiG, everything is an expression:
