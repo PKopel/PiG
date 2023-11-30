@@ -1,11 +1,11 @@
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 module Main
   ( main
   ) where
 
+import           Data.Version                   ( showVersion )
 import           Options.Applicative.Simple
 import qualified Paths_PiG
 import           RIO
@@ -37,12 +37,14 @@ main = do
 
 pigOptions :: IO (Options, ())
 pigOptions = simpleOptions
-  $(simpleVersion Paths_PiG.version)
+  ("PiG version " <> showVersion Paths_PiG.version)
   "PiG - interpreter for a simple imperative language"
   "start the interpreter"
-  (   Options <$> strOption
+  (   Options
+  <$> strOption
         (long "load" <> short 'l' <> metavar "FILE" <> value "" <> help
           "start interpreter with FILE loaded"
         )
+  <*> many (argument str (metavar "ARGS..."))
   )
   empty

@@ -1,6 +1,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedLists #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -15,6 +16,7 @@ import           RIO.Orphans                    ( )
 import           RIO.Process                    ( HasProcessContext(..)
                                                 , ProcessContext
                                                 )
+import           RIO.Seq                        ( fromList )
 import           System.Console.Haskeline       ( Settings )
 
 import           Control.Monad.Catch            ( MonadCatch
@@ -24,8 +26,9 @@ import           Control.Monad.State            ( MonadState
                                                 , StateT(StateT)
                                                 )
 
-newtype Options = Options
+data Options = Options
   { optionsLoad :: String
+  , scriptArgs  :: [String]
   }
 
 data App = App
@@ -131,6 +134,10 @@ type Store = Either Int Scopes
 
 emptyStore :: Scopes
 emptyStore = Scopes { globalS = [], localS = [] }
+
+argsStore :: [String] -> Scopes
+argsStore args = Scopes { globalS = [("args", argsList)], localS = [] }
+  where argsList = ListVal . fromList $ map StrVal args
 
 globalL :: Scope
 globalL = Scope $ lens globalS (\x y -> x { globalS = y })

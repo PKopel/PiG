@@ -31,7 +31,11 @@ run = do
         Left  val -> return val
         Right _   -> return 0
  where
-  startStore ops = case optionsLoad ops of
-    []   -> return $ Right emptyStore
-    file -> runWithStore (evalWithCach . Load . Val . StrVal $ file)
-      $ Right emptyStore
+  startStore ops =
+    let args = scriptArgs ops
+    in  case optionsLoad ops of
+          [] -> return . Right $ argsStore args
+          file ->
+            runWithStore (evalWithCach . Load . Val . StrVal $ file)
+              . Right
+              $ argsStore args
