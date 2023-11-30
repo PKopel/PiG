@@ -1,3 +1,5 @@
+#! ./pig -l
+
 hello = () =>{
     print("What is your name?\n");
     name = read();

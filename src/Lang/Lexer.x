@@ -23,7 +23,7 @@ import           Lang.Tokens
 }
 
 
-@comment_line      = "//" ( [^\n\/]* [^\n]* )?
+@comment_line      = ("#" | "//") ( [^\n\/]* [^\n]* )?
 @comment_start     = "/*"
 @comment_end       = "*/"
 

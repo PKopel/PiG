@@ -1,3 +1,5 @@
+#! ./pig -l
+
 guessing = () => {
     print("think of a natural number between 0 and 100\n");
     print("answer 'less', 'more', 'yes' or 'stop'\n");
