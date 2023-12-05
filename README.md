@@ -33,12 +33,13 @@ In PiG, everything is an expression:
   * characters like `'a'` and strings like `"abcd"`
   * functions (lambdas) in form `(<arg1>,...,<argn>) => <sequence>`. Return value of a function is either the value of its last expression or value explicitly marked with the `return` keyword.
   * lists in form `[<expr1>,...,<exprn>]`
-* assignments: `<name> = <expr>`, where name consists of alphanumeric characters, or `<name>(<number>) = <expr>` to assign value to a specific element of a list. Value of assignment is the value of expression on the right.
+  * dictionaries (maps) in form `[<key1>: <value1>,...,<keyn>: <valuen]`
+* assignments: `<name> = <expr>`, where name consists of alphanumeric characters, `<name>(<number>) = <expr>` to assign value to a specific element of a list, or `<name>(<expr>) = <expr>` to add key-value pair to a dictionary. Value of assignment is the value of expression on the right.
 * sequence of expressions, separated and optionally ended by `;`. When sequence is enclosed by braces (`{...}`), it is treated as a single expression (sequences can be nested, like `{ <expr1>; { <expr2>; <expr3> }; }`). Value of a sequence is the value of the last expression in it.
 * while loop: `while <expr1> : <expr2>`. Both `<expr1>` and `<expr2>` must be a single expressions, but they don't have to be enclosed in braces. `<expr2>` will be executed as long as `<expr1>` is a `true`, non-zero number, non-empty list or a non-empty string. Value of a while expression is a list of values of `<expr2>` (for example value of `x = 3; while x > 0 : x = x - 1` is `[2,1,0]`).
 * if: `if <expr> : <expr> elif <expr> : <expr> ... else : <expr>` (`elif` and `else` are optional). Value of "if" is the value of expression after ifrst condition evaluated to `true`, non-zero number, non-empty list or a non-empty string, or value of expresion after `else` (`null` if no `else` is specified).
 * a variable name, as in assignment. If the variable is bound to a list, `<name>(<num1>,...,<numn>)` syntax can be used to get the value at specified index or a list of them.
-* function application, in form `<name>(<arg1>,...,<argn>)`
+* function application, in form `<name>(<arg1>,...,<argn>)`. If the `<name>` is a list, arguments that can be evaluated to numbers will be rounded to integers and treated as zero-based indices, and the return value will be the value associated with that index or a list of values in case of more than one indices (for example a value of `l = [1,2,3]; l(0)` is `1`, value of `l = [1,2,3]; l(0,2)` is `[1,3]`). If the `<name>` is a dictionary, the return value will be the value associated with the argument or a list of values in case of more than one argument (for example a value of `m = ["a":1,"b":3]; m("a")` is `1`, value of `m = ["a":1,"b":3]; m("a","b")` is `[1,3]`).
 * expressions with build-in keywords and operators
 
 Build-in functions provided:

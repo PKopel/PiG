@@ -6,6 +6,7 @@ module Utils.Util
   , getElems
   , (>-)
   , (-<)
+  , mapTuple
   ) where
 
 import           Data.List                      ( (!!) )
@@ -45,3 +46,6 @@ isVar _       = (False, "")
 (-<) :: Seq Val -> (Val, Seq Val)
 (-<) (i :|> l) = (l, i)
 (-<) l         = (Null, l)
+
+mapTuple :: (a -> b) -> (a, a) -> (b, b)
+mapTuple f (a, b) = (f a, f b)

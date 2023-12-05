@@ -12,6 +12,7 @@ import           Data.List                      ( intercalate )
 import qualified Data.Text.Lazy                as Lazy
 import           Data.Version                   ( Version )
 import           RIO
+import qualified RIO.Map                       as Map
 import           RIO.Orphans                    ( )
 import           RIO.Process                    ( HasProcessContext(..)
                                                 , ProcessContext
@@ -63,6 +64,7 @@ data Expr
   | Val Val
   | Assign Var Expr Expr
   | ListLiteral [Expr]
+  | MapLiteral [(Expr,Expr)]
   | FunApp Expr [Expr]
   | Load Expr
   | While Expr Expr
@@ -82,6 +84,7 @@ instance Show Expr where
   show (If a b) =
     unwords ["if", intercalate " elif " (show <$> a), "else", show b]
   show (ListLiteral v) = '[' : intercalate ", " (show <$> v) <> "]"
+  show (MapLiteral  m) = '[' : intercalate ", " (showEntry <$> m) <> "]"
   show (FunApp a b   ) = show a <> "(" <> intercalate ", " (show <$> b) <> ")"
 
 instance Ord Handle where
@@ -94,12 +97,13 @@ data Val
   | StrVal String
   | IOVal Handle
   | ListVal (Seq Val)
+  | MapVal (Map Val Val)
   | FunVal [Var] Expr
   | Null
   deriving (Eq, Ord)
 
 instance Show Val where
-  show (AlgVal v) | v == fromInteger (round v) = show $ (round v :: Integer)
+  show (AlgVal v) | v == fromInteger (round v) = show (round v :: Integer)
                   | otherwise                  = show v
   show (CharVal v    ) = [v]
   show (BoolVal True ) = "true"
@@ -107,8 +111,12 @@ instance Show Val where
   show (StrVal  v    ) = v
   show (IOVal   v    ) = show v
   show (ListVal v    ) = '[' : intercalate ", " (toList $ show <$> v) <> "]"
+  show (MapVal m) = '[' : intercalate ", " (showEntry <$> Map.toList m) <> "]"
   show (FunVal n _   ) = "fun(" <> intercalate ", " (show <$> n) <> ")"
   show Null            = "null"
+
+showEntry :: (Show a1, Show a2) => (a1, a2) -> String
+showEntry (k, v) = show k <> ": " <> show v
 
 instance Exception Val
 

@@ -11,7 +11,6 @@ where
 import Lang.Tokens
 import Lang.Lexer
 import Control.Monad.Except
-import qualified RIO.Seq as Seq
 import qualified Data.Text.Lazy as Lazy
 import Utils.Types   
 import Utils.Util           
@@ -81,6 +80,7 @@ File    : InSeq                 { $1 }
 
 Expr    : Atom                          { $1 }
         | ListLit                       { $1 }   
+        | MapLit                        { $1 }   
         | If                            { $1 }
         | '(' Expr ')'                  { $2 }
         | load Expr                     { Load $2 }
@@ -127,6 +127,8 @@ ExprList : Expr ';' ExprList    { $1:$3 }
          | Expr ';'             { [$1] }
          | Expr                 { [$1] }
 
+MapLit  : '[' MapList ']'   { MapLiteral $2 }
+
 ListLit : '[' List ']'      { ListLiteral $2 }
         | '[' ']'           { ListLiteral [] }
 
@@ -137,8 +139,11 @@ FunArgs : '(' List ')'      { $2 }
         | '(' Expr ')'      { [$2] }
         | '(' ')'           { [] }
 
+MapList : Expr ':' Expr ',' MapList { ($1,$3):$5 }
+        | Expr ':' Expr             { [($1,$3)] }   
+
 List    : Expr ',' List     { $1:$3 }
-        | Expr              { [$1] }
+        | Expr              { [$1] } 
 
 Atom    : VAR               { Var $1 }
         | Val               { Val $1 }

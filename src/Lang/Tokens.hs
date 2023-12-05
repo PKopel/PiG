@@ -58,7 +58,7 @@ instance Show TokenType where
   show TElIf     = "elif"
   show TElse     = "else"
   show TWhile    = "while"
-  show TDo       = "do"
+  show TDo       = ":"
   show TLoad     = "load"
   show TReturn   = "eturn"
   show TPlus     = "+"
