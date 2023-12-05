@@ -2,6 +2,10 @@
 
 ## Changes
 
+### 0.3.0
+
+* Add dictionaries (hash maps)
+
 ### 0.2.0
 
 * Add support for command line arguments for pig scripts

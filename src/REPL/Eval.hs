@@ -31,6 +31,7 @@ eval (Load e) = eval e >>= \case
   _           -> return Null
 eval (Return      e         ) = eval e >>= throwM
 eval (ListLiteral es        ) = ListVal . Seq.fromList <$> mapM eval es
+eval (MapLiteral  ms        ) = MapVal . Map.fromList <$> mapM evalTuple ms
 eval (FunApp (Var "fst") [e]) = evalListUnOp (>-) e
 eval (FunApp (Var "lst") [e]) = evalListUnOp (-<) e
 eval (FunApp (Var n    ) vs ) = case Map.lookup n bifs of
@@ -52,7 +53,12 @@ eval (Assign x i e) = do
   getVar x >>= \case
     ListVal l -> eval i >>= \case
       AlgVal ind -> putVar x . ListVal $ Seq.update (round ind) v l
-      _          -> putVar x v
+      k | k /= Null && Seq.length l == 0 ->
+        putVar x . MapVal $ Map.singleton k v
+      _ -> putVar x v
+    MapVal m -> eval i >>= \case
+      Null -> putVar x v
+      k    -> putVar x . MapVal $ Map.insert k v m
     _ -> putVar x v
 
 evalWhile :: Expr -> Expr -> Seq Val -> Interp a (Seq Val)
@@ -96,6 +102,18 @@ evalFunApp args (ListVal l) = do
     v  :<|    Empty -> return v -- one argument in vs, result is a single value
     v@(_ :<| _)     -> return $ ListVal v -- more than one argument in vs, result is a list
     _               -> return Null
+-- get elements from map
+evalFunApp args (MapVal m) = do
+  evs <- mapM eval args
+  let vals = map
+        (\k -> case Map.lookup k m of
+          Just v -> v -- value for a given key
+          _      -> Null
+        )
+        evs
+  case vals of
+    [v] -> return v
+    vs  -> return . ListVal $ Seq.fromList vs
 -- get chars from string
 evalFunApp args (StrVal l) = do
   evs <- evalDoubleList args
@@ -112,6 +130,12 @@ evalDoubleList = foldM
     _         -> return acc
   )
   []
+
+evalTuple :: (Expr, Expr) -> Interp a (Val, Val)
+evalTuple (k, v) = do
+  ek <- eval k
+  ev <- eval v
+  return (ek, ev)
 
 
 evalFile :: FilePath -> Store -> Interp a Store
