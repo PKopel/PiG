@@ -11,7 +11,9 @@ import           Lang.BIF.Alg
 import           Lang.BIF.Bool
 import           Lang.BIF.List
 import           Lang.BIF.Str
-import           RIO                     hiding ( openFile )
+import           RIO                     hiding ( length
+                                                , openFile
+                                                )
 import           System.IO                      ( getLine
                                                 , hGetLine
                                                 , hPutStr
@@ -57,6 +59,7 @@ bifs =
   , ("neq"      , return . neq)
   , ("catList"  , return . catl)
   , ("catStr"   , return . cats)
+  , ("length"   , return . length)
   ]
 
 
