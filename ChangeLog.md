@@ -2,6 +2,10 @@
 
 ## Changes
 
+### 0.3.1
+
+* Add `length` BIF for lists, maps and strings
+
 ### 0.3.0
 
 * Add dictionaries (hash maps)

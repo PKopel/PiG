@@ -4,6 +4,10 @@
 module Lang.BIF.List where
 
 import           RIO
+import qualified RIO.Map                       as Map
+                                                ( size )
+import qualified RIO.Seq                       as Seq
+                                                ( length )
 import           Utils.Types                    ( Interp
                                                 , Val(..)
                                                 )
@@ -11,18 +15,11 @@ import           Utils.Types                    ( Interp
 catl :: [Val] -> Val
 catl = seqBinOp (<>)
 
-cats :: [Val] -> Val
-cats = strBinOp (<>)
-
-strBinOp :: (String -> String -> String) -> [Val] -> Val
-strBinOp _  [val@( StrVal _)   ] = val
-strBinOp op (a : b :       vals) = strBinOp
-  op
-  (StrVal (op (toStr a) (toStr b)) : vals)
- where
-  toStr (FunVal _ _) = ""
-  toStr v            = show v
-strBinOp _ _ = Null
+length :: [Val] -> Val
+length ((ListVal l) : _) = AlgVal . fromIntegral $ Seq.length l
+length ((StrVal  s) : _) = AlgVal . fromIntegral $ RIO.length s
+length ((MapVal  m) : _) = AlgVal . fromIntegral $ Map.size m
+length _                 = Null
 
 seqBinOp :: (Seq Val -> Seq Val -> Seq Val) -> [Val] -> Val
 seqBinOp _  [val@( ListVal _)   ] = val
