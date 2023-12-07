@@ -53,6 +53,7 @@ Build-in functions provided:
 * `strToNum(arg)` parses number from string
 * `strToList(arg)` turns string to a list of chars
 * `listToStr(arg)` turns a list of chars to string
+* `length(arg)` returns the length of a list, map or string
 * `isNum(arg)` checks if `arg` is a number
 * `isBool(arg)` checks if `arg` is a boolean
 * `isList(arg)` checks if `arg` is a list
