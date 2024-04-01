@@ -1,6 +1,25 @@
-*~
+# editor and IDE paraphernalia
+.idea
 *.swp
-tarballs/
+*.swo
+*~
+.vscode
+
+# direnv cache
+.direnv
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+**/bin
+**/testbin/*
+**/target/
+**/result
 .stack-work/
-Lexer.hs
+tarballs/
 .ignore
+
+
