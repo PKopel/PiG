@@ -43,10 +43,15 @@ eval (Seq [s     ]       ) = eval s
 eval (Seq (s : ss)       ) = eval s >> eval (Seq ss)
 eval (If []            e2) = eval e2
 eval (If ((c, e1) : t) e2) = eval c >>= \case
-  AlgVal  v -> if v /= 0 then eval e1 else eval (If t e2)
-  BoolVal v -> if v then eval e1 else eval (If t e2)
-  ListVal v -> if not (Seq.null v) then eval e1 else eval (If t e2)
+  BoolVal v -> evalIf $ v 
+  AlgVal  v -> evalIf $ v /= 0
+  CharVal v -> evalIf $ v /= '\0'
+  StrVal  v -> evalIf $ length v /= 0
+  ListVal v -> evalIf $ not (Seq.null v)
+  MapVal  v -> evalIf $ not (Map.null v)
   _         -> return Null
+  where
+    evalIf cond = if cond then eval e1 else eval (If t e2)
 eval (While e s   ) = ListVal <$> evalWhile e s Empty
 eval (Assign x i e) = do
   v <- eval e

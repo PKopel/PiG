@@ -2,6 +2,10 @@
 
 ## Changes
 
+### 0.3.2
+
+* Improve `if` to handle more types
+
 ### 0.3.1
 
 * Add `length` BIF for lists, maps and strings
