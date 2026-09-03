@@ -158,7 +158,7 @@ jobs:
           name: pig-amd64-windows.exe
 
       - name: Upload assets
-        uses: softprops/action-gh-release@v3.0.2
+        uses: softprops/action-gh-release@v3.0.3
         with:
           files: |
             pig-amd64-linux
