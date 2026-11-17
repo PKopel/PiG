@@ -1,11 +1,11 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.36.0.
+-- This file has been generated from package.yaml by hpack version 0.39.6.
 --
 -- see: https://github.com/sol/hpack
 
 name:           PiG
-version:        0.3.2
+version:        0.3.3
 description:    Please see the README on Github at <https://github.com/PKopel/PiG#readme>
 homepage:       https://github.com/PKopel/PiG#readme
 bug-reports:    https://github.com/PKopel/PiG/issues
@@ -110,6 +110,7 @@ test-suite pig-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      LanguageSpec
       TypesSpec
       UtilSpec
       Paths_PiG
