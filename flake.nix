@@ -14,8 +14,8 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        # need to match Stackage LTS version from stack.yaml snapshot
-        hPkgs = pkgs.haskell.packages."ghc964"; 
+        # Match the GHC version configured in stack.yaml.
+        hPkgs = pkgs.haskell.packages."ghc9141";
 
         haskellDevTools = [
           hPkgs.ghc # GHC compiler in the desired version (will be available on PATH)
@@ -49,7 +49,7 @@
           '';
         };
 
-        pigPackage = pkgs.haskellPackages.developPackage {
+        pigPackage = hPkgs.developPackage {
           name = "PiG";
           root = ./.;
         };
